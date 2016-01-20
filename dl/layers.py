@@ -1,6 +1,8 @@
 # -*- coding: UTF-8 -*-
 
 from utils import *
+from . import init
+from . import activation
 
 
 class Layer(object):
@@ -116,11 +118,11 @@ class InputLayer(Layer):
 
 class DenseLayer(Layer):
     def __init__(self, incoming, num_units, W=init.GlorotUniform(),
-                 b=init.Constant(0.), nonlinearity=nonlinearities.rectify,
+                 b=init.Constant(0.), activation=activation.relu,
                  **kwargs):
         super(DenseLayer, self).__init__(incoming, **kwargs)
-        self.nonlinearity = (nonlinearities.identity if nonlinearity is None
-                             else nonlinearity)
+        self.activation = (activation.linear if activation is None
+                           else activation)
 
         self.num_units = num_units
 
@@ -145,4 +147,4 @@ class DenseLayer(Layer):
         activation = T.dot(input, self.W)
         if self.b is not None:
             activation = activation + self.b.dimshuffle('x', 0)
-        return self.nonlinearity(activation)
+        return self.activation(activation)

@@ -18,3 +18,8 @@ def softmax(x):
 
 def relu(x):
     return T.nnet.relu(x)
+
+
+def linear(x):
+    return x
+
