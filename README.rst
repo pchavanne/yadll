@@ -1,8 +1,8 @@
 dl
 ==
 
-dl is my personal deep learning framework based on Theano.
-It is highly inspired by Lasagne and I would therefore highly recommend
+dl is my personal deep learning framework based on ***Theano***.
+It is highly inspired by ***Lasagne*** and I would therefore recommend
 considering Lasagne in stead of dl.
 
 
