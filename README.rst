@@ -9,7 +9,7 @@ considering one or the other in stead of dl.
 Its main features are:
 
 * Layers: Base, Input, dense
-* optimisation: sgd, momentum, Neseterov momentum, rmsprop
+* optimisation: sgd, momentum, Nesterov momentum, rmsprop
 
 
 Installation

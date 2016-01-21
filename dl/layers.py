@@ -45,7 +45,7 @@ class Dense_Layer(Layer):
     def __init__(self, incoming, nb_units, name=None,
                  W=glorot_uniform, b=(constant, {'value':0.0}),
                  activation=tanh):
-        super(Dense, self).__init__(incoming, name)
+        super(Dense_Layer, self).__init__(incoming, name)
         self.shape = (incoming.output_shape, nb_units)
         self.W = initializer(W, shape=self.shape, name='W')
         self.params.append(self.W)
