@@ -8,7 +8,14 @@ from .activation import *
 np_rng = np.random.RandomState(1234)
 
 
-def constant(shape, value=0, name=None, borrow=True):
+def initializer(init_obj, shape, name):     # init_obj = glorot_uniform  or init_obj = (glorot_uniform, {'gain':tanh, 'borrow':False})
+    if not isinstance(init_obj, tuple):
+        return init_obj(shape, name=name)
+    else:
+        return init_obj[0](shape, name=name, **init_obj[1])
+
+
+def constant(shape, value=0.0, name=None, borrow=True):
     return shared_variable(np.ones(shape=shape) * value,
                            name=name, borrow=borrow)
 

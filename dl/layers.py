@@ -8,7 +8,7 @@ from . import activation
 
 
 class Layer(object):
-    def __init__(self, incoming, params, name=None):
+    def __init__(self, incoming, name=None):
         if isinstance(incoming, tuple):
             self.input_shape = incoming
             self.input_layer = None
@@ -17,7 +17,7 @@ class Layer(object):
             self.input_layer = incoming
 
         self.name = name
-        self.params = [ for k, v in params]
+        self.params = []
 
     @property
     def output_shape(self):
@@ -29,13 +29,18 @@ class Layer(object):
     def get_output(self, input, **kwargs):
         raise NotImplementedError
 
+    def creat_param(self, name, how_to):
+        raise NotImplementedError
+
 
 class Dense(Layer):
     def __init__(self, incoming, nb_units, name=None,
-                 params={'W': glorot_uniform, 'b': constant},
+                 W=glorot_uniform, b=(constant, {'value':0.0}),
                  activation=tanh):
         super(Dense, self).__init__(incoming, name)
-        self.init =
+        self.W = initializer(W, shape=(incoming.output_shape, nb_units), name='W')
+        self.params.append(self.W)
+        self.activation = activation
 
     def get_output_shape(self, input_shape):
         raise NotImplementedError
