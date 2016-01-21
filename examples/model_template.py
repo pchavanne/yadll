@@ -1,7 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-__author__ = "Philippe Chavanne"
+import timeit
+import cPickle
+import gzip
+
+import numpy as np
+
+import theano
+import theano.tensor as T
 
 import dl
 
@@ -36,9 +43,16 @@ def load_data(dataset):
 
     return rval
 
+
 def build_model(input_var=None):
-    l_in =
+    l_in = dl.layers.InputLayer(shape=(None, 1, 28, 28), input_var=input_var)
+    l_hid = dl.layers.DenseLayer(incoming=l_in, num_units=800,
+                                 W=dl.init.GlorotUniform(),
+                                 activation=dl.activation.relu)
+    l_out = dl.layers.DenseLayer(incoming=l_hid, num_units=10,
+                                 activation=dl.activation.softmax)
     return l_out
+
 
 def train(hp, dataset, save_model=False):
 ################################################
@@ -71,11 +85,11 @@ def train(hp, dataset, save_model=False):
     y = T.ivector('y')      # the output labels are presented as 1D vector of[int] labels
 
     # Random generators
-    np_rng = np.random.RandomState(1234)
-    theano_rng = RandomStreams(np_rng.randint(2 ** 30))
+    #np_rng = np.random.RandomState(1234)
+    #theano_rng = RandomStreams(np_rng.randint(2 ** 30))
 
     # construct the network
-    network = Network(input=x, np_rng=np_rng, theano_rng=theano_rng, noise=noise, name='MLP')
+    network = build_model(input=x)
 
     # the cost we minimize during training is the negative log likelihood of last layer plus regularisation
     cost = network.cost(y, l1_reg=hp.l1_reg, l2_reg=hp.l2_reg)
@@ -84,7 +98,7 @@ def train(hp, dataset, save_model=False):
     gparams = [T.grad(cost, param) for param in network.params]
 
     # specify how to update the parameters of the model as a list of (variable, update expression) pairs
-    updates = sgd_updates(gparams, network.params, hp.learning_rate)
+    updates = dl.updates.sgd_updates(gparams, network.params, hp.learning_rate)
 
     # compiling Theano functions for training, validating and testing the model
     train_model = theano.function(inputs=[index, theano.Param(noise, default=1)],

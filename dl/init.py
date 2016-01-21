@@ -2,89 +2,57 @@
 
 import numpy as np
 
-from .utils import floatX
-from .random import get_rng
+from .utils import shared_variable
+from .activation import *
+
+np_rng = np.random.RandomState(1234)
 
 
-class Initializer(object):
-    def __call__(self, shape):
-        return self.sample(shape)
-
-    def sample(self, shape):
-        raise NotImplementedError()
+def constant(shape, value=0, name=None, borrow=True):
+    return shared_variable(np.ones(shape=shape) * value,
+                           name=name, borrow=borrow)
 
 
-class Constant(Initializer):
-    def __init__(self, val=0.0):
-        self.val = val
-
-    def sample(self, shape):
-        return floatX(np.ones(shape) * self.val)
+def uniform(shape, scale=0.5, name=None, borrow=True):
+    return shared_variable(np_rng.uniform(low=-scale, high=scale, size=shape),
+                           name=name, borrow=borrow)
 
 
-class Normal(Initializer):
-    def __init__(self, std=0.01, mean=0.0):
-        self.std = std
-        self.mean = mean
-
-    def sample(self, shape):
-        return floatX(get_rng().normal(self.mean, self.std, size=shape))
+def normal(shape, scale=0.5, name=None, borrow=True):
+    return shared_variable(np_rng.normal(loc=0.0, scale=scale, size=shape),
+                           name=name, borrow=borrow)
 
 
-class Uniform(Initializer):
-    def __init__(self, range=0.01, std=None, mean=0.0):
-        if std is not None:
-            a = mean - np.sqrt(3) * std
-            b = mean + np.sqrt(3) * std
-        else:
-            try:
-                a, b = range  # range is a tuple
-            except TypeError:
-                a, b = -range, range  # range is a number
-
-        self.range = (a, b)
-
-    def sample(self, shape):
-        return floatX(get_rng().uniform(
-            low=self.range[0], high=self.range[1], size=shape))
+def glorot_uniform(shape, gain=1.0,  name=None, borrow=True):
+    if gain == tanh:
+        gain = 1
+    if gain == sigmoid:
+        gain = 4
+    scale = gain * np.sqrt(6. / (shape[0] + shape[1]))
+    return uniform(shape, scale, name, borrow)
 
 
-class Glorot(Initializer):
-    def __init__(self, initializer, gain=1.0, c01b=False):
-        if gain == 'relu':
-            gain = np.sqrt(2)
-
-        self.initializer = initializer
-        self.gain = gain
-        self.c01b = c01b
-
-    def sample(self, shape):
-        if self.c01b:
-            if len(shape) != 4:
-                raise RuntimeError(
-                    "If c01b is True, only shapes of length 4 are accepted")
-
-            n1, n2 = shape[0], shape[3]
-            receptive_field_size = shape[1] * shape[2]
-        else:
-            if len(shape) < 2:
-                raise RuntimeError(
-                    "This initializer only works with shapes of length >= 2")
-
-            n1, n2 = shape[:2]
-            receptive_field_size = np.prod(shape[2:])
-
-        std = self.gain * np.sqrt(2.0 / ((n1 + n2) * receptive_field_size))
-        return self.initializer(std=std).sample(shape)
+def glorot_normal(shape, activation=tanh,  name=None, borrow=True):
+    # TODO implement this method
+    raise NotImplementedError
 
 
-class GlorotNormal(Glorot):
-    def __init__(self, gain=1.0, c01b=False):
-        super(GlorotNormal, self).__init__(Normal, gain, c01b)
+def He_uniform(shape, name=None, borrow=True):
+    # TODO implement this method
+    raise NotImplementedError
 
 
-class GlorotUniform(Glorot):
-    def __init__(self, gain=1.0, c01b=False):
-        super(GlorotUniform, self).__init__(Uniform, gain, c01b)
+def He_normal(shape, name=None, borrow=True):
+    # TODO implement this method
+    raise NotImplementedError
 
 
+def orthogonal(shape, gain=1, name=None, borrow=True):
+    if gain == relu:
+        gain = np.sqrt(2)
+    flat_shape = (shape[0], np.prod(shape[1:]))
+    a = np.random.normal(0.0, 1.0, size=flat_shape)
+    u, _, v = np.linalg.svd(a, full_matrices=False)
+    q = u if u.shape == flat_shape else v
+    q = q.reshape(shape)
+    return shared_variable(gain * q, name=name, borrow=borrow)

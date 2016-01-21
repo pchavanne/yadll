@@ -9,29 +9,29 @@ def sgd_updates(gparams, params, learning_rate):
 
 def momentum_updates(gparams, params, learning_rate, momentum=0.9):
     # TODO implement this method
-    pass
+    raise NotImplementedError
 
 
 def nesterov_momentum_updates(gparams, params, learning_rate, momentum=0.9):
     # TODO implement this method
-    pass
+    raise NotImplementedError
 
 
 def adagrad_updates(gparams, params, learning_rate=1.0, epsilon=0.9):
     # TODO implement this method
-    pass
+    raise NotImplementedError
 
 
 def rmsprop_updates(gparams, params, learning_rate=1.0, rho=0.9, epsilon=1e-6):
     # TODO implement this method
-    pass
+    raise NotImplementedError
 
 
 def adadelta_updates(gparams, params, learning_rate=1.0, rho=0.95, epsilon=1e-6):
     # TODO implement this method
-    pass
+    raise NotImplementedError
 
 
 def hessian_free_updates(gparams, parms):
     # TODO implement this method
-    pass
+    raise NotImplementedError
