@@ -1,9 +1,9 @@
 dl
 ==
 
-dl is my personal deep learning framework based on **Theano**.
-It is highly inspired by **Lasagne** and I would therefore recommend
-considering Lasagne in stead of dl.
+dl is my personal ultra light deep learning framework based on **Theano**.
+It is highly inspired by **Lasagne** and **keras** I would therefore recommend
+considering one or the other in stead of dl.
 
 
 Its main features are:

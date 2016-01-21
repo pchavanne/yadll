@@ -21,29 +21,43 @@ class Layer(object):
 
     @property
     def output_shape(self):
-        return self.get_output_shape(self.input_shape)
-
-    def get_output_shape(self, input_shape):
-        raise NotImplementedError
+        return self.input_shape
 
     def get_output(self, input, **kwargs):
         raise NotImplementedError
 
-    def creat_param(self, name, how_to):
-        raise NotImplementedError
+
+class Input_Layer(Layer):
+    def __init__(self, shape, input_var=None, name=None):
+        self.shape = shape
+        self.input = input_var
+        self.name = name
+
+    @property
+    def output_shape(self):
+        return self.shape
+
+    def get_output(self, input, **kwargs):
+        return self.input
 
 
-class Dense(Layer):
+class Dense_Layer(Layer):
     def __init__(self, incoming, nb_units, name=None,
                  W=glorot_uniform, b=(constant, {'value':0.0}),
                  activation=tanh):
         super(Dense, self).__init__(incoming, name)
-        self.W = initializer(W, shape=(incoming.output_shape, nb_units), name='W')
+        self.shape = (incoming.output_shape, nb_units)
+        self.W = initializer(W, shape=self.shape, name='W')
         self.params.append(self.W)
+        self.b = initializer(b, shape=(self.shape[1],), name='b')
+        self.params.append(self.b)
         self.activation = activation
 
-    def get_output_shape(self, input_shape):
-        raise NotImplementedError
+    @property
+    def output_shape(self):
+        return self.shape
 
     def get_output(self, input, **kwargs):
-        raise NotImplementedError
+        X = self.input_layer.get_output()
+        return self.activation(T.dot(X, self.W) + self.b)
+

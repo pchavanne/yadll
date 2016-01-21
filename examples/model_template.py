@@ -44,13 +44,10 @@ def load_data(dataset):
     return rval
 
 
-def build_model(input_var=None):
-    l_in = dl.layers.InputLayer(shape=(None, 1, 28, 28), input_var=input_var)
-    l_hid = dl.layers.DenseLayer(incoming=l_in, num_units=800,
-                                 W=dl.init.GlorotUniform(),
-                                 activation=dl.activation.relu)
-    l_out = dl.layers.DenseLayer(incoming=l_hid, num_units=10,
-                                 activation=dl.activation.softmax)
+def build_network(input_var=None):
+    l_in = dl.layers.Input_Layer(shape=(None, 28 * 28), input_var=input_var)
+    l_out = dl.layers.Dense_Layer(incoming=l_in, nb_units=800,
+                                  activation=dl.activation.softmax)
     return l_out
 
 
@@ -84,15 +81,12 @@ def train(hp, dataset, save_model=False):
     x = T.matrix('x')       # the input data is presented as a matrix
     y = T.ivector('y')      # the output labels are presented as 1D vector of[int] labels
 
-    # Random generators
-    #np_rng = np.random.RandomState(1234)
-    #theano_rng = RandomStreams(np_rng.randint(2 ** 30))
 
     # construct the network
-    network = build_model(input=x)
+    network = build_network(input_var=x)
 
-    # the cost we minimize during training is the negative log likelihood of last layer plus regularisation
-    cost = network.cost(y, l1_reg=hp.l1_reg, l2_reg=hp.l2_reg)
+    # the cost we minimize during training
+    cost = network.get_output()
 
     # compute the gradient of cost with respect to params
     gparams = [T.grad(cost, param) for param in network.params]
