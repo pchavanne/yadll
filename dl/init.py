@@ -32,9 +32,9 @@ def normal(shape, scale=0.5, name=None, borrow=True):
 
 def glorot_uniform(shape, gain=1.0,  name=None, borrow=True):
     if gain == tanh:
-        gain = 1
+        gain = 1.
     if gain == sigmoid:
-        gain = 4
+        gain = 4.
     scale = gain * np.sqrt(6. / (shape[0] + shape[1]))
     return uniform(shape, scale, name, borrow)
 

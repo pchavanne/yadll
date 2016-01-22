@@ -2,17 +2,18 @@
 
 
 class Network(object):
-    def __init__(self, layers=[]):
-        self.layers = []
+    def __init__(self, layers=None):
+        if not layers:
+            self.layers = []
+        else:
+            for layer in layers:
+                self.add(layer)
         self.params = []
-        for layer in layers:
-            self.add(layer)
 
     def add(self, layer):
         self.layers.append(layer)
         self.params.extend(layer.params)
 
-    @property
     def params(self):
         return self.params
 

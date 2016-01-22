@@ -29,13 +29,8 @@ class Layer(object):
 
 class InputLayer(Layer):
     def __init__(self, shape, input_var=None, name=None):
-        self.shape = shape
+        super(InputLayer, self).__init__(shape, name)
         self.input = input_var
-        self.name = name
-
-    @property
-    def output_shape(self):
-        return self.shape
 
     def get_output(self, **kwargs):
         return self.input
@@ -46,7 +41,7 @@ class DenseLayer(Layer):
                  W=glorot_uniform, b=(constant, {'value':0.0}),
                  activation=tanh):
         super(DenseLayer, self).__init__(incoming, name)
-        self.shape = (incoming.output_shape, nb_units)
+        self.shape = (self.input_shape[1], nb_units)
         self.W = initializer(W, shape=self.shape, name='W')
         self.params.append(self.W)
         self.b = initializer(b, shape=(self.shape[1],), name='b')

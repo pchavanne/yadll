@@ -47,11 +47,11 @@ def load_data(dataset):
     return rval
 
 
-def build_network(input_var=None):
+def build_network(input_var=None, batch_size=None):
     # Create connected layers
-    l_in = dl.layers.InputLayer(shape=(None, 28 * 28), input_var=input_var)
-    l_out = dl.layers.DenseLayer(incoming=l_in, nb_units=800,
-                                 activation=dl.activation.softmax)
+    l_in = dl.layers.InputLayer(shape=(batch_size, 28 * 28), input_var=input_var, name='Input')
+    l_out = dl.layers.DenseLayer(incoming=l_in, nb_units=10, W=dl.init.constant,
+                                 activation=dl.activation.softmax, name='Logistic regression')
     # Create network and add layers
     net = dl.model.Network()
     net.add(l_in)
@@ -91,7 +91,7 @@ def train(hp, dataset, save_model=False):
 
 
     # construct the network
-    network = build_network(input_var=x)
+    network = build_network(input_var=x, batch_size=hp.batch_size)
 
     # the cost we minimize during training
     cost = dl.objectives.categorical_crossentropy(
@@ -105,18 +105,17 @@ def train(hp, dataset, save_model=False):
     updates = dl.updates.sgd_updates(gparams, network.params, hp.learning_rate)
 
     # compiling Theano functions for training, validating and testing the model
-    train_model = theano.function(inputs=[index, theano.Param(stochastic, default=1)],
-                                  outputs=cost, updates=updates, name='train',
+    train_model = theano.function(inputs=[index], outputs=cost, updates=updates, name='train',
                                   givens={x: train_set_x[index * hp.batch_size: (index + 1) * hp.batch_size],
                                           y: train_set_y[index * hp.batch_size: (index + 1) * hp.batch_size]})
+    prediction = T.argmax(network.get_output(), axis=1)
+    error = T.neq(prediction, y)
 
-    validate_model = theano.function(inputs=[index, theano.Param(stochastic, default=0)],
-                                     outputs=network.errors(y), name='validate',
+    validate_model = theano.function(inputs=[index], outputs=error, name='validate',
                                      givens={x: valid_set_x[index * hp.batch_size:(index + 1) * hp.batch_size],
                                              y: valid_set_y[index * hp.batch_size:(index + 1) * hp.batch_size]})
 
-    test_model = theano.function(inputs=[index, theano.Param(stochastic, default=0)],
-                                 outputs=network.errors(y), name='test',
+    test_model = theano.function(inputs=[index], outputs=error, name='test',
                                  givens={x: test_set_x[index * hp.batch_size:(index + 1) * hp.batch_size],
                                          y: test_set_y[index * hp.batch_size:(index + 1) * hp.batch_size]})
 
@@ -133,7 +132,7 @@ def train(hp, dataset, save_model=False):
     start_time = timeit.default_timer()
 
     # early-stopping parameters
-    patience = 10000  # look at this many batches regardless
+    patience = 5000  # look at this many batches regardless
     patience_increase = 2  # wait this much longer when a new best is found
     improvement_threshold = 0.995  # a relative improvement of this much is considered significant
     validation_frequency = min(n_train_batches, patience / 2) # go through this many minibatche before checking the network
@@ -188,13 +187,10 @@ def train(hp, dataset, save_model=False):
 
     end_time = timeit.default_timer()
 
-    print str(network)
-
-    print hp
-
-    print ' Optimization completed. ' + ('Early stopped at epoch: %i' % epoch) \
+    print '\nOptimization completed. ' + ('Early stopped at epoch: %i' % epoch) \
         if done_looping else 'Optimization completed. ' + ('Trained on all %i epochs' % epoch)
-    print(' Validation score of %f %% obtained at iteration %i, with test performance %f %%' %
+
+    print('\n Validation score of %f %% obtained at iteration %i, with test performance %f %%' %
           (best_validation_loss * 100., best_iter + 1, test_score * 100.))
 
     s = end_time - start_time
@@ -204,8 +200,7 @@ def train(hp, dataset, save_model=False):
 
     report = OrderedDict()
     report['index'] = hp.iteration
-    report['network'] = str(network)
-    report['file'] = network.file
+#    report['file'] = network.file
     report['parameters'] = hp.hp_value
     report['iteration'] = best_iter
     report['validation'] = best_validation_loss * 100.
@@ -237,10 +232,10 @@ if __name__ == '__main__':
     dataset = load_data(datafile)
 
     # Load Hyperparameters
-    hp = dl.Hyperparameters()
-    hp('batch_size', 20, [5, 10, 15, 20])
-    hp('n_epochs', 50)
-    hp('learning_rate', 0.01, [0.001, 0.01, 0.1, 1])
+    hp = dl.hyperparameters.Hyperparameters()
+    hp('batch_size', 600, [5, 10, 15, 20])
+    hp('n_epochs', 1000)
+    hp('learning_rate', 0.13, [0.001, 0.01, 0.1, 1])
     hp('l1_reg', 0.00, [0.0001, 0.001])
     hp('l2_reg', 0.000)
 
@@ -260,6 +255,6 @@ if __name__ == '__main__':
                              columns=['iteration', 'test', 'validation', 'training time'])
     reports = pd.concat([param_reports, pd_report], axis=1)
 
-    reports.to_html(open('/home/philippe/Python/Theano/dl/report.html', 'w'))
+    reports.to_html(open('/home/philippe/Python/dl/report.html', 'w'))
 
     print reports.loc[reports['validation'].idxmin()]
