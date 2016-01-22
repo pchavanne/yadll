@@ -3,6 +3,7 @@
 from . import activation
 from . import init
 from . import layers
+from . import model
 from . import objectives
 from . import regularization
 from . import updates

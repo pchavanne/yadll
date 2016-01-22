@@ -23,11 +23,11 @@ class Layer(object):
     def output_shape(self):
         return self.input_shape
 
-    def get_output(self, input, **kwargs):
+    def get_output(self, **kwargs):
         raise NotImplementedError
 
 
-class Input_Layer(Layer):
+class InputLayer(Layer):
     def __init__(self, shape, input_var=None, name=None):
         self.shape = shape
         self.input = input_var
@@ -37,15 +37,15 @@ class Input_Layer(Layer):
     def output_shape(self):
         return self.shape
 
-    def get_output(self, input, **kwargs):
+    def get_output(self, **kwargs):
         return self.input
 
 
-class Dense_Layer(Layer):
+class DenseLayer(Layer):
     def __init__(self, incoming, nb_units, name=None,
                  W=glorot_uniform, b=(constant, {'value':0.0}),
                  activation=tanh):
-        super(Dense_Layer, self).__init__(incoming, name)
+        super(DenseLayer, self).__init__(incoming, name)
         self.shape = (incoming.output_shape, nb_units)
         self.W = initializer(W, shape=self.shape, name='W')
         self.params.append(self.W)
@@ -57,7 +57,7 @@ class Dense_Layer(Layer):
     def output_shape(self):
         return self.shape
 
-    def get_output(self, input, **kwargs):
+    def get_output(self, **kwargs):
         X = self.input_layer.get_output()
         return self.activation(T.dot(X, self.W) + self.b)
 

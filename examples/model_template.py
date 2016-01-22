@@ -6,11 +6,14 @@ import cPickle
 import gzip
 
 import numpy as np
+import pandas as pd
 
 import theano
 import theano.tensor as T
 
 import dl
+
+from collections import OrderedDict
 
 
 def load_data(dataset):
@@ -45,10 +48,15 @@ def load_data(dataset):
 
 
 def build_network(input_var=None):
-    l_in = dl.layers.Input_Layer(shape=(None, 28 * 28), input_var=input_var)
-    l_out = dl.layers.Dense_Layer(incoming=l_in, nb_units=800,
-                                  activation=dl.activation.softmax)
-    return l_out
+    # Create connected layers
+    l_in = dl.layers.InputLayer(shape=(None, 28 * 28), input_var=input_var)
+    l_out = dl.layers.DenseLayer(incoming=l_in, nb_units=800,
+                                 activation=dl.activation.softmax)
+    # Create network and add layers
+    net = dl.model.Network()
+    net.add(l_in)
+    net.add(l_out)
+    return net
 
 
 def train(hp, dataset, save_model=False):
@@ -76,7 +84,7 @@ def train(hp, dataset, save_model=False):
     start_time = timeit.default_timer()
 
     # allocate symbolic variables for the data
-    noise = T.bscalar()     # noise set to 1 when training with noise, 0 for validate and test
+    stochastic = T.bscalar()     # stochastic set to 1 when training, 0 for validate and test
     index = T.lscalar()     # index to a [mini]batch
     x = T.matrix('x')       # the input data is presented as a matrix
     y = T.ivector('y')      # the output labels are presented as 1D vector of[int] labels
@@ -86,7 +94,9 @@ def train(hp, dataset, save_model=False):
     network = build_network(input_var=x)
 
     # the cost we minimize during training
-    cost = network.get_output()
+    cost = dl.objectives.categorical_crossentropy(
+            prediction=network.get_output(),
+            target=T.extra_ops.to_one_hot(y, nb_class=10))
 
     # compute the gradient of cost with respect to params
     gparams = [T.grad(cost, param) for param in network.params]
@@ -95,17 +105,17 @@ def train(hp, dataset, save_model=False):
     updates = dl.updates.sgd_updates(gparams, network.params, hp.learning_rate)
 
     # compiling Theano functions for training, validating and testing the model
-    train_model = theano.function(inputs=[index, theano.Param(noise, default=1)],
+    train_model = theano.function(inputs=[index, theano.Param(stochastic, default=1)],
                                   outputs=cost, updates=updates, name='train',
                                   givens={x: train_set_x[index * hp.batch_size: (index + 1) * hp.batch_size],
                                           y: train_set_y[index * hp.batch_size: (index + 1) * hp.batch_size]})
 
-    validate_model = theano.function(inputs=[index, theano.Param(noise, default=0)],
+    validate_model = theano.function(inputs=[index, theano.Param(stochastic, default=0)],
                                      outputs=network.errors(y), name='validate',
                                      givens={x: valid_set_x[index * hp.batch_size:(index + 1) * hp.batch_size],
                                              y: valid_set_y[index * hp.batch_size:(index + 1) * hp.batch_size]})
 
-    test_model = theano.function(inputs=[index, theano.Param(noise, default=0)],
+    test_model = theano.function(inputs=[index, theano.Param(stochastic, default=0)],
                                  outputs=network.errors(y), name='test',
                                  givens={x: test_set_x[index * hp.batch_size:(index + 1) * hp.batch_size],
                                          y: test_set_y[index * hp.batch_size:(index + 1) * hp.batch_size]})
@@ -227,7 +237,7 @@ if __name__ == '__main__':
     dataset = load_data(datafile)
 
     # Load Hyperparameters
-    hp = Hyperparameters()
+    hp = dl.Hyperparameters()
     hp('batch_size', 20, [5, 10, 15, 20])
     hp('n_epochs', 50)
     hp('learning_rate', 0.01, [0.001, 0.01, 0.1, 1])
