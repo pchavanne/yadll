@@ -51,7 +51,7 @@ class DenseLayer(Layer):
 
     @property
     def output_shape(self):
-        return self.shape
+        return self.input_shape[0], self.shape[1]
 
     def get_output(self, **kwargs):
         X = self.input_layer.get_output(**kwargs)
@@ -71,7 +71,7 @@ class Dropout(Layer):
         self.p = 1 - corruption_level
 
     def get_output(self, stochastic=False, **kwargs):
-        X = self.input_layer.get_output(stochastic=False, **kwargs)
+        X = self.input_layer.get_output(stochastic=stochastic, **kwargs)
         if self.p > 0 and stochastic:
             X = X * T_rng.binomial(self.input_shape, n=1, p=self.p, dtype=floatX)
         return X
@@ -86,7 +86,7 @@ class Dropconnect(DenseLayer):
         self.p = 1 - corruption_level
 
     def get_output(self, stochastic=False, **kwargs):
-        X = super(Dropconnect,self).get_output(stochastic=stochastic, **kwargs)
+        X = self.input_layer.get_output(stochastic=stochastic, **kwargs)
         if self.p > 0 and stochastic:
-            X = X * T_rng.binomial(self.input_shape, n=1, p=self.p, dtype=floatX)
-        return X
+            self.W = self.W * T_rng.binomial(self.shape, n=1, p=self.p, dtype=floatX)
+        return self.activation(T.dot(X, self.W) + self.b)
