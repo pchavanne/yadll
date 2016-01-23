@@ -49,18 +49,11 @@ def load_data(dataset):
 
 def build_network(input_var=None, batch_size=None):
     # Create connected layers
-    l_in = dl.layers.InputLayer(shape=(batch_size, 28 * 28), input_var=input_var)
-    l_hid1 = dl.layers.DenseLayer(incoming=l_in, nb_units=5000, W=dl.init.glorot_uniform,
-                                 activation=dl.activation.relu)
-    l_hid2 = dl.layers.DenseLayer(incoming=l_hid1, nb_units=5000, W=dl.init.glorot_uniform,
-                                 activation=dl.activation.relu)
-    l_out = dl.layers.DenseLayer(incoming=l_hid2, nb_units=10, W=dl.init.constant,
-                                 activation=dl.activation.softmax)
+    l_in = dl.layers.InputLayer(shape=(batch_size, 28 * 28), input_var=input_var, name='Input')
+    l_out = dl.layers.LogisticRegression(incoming=l_in, nb_class=10, name='Logistic regression')
     # Create network and add layers
     net = dl.model.Network()
     net.add(l_in)
-    net.add(l_hid1)
-    net.add(l_hid2)
     net.add(l_out)
     return net
 

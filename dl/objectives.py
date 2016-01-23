@@ -2,7 +2,7 @@
 
 import theano.tensor as T
 
-from .utils import _EPSILON
+from .utils import EPSILON
 
 
 def mean_squared_error(prediction, target):
@@ -26,11 +26,11 @@ def squared_hinge(prediction, target):
 
 
 def binary_crossentropy(prediction, target):
-    clip_pred = T.clip(prediction, _EPSILON, 1 - _EPSILON)
+    clip_pred = T.clip(prediction, EPSILON, 1 - EPSILON)
     return T.mean(T.nnet.binary_crossentropy(clip_pred, target), axis=-1)
 
 
 def categorical_crossentropy(prediction, target):
     prediction /= prediction.sum(axis=-1, keepdims=True)
-    prediction = T.clip(prediction, _EPSILON, 1 - _EPSILON)
+    prediction = T.clip(prediction, EPSILON, 1 - EPSILON)
     return T.mean(T.nnet.categorical_crossentropy(prediction, target), axis=-1)

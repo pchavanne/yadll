@@ -58,6 +58,13 @@ class DenseLayer(Layer):
         return self.activation(T.dot(X, self.W) + self.b)
 
 
+class LogisticRegression(DenseLayer):
+    def __init__(self, incoming, nb_class, name=None,
+                 W=constant, b=constant, activation=softmax):
+        super(LogisticRegression, self).__init__(incoming, nb_class, name=name,
+                                                 W=W, b=b, activation=activation)
+
+
 class Dropout(Layer):
     def __init__(self, incoming, corruption_level=0.5, name=None):
         super(Dropout, self).__init__(incoming, name)
