@@ -89,34 +89,40 @@ def train(hp, dataset, save_model=False):
 
     start_time = timeit.default_timer()
 
+    ################################################
     # allocate symbolic variables for the data
-    stochastic = T.bscalar()     # stochastic set to 1 when training, 0 for validate and test
     index = T.lscalar()     # index to a [mini]batch
     x = T.matrix('x')       # the input data is presented as a matrix
     y = T.ivector('y')      # the output labels are presented as 1D vector of[int] labels
 
-
+    ################################################
     # construct the network
     network = build_network(input_var=x, batch_size=hp.batch_size)
+
+
+    ################################################
+    # Train function
 
     # the cost we minimize during training
     # cost = dl.objectives.categorical_crossentropy(
     #         prediction=network.get_output(),
     #         target=T.extra_ops.to_one_hot(y, nb_class=10))
-
-    cost = -T.mean(T.log(network.get_output())[T.arange(y.shape[0]), y])
+    cost = -T.mean(T.log(network.get_output(stochastic=True))[T.arange(y.shape[0]), y])
 
     # compute the gradient of cost with respect to params
     gparams = [T.grad(cost, param) for param in network.params]
 
-    # specify how to update the parameters of the model as a list of (variable, update expression) pairs
+    # updates of the model as a list of (variable, update expression) pairs
     updates = dl.updates.sgd_updates(gparams, network.params, hp.learning_rate)
 
     # compiling Theano functions for training, validating and testing the model
     train_model = theano.function(inputs=[index], outputs=cost, updates=updates, name='train',
                                   givens={x: train_set_x[index * hp.batch_size: (index + 1) * hp.batch_size],
                                           y: train_set_y[index * hp.batch_size: (index + 1) * hp.batch_size]})
-    prediction = T.argmax(network.get_output(), axis=1)
+
+    ################################################
+    # Validation & Test functions
+    prediction = T.argmax(network.get_output(stochastic=False), axis=1)
     error = T.neq(prediction, y)
 
     validate_model = theano.function(inputs=[index], outputs=error, name='validate',

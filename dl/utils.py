@@ -6,15 +6,15 @@ import numpy as np
 import theano
 
 
-_float_X = theano.config.floatX
-_EPSILON = 1e-8
+floatX = theano.config.floatX
+EPSILON = 1e-8
 
 
 def to_float_X(arr):
-    return np.asarray(arr, dtype=_float_X)
+    return np.asarray(arr, dtype=floatX)
 
 
-def shared_variable(value, dtype=_float_X, name=None, borrow=True):
+def shared_variable(value, dtype=floatX, name=None, borrow=True):
     value = np.asarray(value, dtype=dtype)
     return theano.shared(value=value, name=name, borrow=True)
 

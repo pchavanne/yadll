@@ -17,8 +17,8 @@ class Network(object):
     def params(self):
         return self.params
 
-    def get_output(self):
-        return self.layers[-1].get_output()
+    def get_output(self, **kwargs):
+        return self.layers[-1].get_output(**kwargs)
 
 
 class Model(object):

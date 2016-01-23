@@ -1,10 +1,11 @@
 # -*- coding: UTF-8 -*-
 
-from collections import OrderedDict
-
-from utils import *
 from .init import *
-from . import activation
+from .utils import *
+
+from theano.tensor.shared_randomstreams import RandomStreams
+
+T_rng = RandomStreams(np_rng.randint(2 ** 30))
 
 
 class Layer(object):
@@ -53,6 +54,32 @@ class DenseLayer(Layer):
         return self.shape
 
     def get_output(self, **kwargs):
-        X = self.input_layer.get_output()
+        X = self.input_layer.get_output(**kwargs)
         return self.activation(T.dot(X, self.W) + self.b)
 
+
+class Dropout(Layer):
+    def __init__(self, incoming, corruption_level=0.5, name=None):
+        super(Dropout, self).__init__(incoming, name)
+        self.p = 1 - corruption_level
+
+    def get_output(self, stochastic=False, **kwargs):
+        X = self.input_layer.get_output(stochastic=False, **kwargs)
+        if self.p > 0 and stochastic:
+            X = X * T_rng.binomial(self.input_shape, n=1, p=self.p, dtype=floatX)
+        return X
+
+
+class Dropconnect(DenseLayer):
+    def __init__(self, incoming, nb_units, corruption_level=0.5, name=None,
+                 W=glorot_uniform, b=(constant, {'value':0.0}),
+                 activation=tanh):
+        super(Dropconnect, self).__init__(incoming, nb_units, name=name,
+                 W=W, b=b, activation=activation)
+        self.p = 1 - corruption_level
+
+    def get_output(self, stochastic=False, **kwargs):
+        X = super(Dropconnect,self).get_output(stochastic=stochastic, **kwargs)
+        if self.p > 0 and stochastic:
+            X = X * T_rng.binomial(self.input_shape, n=1, p=self.p, dtype=floatX)
+        return X
