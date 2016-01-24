@@ -3,7 +3,8 @@
 from .init import *
 from .utils import *
 
-from theano.tensor.shared_randomstreams import RandomStreams
+# from theano.tensor.shared_randomstreams import RandomStreams
+from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 
 T_rng = RandomStreams(np_rng.randint(2 ** 30))
 

@@ -108,8 +108,7 @@ def train(hp, dataset, save_model=False):
     #         target=T.extra_ops.to_one_hot(y, nb_class=10))
     cost = -T.mean(T.log(network.get_output(stochastic=True))[T.arange(y.shape[0]), y])
 
-    # compute the gradient of cost with respect to params
-    gparams = [T.grad(cost, param) for param in network.params]
+
 
     # updates of the model as a list of (variable, update expression) pairs
     updates = dl.updates.sgd_updates(gparams, network.params, hp.learning_rate)
