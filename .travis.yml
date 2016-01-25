@@ -2,13 +2,8 @@ language: python
 sudo: required
 python:
   - "2.7"
-addons:
-  apt:
-    packages:
-      - libblas-dev
-      - liblapack-dev
-      - gfortran
 before_install:
+  - sudo apt-get install -y libblas-dev liblapack-dev libatlas-base-dev gfortran
   - pip install --upgrade pip
 install:
   - pip install -r requirements.txt
