@@ -2,7 +2,6 @@ sudo: required
 language: python
 python:
   # We don't actually use the Travis Python, but this keeps it organized.
-  - "2.6"
   - "2.7"
 install:
   - sudo apt-get update
@@ -22,7 +21,6 @@ install:
   # Useful for debugging any issues with conda
   - conda info -a
 
-  # Replace dep1 dep2 ... with your dependencies
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib pandas pytest
   - source activate test-environment
   - pip install pytest-cov python-coveralls pytest-xdist coverage==3.7.1 #we need this version of coverage for coveralls.io to work
