@@ -23,7 +23,7 @@ Its main features are:
 
 Installation
 ------------
-dl uses the following dependencies:
+**dl** uses the following dependencies:
 
 * **Python 2.7**
 * scipy
