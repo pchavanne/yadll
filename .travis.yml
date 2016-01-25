@@ -1,2 +1,4 @@
 language: pyhton
-sudo: required
+sudo: false
+python:
+  - "2.7"
