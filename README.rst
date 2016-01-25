@@ -8,9 +8,10 @@ dl
 ==
 
 dl is an ultra light deep learning framework based on [Theano](https://github.com/Theano/Theano).
-It is highly inspired by `Lasagne<https://github.com/Lasagne/Lasagne>` and [keras](https://github.com/fchollet/keras).
+It is highly inspired by Lasagne_ and [keras](https://github.com/fchollet/keras).
 I would therefore recommend considering one or the other in stead of dl.
 
+.. _Lasagne : https://github.com/Lasagne/Lasagne
 
 Its main features are:
 
