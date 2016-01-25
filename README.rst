@@ -24,11 +24,12 @@ Its main features are:
 Installation
 ------------
 dl uses the following dependencies:
-.Python 2.7
-.scipy
-.theano
+* **Python 2.7**
+* scipy
+* theano
 
 .. code-block:: bash
+
   pip install git+git@github.com:pchavanne/dl.git
 
 
