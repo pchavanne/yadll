@@ -1,3 +1,6 @@
+.. image:: https://img.shields.io/badge/license-MIT-blue.svg
+    :target: https://github.com/pchavanne/dl/blob/master/LICENSE
+
 dl
 ==
 
@@ -8,14 +11,15 @@ considering one or the other in stead of dl.
 
 Its main features are:
 
-* Layers: Base, Input, dense
-* optimisation: sgd, momentum, Nesterov momentum, rmsprop
+* Layers: Base, Input, Dense, Dropout, Dropconnect
+* optimisation: sgd, momentum, Nesterov momentum, adagrad, adadelta, rmsprop
 
 
 Installation
 ------------
+dl uses the following dependencies:
 
-pip install
+pip install git+git@github.com:pchavanne/dl.git
 
 
 Documentation
@@ -27,4 +31,8 @@ not yet implemented
 Example
 -------
 
-not yet implemented
+different network tested on mnist:
+    - Linear Regression
+    - MLP
+    - MLP with dropout
+    - MLP with dropconnect

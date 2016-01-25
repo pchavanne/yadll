@@ -50,16 +50,16 @@ def load_data(dataset):
 def build_network(input_var=None, batch_size=None):
     # Create connected layers
     l_in = dl.layers.InputLayer(shape=(batch_size, 28 * 28), input_var=input_var, name='Input')
-    l_dc1 = dl.layers.Dropconnect(incoming=l_in, nb_units=500, corruption_level=0.4, W=dl.init.glorot_uniform,
+    l_hid1 = dl.layers.DenseLayer(incoming=l_in, nb_units=500, W=dl.init.glorot_uniform,
                                  activation=dl.activation.relu, name='Hidden layer 1')
-    l_dc2 = dl.layers.Dropconnect(incoming=l_dc1, nb_units=500, corruption_level=0.2,W=dl.init.glorot_uniform,
+    l_hid2 = dl.layers.DenseLayer(incoming=l_hid1, nb_units=500, W=dl.init.glorot_uniform,
                                  activation=dl.activation.relu, name='Hidden layer 2')
-    l_out = dl.layers.LogisticRegression(incoming=l_dc2, nb_class=10, name='Logistic regression')
+    l_out = dl.layers.LogisticRegression(incoming=l_hid2, nb_class=10, name='Logistic regression')
     # Create network and add layers
     net = dl.model.Network()
     net.add(l_in)
-    net.add(l_dc1)
-    net.add(l_dc2)
+    net.add(l_hid1)
+    net.add(l_hid2)
     net.add(l_out)
     return net
 
@@ -109,9 +109,8 @@ def train(hp, dataset, save_model=False):
     cost = -T.mean(T.log(network.get_output(stochastic=True))[T.arange(y.shape[0]), y])
 
 
-
     # updates of the model as a list of (variable, update expression) pairs
-    updates = dl.updates.sgd_updates(gparams, network.params, hp.learning_rate)
+    updates = dl.updates.nesterov_momentum_updates(cost, network.params, hp.learning_rate)
 
     # compiling Theano functions for training, validating and testing the model
     train_model = theano.function(inputs=[index], outputs=cost, updates=updates, name='train',
