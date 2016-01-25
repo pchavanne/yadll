@@ -1,2 +1,1 @@
-Theano
-numpy
+git+https://github.com/Theano/Theano.git@54186290#egg=Theano==0.8.git
