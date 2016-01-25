@@ -1,1 +1,2 @@
 language: pyhton
+sudo: required
