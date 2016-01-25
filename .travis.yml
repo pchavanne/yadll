@@ -1,29 +1,21 @@
-sudo: required
 language: python
+sudo: false
 python:
-  # We don't actually use the Travis Python, but this keeps it organized.
   - "2.7"
+addons:
+  apt:
+    packages:
+    - libblas-dev
+    - liblapack-dev
+    - gfortran
+before_install:
+  - pip install -U pip
 install:
-  - sudo apt-get update
-  # code below is taken from http://conda.pydata.org/docs/travis.html
-  # We do this conditionally because it saves us some downloading if the
-  # version is the same.
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
-    else
-      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-    fi
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - hash -r
-  - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
-  # Useful for debugging any issues with conda
-  - conda info -a
-
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib pandas pytest
-  - source activate test-environment
-  - pip install pytest-cov python-coveralls pytest-xdist coverage==3.7.1 #we need this version of coverage for coveralls.io to work
-  - pip install pep8 pytest-pep8
-  - pip install git+git://github.com/Theano/Theano.git
-  - python setup.py install
+  - travis_wait travis_retry pip install -r requirements.txt
+  - travis_retry pip install python-coveralls
+  - travis_retry python setup.py dev
+cache:
+  - apt
+  - directories:
+    - $HOME/.cache/pip
+    - $HOME/.theano
