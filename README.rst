@@ -1,12 +1,15 @@
+.. image:: https://travis-ci.org/pchavanne/dl.svg
+    :target: https://travis-ci.org/pchavanne/dl
+
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg
     :target: https://github.com/pchavanne/dl/blob/master/LICENSE
 
 dl
 ==
 
-dl is my personal ultra light deep learning framework based on **Theano**.
-It is highly inspired by **Lasagne** and **keras** I would therefore recommend
-considering one or the other in stead of dl.
+dl is an ultra light deep learning framework based on [Theano](https://github.com/Theano/Theano).
+It is highly inspired by [Lasagne](https://github.com/Lasagne/Lasagne) and [keras](https://github.com/fchollet/keras).
+I would therefore recommend considering one or the other in stead of dl.
 
 
 Its main features are:
