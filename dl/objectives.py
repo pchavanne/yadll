@@ -14,7 +14,7 @@ def root_mean_squared_error(prediction, target):
 
 
 def mean_absolute_error(prediction, target):
-    return T.mean(T.abs(prediction - target), axis=-1)
+    return T.mean(T.abs_(prediction - target), axis=-1)
 
 
 def hinge(prediction, target):

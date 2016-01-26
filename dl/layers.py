@@ -2,6 +2,7 @@
 
 from .init import *
 from .utils import *
+from .objectives import *
 
 # from theano.tensor.shared_randomstreams import RandomStreams
 from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
@@ -95,9 +96,9 @@ class Dropout(Layer):
 class Dropconnect(DenseLayer):
     def __init__(self, incoming, nb_units, corruption_level=0.5, name=None,
                  W=glorot_uniform, b=(constant, {'value':0.0}),
-                 activation=tanh):
+                 activation=tanh, **kwargs):
         super(Dropconnect, self).__init__(incoming, nb_units, name=name,
-                 W=W, b=b, activation=activation)
+                 W=W, b=b, activation=activation, **kwargs)
         self.p = 1 - corruption_level
 
     def get_output(self, stochastic=False, **kwargs):
@@ -105,3 +106,30 @@ class Dropconnect(DenseLayer):
         if self.p > 0 and stochastic:
             self.W = self.W * T_rng.binomial(self.shape, n=1, p=self.p, dtype=floatX)
         return self.activation(T.dot(X, self.W) + self.b)
+
+
+class AutoEncoder(DenseLayer):
+    def __init__(self, incoming, nb_units, corruption_level=0.5, name=None,
+                 W=glorot_uniform, b=(constant, {'value':0.0}),
+                 activation=tanh, **kwargs):
+        super(AutoEncoder, self).__init__(incoming, nb_units, name=name,
+                                          W=W, b=b, activation=activation, **kwargs)
+        self.W_prime = self.W.T
+        self.b_prime = initializer(b, shape=(self.shape[1],), name='b_prime')
+        self.auto_params = self.params
+        self.auto_params.append(self.b_prime)
+        self.p = 1 - corruption_level
+
+    def get_encoded_input(self, stochastic=False, **kwargs):
+        X = self.input_layer.get_output(stochastic=stochastic, **kwargs)
+        if self.p > 0 and stochastic:
+            X = X * T_rng.binomial(self.input_shape, n=1, p=self.p, dtype=floatX)
+        Y = self.activation(T.dot(X, self.W) + self.b)
+        Z = self.activation(T.dot(Y, self.W_prime) + self.b_prime)
+        return Z
+
+    def get_encoding_cost(self, stochastic=False, **kwargs):
+        X = self.input_layer.get_output(stochastic=stochastic, **kwargs)
+        Z = self.get_encoded_input(stochastic=stochastic, **kwargs)
+        cost = T.mean(categorical_crossentropy(Z, X))
+        return cost
