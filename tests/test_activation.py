@@ -50,14 +50,19 @@ def test_relu():
     x = T.matrix('x')
     f = theano.function([x], dl.activation.relu(x))
     actual = f(x_val)
-    desired = 1 / 1 + np.exp(-x_val)
+    desired = x * (x > 0)
+    assert_allclose(actual, desired, rtol=1e-5)
+    x = T.matrix('x')
+    alpha = 0.5
+    f = theano.function([x], dl.activation.relu(x, alpha))
+    actual = f(x_val)
+    desired = x * (x > 0) + alpha * x * (x < 0)
     assert_allclose(actual, desired, rtol=1e-5)
 
 
 def test_linear(x):
-    x = T.matrix('x')
-    f = theano.function([x], dl.activation.linear(x))
-    actual = f(x_val)
-    desired = x_val
+    x = [0, -1, 1, 3.2, 1e-7, np.inf, True, None, 'foo']
+    actual = dl.activation.linear(x)
+    desired = x
     assert_allclose(actual, desired, rtol=1e-5)
 

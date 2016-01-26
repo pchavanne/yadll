@@ -20,6 +20,7 @@ class Layer(object):
 
         self.name = name
         self.params = []
+        self.reguls = None
 
     @property
     def output_shape(self):
@@ -41,18 +42,31 @@ class InputLayer(Layer):
 class DenseLayer(Layer):
     def __init__(self, incoming, nb_units, name=None,
                  W=glorot_uniform, b=(constant, {'value':0.0}),
-                 activation=tanh):
+                 activation=tanh, l1=None, l2=None):
         super(DenseLayer, self).__init__(incoming, name)
         self.shape = (self.input_shape[1], nb_units)
-        self.W = initializer(W, shape=self.shape, name='W')
+        if isinstance(W, theano.compile.SharedVariable):
+            self.W = W
+        else:
+            self.W = initializer(W, shape=self.shape, name='W')
         self.params.append(self.W)
-        self.b = initializer(b, shape=(self.shape[1],), name='b')
+        if isinstance(b, theano.compile.SharedVariable):
+            self.b = b
+        else:
+            self.b = initializer(b, shape=(self.shape[1],), name='b')
         self.params.append(self.b)
         self.activation = activation
+        if l1:
+            self.reguls += l1 * T.sum(T.abs_(self.W))
+        if l2:
+            self.reguls += l2 * T.sum(T.sqr(self.W))
 
     @property
     def output_shape(self):
         return self.input_shape[0], self.shape[1]
+
+    def get_reguls(self):
+        return self.reguls
 
     def get_output(self, **kwargs):
         X = self.input_layer.get_output(**kwargs)
