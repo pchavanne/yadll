@@ -8,6 +8,10 @@ def sigmoid(x):
     return T.nnet.sigmoid(x)
 
 
+def ultra_fast_sigmoid(x):
+    return T.nnet.ultra_fast_sigmoid(x)
+
+
 def tanh(x):
     return T.tanh(x)
 

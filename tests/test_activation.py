@@ -22,6 +22,14 @@ def test_sigmoid():
     assert_allclose(actual, desired, rtol=1e-5)
 
 
+def test_ultra_fast_sigmoid():
+    x = T.matrix('x')
+    f = theano.function([x], dl.activation.ultra_fast_sigmoid(x))
+    actual = f(x_val)
+    desired = 1 / (1 + np.exp(-x_val))
+    assert_allclose(actual, desired, rtol=0, atol=1e-1)
+
+
 def test_tanh():
     x = T.matrix('x')
     f = theano.function([x], dl.activation.tanh(x))
@@ -43,26 +51,26 @@ def test_softplus():
     f = theano.function([x], dl.activation.softplus(x))
     actual = f(x_val)
     desired = np.log(1 + np.exp(x_val))
-    assert_allclose(actual, desired, rtol=1e-5)
+    assert_allclose(actual, desired, rtol=1e-3)
 
 
 def test_relu():
     x = T.matrix('x')
     f = theano.function([x], dl.activation.relu(x))
     actual = f(x_val)
-    desired = x * (x > 0)
+    desired = x_val * (x_val > 0)
     assert_allclose(actual, desired, rtol=1e-5)
     x = T.matrix('x')
     alpha = 0.5
     f = theano.function([x], dl.activation.relu(x, alpha))
     actual = f(x_val)
-    desired = x * (x > 0) + alpha * x * (x < 0)
+    desired = x_val * (x_val > 0) + alpha * x_val * (x_val < 0)
     assert_allclose(actual, desired, rtol=1e-5)
 
 
-def test_linear(x):
+def test_linear():
     x = [0, -1, 1, 3.2, 1e-7, np.inf, True, None, 'foo']
     actual = dl.activation.linear(x)
     desired = x
-    assert_allclose(actual, desired, rtol=1e-5)
+    assert actual == desired
 
