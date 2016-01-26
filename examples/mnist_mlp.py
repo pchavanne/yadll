@@ -98,7 +98,6 @@ def train(hp, dataset, save_model=False):
     # construct the network
     network = build_network(input_var=x, batch_size=hp.batch_size)
 
-
     ################################################
     # Train function
 
@@ -106,11 +105,13 @@ def train(hp, dataset, save_model=False):
     # cost = dl.objectives.categorical_crossentropy(
     #         prediction=network.get_output(),
     #         target=T.extra_ops.to_one_hot(y, nb_class=10))
+    # cost functions
     cost = -T.mean(T.log(network.get_output(stochastic=True))[T.arange(y.shape[0]), y])
-
+    # add regularistion
+    cost += network.reguls
 
     # updates of the model as a list of (variable, update expression) pairs
-    updates = dl.updates.nesterov_momentum_updates(cost, network.params, hp.learning_rate)
+    updates = dl.updates.sgd_updates(cost, network.params, hp.learning_rate)
 
     # compiling Theano functions for training, validating and testing the model
     train_model = theano.function(inputs=[index], outputs=cost, updates=updates, name='train',

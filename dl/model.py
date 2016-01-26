@@ -9,13 +9,18 @@ class Network(object):
             for layer in layers:
                 self.add(layer)
         self.params = []
+        self.reguls = 0
 
     def add(self, layer):
         self.layers.append(layer)
         self.params.extend(layer.params)
+        self.reguls += layer.reguls
 
     def params(self):
         return self.params
+
+    def reguls(self):
+        return self.reguls
 
     def get_output(self, **kwargs):
         return self.layers[-1].get_output(**kwargs)

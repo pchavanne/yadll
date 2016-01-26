@@ -20,7 +20,7 @@ class Layer(object):
 
         self.name = name
         self.params = []
-        self.reguls = None
+        self.reguls = 0
 
     @property
     def output_shape(self):
@@ -57,9 +57,9 @@ class DenseLayer(Layer):
         self.params.append(self.b)
         self.activation = activation
         if l1:
-            self.reguls += l1 * T.sum(T.abs_(self.W))
+            self.reguls += l1 * T.mean(T.abs_(self.W))
         if l2:
-            self.reguls += l2 * T.sum(T.sqr(self.W))
+            self.reguls += l2 * T.mean(T.sqr(self.W))
 
     @property
     def output_shape(self):

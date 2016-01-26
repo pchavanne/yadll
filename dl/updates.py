@@ -28,7 +28,7 @@ def nesterov_momentum_updates(cost, params, learning_rate, momentum=0.9):
         param_update = shared_variable(np.zeros(param.get_value().shape))
         updates.append((param, param - learning_rate * param_update))
         eval_param = param + momentum * param_update
-        updates.append((param_update, momentum * param_update + (1. - momentum) * T.grad(cost, eval_param, consider_constant=consider_constant)))
+        updates.append((param_update, momentum * param_update + (1. - momentum) * T.grad(cost, eval_param)))
     return updates
 
 
