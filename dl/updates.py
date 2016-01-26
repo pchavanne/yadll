@@ -1,7 +1,5 @@
 # -*- coding: UTF-8 -*-
 
-import numpy as np
-
 import theano.tensor as T
 
 from .utils import *
