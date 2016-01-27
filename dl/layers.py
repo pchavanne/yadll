@@ -111,7 +111,7 @@ class Dropconnect(DenseLayer):
 class AutoEncoder(DenseLayer):
     def __init__(self, incoming, nb_units, corruption_level=0.5, name=None,
                  W=glorot_uniform, b=(constant, {'value':0.0}),
-                 activation=tanh, **kwargs):
+                 activation=sigmoid, **kwargs):
         super(AutoEncoder, self).__init__(incoming, nb_units, name=name,
                                           W=W, b=b, activation=activation, **kwargs)
         self.W_prime = self.W.T

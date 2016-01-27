@@ -1,3 +1,6 @@
 [run]
 source = dl
-omit = dl/tests/*
+omit =
+    dl/tests/*
+    */python?.?/*
+    */site-packages/nose/*
