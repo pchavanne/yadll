@@ -11,7 +11,7 @@ install:
   - python setup.py install
   - pip install coveralls
 script:
-  - nosetests --with-cov --cov dl --cov-config .coveragerc --logging-level=INFO
+  - nosetests
 after_success:
   - coveralls --config_file .coveragerc
 notifications:
