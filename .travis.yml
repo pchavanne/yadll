@@ -11,8 +11,8 @@ install:
   - python setup.py install
   - pip install coveralls
 script:
-  - nosetests
+  - nosetests --cover-config-file=.coveragerc
 after_success:
-  - coveralls --config_file .coveragerc
+  - coveralls
 notifications:
   email: philippe.chavanne@gmail.com
