@@ -8,10 +8,11 @@ before_install:
   - pip install --upgrade pip
 install:
   - pip install -r requirements.txt
+  - pip install python-coveralls
+  - pip install coverage
   - python setup.py install
-  - pip install coveralls
 script:
-  - nosetests --cover-config-file=.coveragerc
+  - nosetests --with-coverage
 after_success:
   - coveralls
 notifications:

@@ -1,2 +1,3 @@
 [run]
 source = dl
+omit = dl/tests/*
