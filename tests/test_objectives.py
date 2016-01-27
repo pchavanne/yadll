@@ -9,9 +9,9 @@ import theano.tensor as T
 import dl
 
 x_val = np.asarray(np.random.uniform(size=(10, 5)), dtype=dl.utils.floatX)
-x_val /= x_val.sum(axis=1)[:, np.newaxis]
+x_val /= x_val.sum(axis=1, keepdims=True)
 y_val = np.asarray(np.random.uniform(size=(10, 5)), dtype=dl.utils.floatX)
-y_val /= y_val.sum(axis=1)[:, np.newaxis]
+y_val /= y_val.sum(axis=1, keepdims=True)
 x = T.matrix('x')
 y = T.matrix('y')
 
@@ -40,6 +40,6 @@ def test_mean_absolute_error():
 def test_categorical_crossentropy():
     f = theano.function([x, y], dl.objectives.categorical_crossentropy(x, y))
     actual = f(x_val, y_val)
-    desired = np.mean(- np.sum(x_val * np.log(y_val) + (1 - x_val) * np.log(1 - y_val), axis=1))
-    assert_allclose(actual, desired, rtol=1e-2)
+    desired = np.mean(- np.sum(y_val * np.log(x_val), axis=-1))
+    assert_allclose(actual, desired, rtol=1e-5)
 
