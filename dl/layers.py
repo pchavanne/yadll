@@ -133,3 +133,11 @@ class AutoEncoder(DenseLayer):
         Z = self.get_encoded_input(stochastic=stochastic, **kwargs)
         cost = T.mean(categorical_crossentropy(Z, X))
         return cost
+
+
+class RBM(DenseLayer):
+    def __init__(self, incoming, nb_units, corruption_level=0.5, name=None,
+                 W=glorot_uniform, b=(constant, {'value':0.0}),
+                 activation=tanh, **kwargs):
+        super(RBM, self).__init__(incoming, nb_units, name=name,
+                                          W=W, b=b, activation=activation, **kwargs)
