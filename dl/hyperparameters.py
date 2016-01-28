@@ -1,14 +1,13 @@
 # -*- coding: UTF-8 -*-
 
 import itertools
-from collections import OrderedDict
 
 
 class Hyperparameters(object):
     def __init__(self):
-        self.hp_value = OrderedDict()
-        self.hp_default = OrderedDict()
-        self.hp_range = OrderedDict()
+        self.hp_value = dict()
+        self.hp_default = dict()
+        self.hp_range = dict()
         self.iteration = 0
 
     def __call__(self, name, value=None, range=None):
@@ -37,6 +36,7 @@ class Hyperparameters(object):
         return self
 
     def reset(self):
-        self.hp_value = self.hp_default
+        for name, value in self.hp_default.iteritems():
+            self.__setattr__(name, value)
         self.iteration = 0
 

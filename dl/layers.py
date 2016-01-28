@@ -32,7 +32,7 @@ class Layer(object):
 
 
 class InputLayer(Layer):
-    def __init__(self, shape, input_var=None, name=None):
+    def __init__(self, shape, input_var=None, name='Input'):
         super(InputLayer, self).__init__(shape, name)
         self.input = input_var
 
@@ -42,7 +42,7 @@ class InputLayer(Layer):
 
 class DenseLayer(Layer):
     def __init__(self, incoming, nb_units, name=None,
-                 W=glorot_uniform, b=(constant, {'value':0.0}),
+                 W=glorot_uniform, b=(constant, {'value': 0.0}),
                  activation=tanh, l1=None, l2=None):
         super(DenseLayer, self).__init__(incoming, name)
         self.shape = (self.input_shape[1], nb_units)
@@ -75,15 +75,14 @@ class DenseLayer(Layer):
 
 
 class LogisticRegression(DenseLayer):
-    def __init__(self, incoming, nb_class, name=None,
-                 W=constant, b=constant, activation=softmax):
-        super(LogisticRegression, self).__init__(incoming, nb_class, name=name,
-                                                 W=W, b=b, activation=activation)
+    def __init__(self, incoming, nb_class, W=constant, activation=softmax, **kwargs):
+        super(LogisticRegression, self).__init__(incoming, nb_class, W=W,
+                                                 activation=activation, **kwargs)
 
 
 class Dropout(Layer):
-    def __init__(self, incoming, corruption_level=0.5, name=None):
-        super(Dropout, self).__init__(incoming, name)
+    def __init__(self, incoming, corruption_level=0.5, **kwargs):
+        super(Dropout, self).__init__(incoming, **kwargs)
         self.p = 1 - corruption_level
 
     def get_output(self, stochastic=False, **kwargs):
@@ -94,11 +93,8 @@ class Dropout(Layer):
 
 
 class Dropconnect(DenseLayer):
-    def __init__(self, incoming, nb_units, corruption_level=0.5, name=None,
-                 W=glorot_uniform, b=(constant, {'value':0.0}),
-                 activation=tanh, **kwargs):
-        super(Dropconnect, self).__init__(incoming, nb_units, name=name,
-                 W=W, b=b, activation=activation, **kwargs)
+    def __init__(self, incoming, nb_units, corruption_level=0.5, **kwargs):
+        super(Dropconnect, self).__init__(incoming, nb_units, **kwargs)
         self.p = 1 - corruption_level
 
     def get_output(self, stochastic=False, **kwargs):
@@ -109,13 +105,12 @@ class Dropconnect(DenseLayer):
 
 
 class AutoEncoder(DenseLayer):
-    def __init__(self, incoming, nb_units, corruption_level=0.5, name=None,
-                 W=glorot_uniform, b=(constant, {'value':0.0}),
-                 activation=sigmoid, **kwargs):
-        super(AutoEncoder, self).__init__(incoming, nb_units, name=name,
-                                          W=W, b=b, activation=activation, **kwargs)
+    def __init__(self, incoming, nb_units, corruption_level=0.5,
+                 W=glorot_uniform, activation=sigmoid, **kwargs):
+        super(AutoEncoder, self).__init__(incoming, nb_units, W=W,
+                                          activation=activation, **kwargs)
         self.W_prime = self.W.T
-        self.b_prime = initializer(b, shape=(self.shape[1],), name='b_prime')
+        self.b_prime = initializer(self.b, shape=(self.shape[1],), name='b_prime')
         self.auto_params = self.params
         self.auto_params.append(self.b_prime)
         self.p = 1 - corruption_level
@@ -136,8 +131,5 @@ class AutoEncoder(DenseLayer):
 
 
 class RBM(DenseLayer):
-    def __init__(self, incoming, nb_units, corruption_level=0.5, name=None,
-                 W=glorot_uniform, b=(constant, {'value':0.0}),
-                 activation=tanh, **kwargs):
-        super(RBM, self).__init__(incoming, nb_units, name=name,
-                                          W=W, b=b, activation=activation, **kwargs)
+    def __init__(self, incoming, nb_units, corruption_level=0.5, **kwargs):
+        super(RBM, self).__init__(incoming, nb_units, **kwargs)

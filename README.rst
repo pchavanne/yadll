@@ -21,6 +21,7 @@ I would therefore recommend considering one or the other in stead of dl.
 
 Its main features are:
 
+* Hyperparameters grid search
 * Layers: Base, Input, Dense, Dropout, Dropconnect
 * optimisation: sgd, momentum, Nesterov momentum, adagrad, adadelta, rmsprop
 
@@ -48,7 +49,7 @@ Example
 -------
 
 different network tested on mnist:
-    - Linear Regression
-    - MLP
-    - MLP with dropout
-    - MLP with dropconnect
+* Linear Regression
+* MLP
+* MLP with dropout
+* MLP with dropconnect

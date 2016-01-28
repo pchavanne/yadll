@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-
+import timeit
 
 class Network(object):
     def __init__(self, layers=None):
@@ -27,5 +27,6 @@ class Network(object):
 
 
 class Model(object):
-    def __init__(self):
-        raise NotImplementedError
+    def __init__(self, network):
+        self.network = network
+
