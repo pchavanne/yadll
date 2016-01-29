@@ -105,6 +105,24 @@ class Dropout(Layer):
         return X
 
 
+class MaxPool(Layer):
+    def __init__(self, incoming,  **kwargs):
+        super(Dropout, self).__init__(incoming, **kwargs)
+        # TODO implement MaxPool class
+
+    def get_output(self, stochastic=False, **kwargs):
+        raise NotImplementedError
+
+
+class ConvLayer(DenseLayer):
+    def __init__(self, incoming,  **kwargs):
+        super(ConvLayer, self).__init__(incoming, **kwargs)
+        # TODO implement ConvLayer class
+
+    def get_output(self, stochastic=False, **kwargs):
+        raise NotImplementedError
+
+
 class Dropconnect(DenseLayer):
     def __init__(self, incoming, nb_units, corruption_level=0.5, **kwargs):
         super(Dropconnect, self).__init__(incoming, nb_units, **kwargs)
@@ -148,9 +166,20 @@ class AutoEncoder(UnsupervisedLayer):
 class RBM(UnsupervisedLayer):
     def __init__(self, incoming, nb_units, corruption_level=0.5, **kwargs):
         super(RBM, self).__init__(incoming, nb_units, **kwargs)
+        # TODO implement RBM class
 
     def get_encoded_input(self, stochastic=False, **kwargs):
         raise NotImplementedError
 
     def get_unsupervised_cost(self, stochastic=False, **kwargs):
         raise NotImplementedError
+
+
+class LSTM(Layer):
+    def __init__(self, incoming, **kwargs):
+        super(LSTM, self).__init__(self, incoming, **kwargs)
+        # TODO implement LSTM class
+
+    def get_output(self, **kwargs):
+        raise NotImplementedError
+

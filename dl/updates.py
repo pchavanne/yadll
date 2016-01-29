@@ -31,20 +31,20 @@ def nesterov_momentum_updates(cost, params, learning_rate, momentum=0.9):
 
 
 def adagrad_updates(cost, params, learning_rate=1.0, epsilon=0.9):
-    # TODO implement this method
+    # TODO implement adagrad_updates method
     raise NotImplementedError
 
 
 def adadelta_updates(cost, params, learning_rate=1.0, rho=0.95, epsilon=1e-6):
-    # TODO implement this method
+    # TODO implement adadelta_updates method
     raise NotImplementedError
 
 
 def rmsprop_updates(cost, params, learning_rate=1.0, rho=0.9, epsilon=1e-6):
-    # TODO implement this method
+    # TODO implement rmsprop_updates method
     raise NotImplementedError
 
 
 def hessian_free_updates(cost, parms):
-    # TODO implement this method
+    # TODO implement hessian_free_updates method
     raise NotImplementedError
