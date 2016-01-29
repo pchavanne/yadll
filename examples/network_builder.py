@@ -70,3 +70,26 @@ def build_dropconnect(input_var=None, batch_size=None):
     net.add(l_dc2)
     net.add(l_out)
     return net
+
+
+def build_stacked_denoising_autoencoder(input_var=None, batch_size=None):
+    # Autoencoders hyperparameters
+    hp_ae = dl.hyperparameters.Hyperparameters()
+    hp_ae('batch_size', 1)
+    hp_ae('n_epochs', 15)
+    hp_ae('learning_rate', 0.001)
+    # Create connected layers
+    l_in = dl.layers.InputLayer(shape=(batch_size, 28 * 28), input_var=input_var, name='Input')
+    l_ae1 = dl.layers.AutoEncoder(incoming=l_in, nb_units=500, hyperparameters=hp_ae,
+                                  corruption_level=0.1, name='AutoEncoder 1')
+    l_ae2 = dl.layers.AutoEncoder(incoming=l_ae1, nb_units=500, hyperparameters=hp_ae,
+                                  corruption_level=0.1, name='AutoEncoder 2')
+    l_out = dl.layers.LogisticRegression(incoming=l_ae2, nb_class=10, name='Logistic regression')
+    # Create network and add layers
+    net = dl.model.Network()
+    net.add(l_in)
+    net.add(l_ae1)
+    net.add(l_ae2)
+    net.add(l_out)
+    return net
+

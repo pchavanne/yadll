@@ -74,6 +74,19 @@ class DenseLayer(Layer):
         return self.activation(T.dot(X, self.W) + self.b)
 
 
+class UnsupervisedLayer(DenseLayer):
+    def __init__(self, incoming, nb_units, hyperparameters, **kwargs):
+        super(UnsupervisedLayer, self).__init__(incoming, nb_units, **kwargs)
+        self.hp = hyperparameters
+        self.unsupervised_params = list(self.params)
+
+    def get_encoded_input(self, stochastic=False, **kwargs):
+        raise NotImplementedError
+
+    def get_unsupervised_cost(self, stochastic=False, **kwargs):
+        raise NotImplementedError
+
+
 class LogisticRegression(DenseLayer):
     def __init__(self, incoming, nb_class, W=constant, activation=softmax, **kwargs):
         super(LogisticRegression, self).__init__(incoming, nb_class, W=W,
@@ -104,15 +117,17 @@ class Dropconnect(DenseLayer):
         return self.activation(T.dot(X, self.W) + self.b)
 
 
-class AutoEncoder(DenseLayer):
-    def __init__(self, incoming, nb_units, corruption_level=0.5,
-                 W=glorot_uniform, activation=sigmoid, **kwargs):
-        super(AutoEncoder, self).__init__(incoming, nb_units, W=W,
+class AutoEncoder(UnsupervisedLayer):
+    def __init__(self, incoming, nb_units, hyperparameters, corruption_level=0.5, W=glorot_uniform,
+                 b_prime=(constant, {'value': 0.0}), activation=sigmoid, **kwargs):
+        super(AutoEncoder, self).__init__(incoming, nb_units, hyperparameters, W=W,
                                           activation=activation, **kwargs)
         self.W_prime = self.W.T
-        self.b_prime = initializer(self.b, shape=(self.shape[1],), name='b_prime')
-        self.auto_params = self.params
-        self.auto_params.append(self.b_prime)
+        if isinstance(b_prime, theano.compile.SharedVariable):
+            self.b_prime = b_prime
+        else:
+            self.b_prime = initializer(b_prime, shape=(self.shape[0],), name='b_prime')
+        self.unsupervised_params.append(self.b_prime)
         self.p = 1 - corruption_level
 
     def get_encoded_input(self, stochastic=False, **kwargs):
@@ -123,13 +138,19 @@ class AutoEncoder(DenseLayer):
         Z = self.activation(T.dot(Y, self.W_prime) + self.b_prime)
         return Z
 
-    def get_encoding_cost(self, stochastic=False, **kwargs):
+    def get_unsupervised_cost(self, stochastic=False, **kwargs):
         X = self.input_layer.get_output(stochastic=stochastic, **kwargs)
         Z = self.get_encoded_input(stochastic=stochastic, **kwargs)
         cost = T.mean(categorical_crossentropy(Z, X))
         return cost
 
 
-class RBM(DenseLayer):
+class RBM(UnsupervisedLayer):
     def __init__(self, incoming, nb_units, corruption_level=0.5, **kwargs):
         super(RBM, self).__init__(incoming, nb_units, **kwargs)
+
+    def get_encoded_input(self, stochastic=False, **kwargs):
+        raise NotImplementedError
+
+    def get_unsupervised_cost(self, stochastic=False, **kwargs):
+        raise NotImplementedError

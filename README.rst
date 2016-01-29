@@ -22,9 +22,16 @@ I would therefore recommend considering one or the other in stead of dl.
 Its main features are:
 
 * Hyperparameters grid search
-* Layers: Base, Input, Dense, Dropout, Dropconnect
 * optimisation: sgd, momentum, Nesterov momentum, adagrad, adadelta, rmsprop
-
+* Layer:
+  * Input Layer
+  * Dropout Layer
+  * Dense Layer:
+    * Logistic Regression
+    * Dropconnect
+    * Unsupervised Layer:
+      * Autoencoder (denoising autoencoder)
+      * Restricted Boltzmann Machines
 
 Installation
 ------------
@@ -49,6 +56,7 @@ Example
 -------
 
 different network tested on mnist:
+
 * Linear Regression
 * MLP
 * MLP with dropout

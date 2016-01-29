@@ -49,12 +49,23 @@ def load_data(dataset):
 
 
 def build_network(input_var=None, batch_size=None):
+    # Autoencoders hyperparameters
+    hp_ae = dl.hyperparameters.Hyperparameters()
+    hp_ae('batch_size', 1)
+    hp_ae('n_epochs', 15)
+    hp_ae('learning_rate', 0.001)
     # Create connected layers
     l_in = dl.layers.InputLayer(shape=(batch_size, 28 * 28), input_var=input_var, name='Input')
-    l_out = dl.layers.LogisticRegression(incoming=l_in, nb_class=10, name='Logistic regression')
+    l_ae1 = dl.layers.AutoEncoder(incoming=l_in, nb_units=500, hyperparameters=hp_ae,
+                                  corruption_level=0.1, name='AutoEncoder 1')
+    l_ae2 = dl.layers.AutoEncoder(incoming=l_ae1, nb_units=500, hyperparameters=hp_ae,
+                                  corruption_level=0.1, name='AutoEncoder 2')
+    l_out = dl.layers.LogisticRegression(incoming=l_ae2, nb_class=10, name='Logistic regression')
     # Create network and add layers
     net = dl.model.Network()
     net.add(l_in)
+    net.add(l_ae1)
+    net.add(l_ae2)
     net.add(l_out)
     return net
 
@@ -128,6 +139,28 @@ def train(hp, dataset, save_model=False):
     end_time = timeit.default_timer()
 
     print ' Building the model took %.2f s' % ((end_time - start_time) / 60.)
+
+
+################################################
+##   PRETRAINING UNSUPERVISED LAYERS          ##
+################################################
+    for layer in network.layers:
+        if isinstance(layer, dl.layers.UnsupervisedLayer):
+            start_time = timeit.default_timer()
+            print '... Pretraining the layer: %s' % layer.name
+            n_train_batches = train_set_x.get_value(borrow=True).shape[0] / layer.hp.batch_size
+            cost = layer.get_unsupervised_cost(stochastic=True)
+            updates = dl.updates.sgd_updates(cost, layer.unsupervised_params, layer.hp.learning_rate)
+            pretrain = theano.function(inputs=[index], outputs=cost, updates=updates,
+                                       givens={x: train_set_x[index * layer.hp.batch_size: (index + 1) * layer.hp.batch_size]})
+            for epoch in xrange(layer.hp.n_epochs):
+                c = []
+                for minibatch_index in xrange(n_train_batches):
+                    c.append(pretrain(minibatch_index))
+                print 'Layer: %s, pretraining epoch %d, cost %d' % (layer.name, epoch, np.mean(c))
+            end_time = timeit.default_timer()
+            s = end_time - start_time
+            print ' Pretraining the layer %s took %d h %02d m %02d s' % (layer.name, s / 3600, s / 60 % 60, s % 60)
 
 ################################################
 ##         TRAINING THE MODEL                 ##
@@ -239,9 +272,9 @@ if __name__ == '__main__':
 
     # Load Hyperparameters
     hp = dl.hyperparameters.Hyperparameters()
-    hp('batch_size', 20, [5, 10, 15, 20])
-    hp('n_epochs', 50)
-    hp('learning_rate', 0.01, [0.001, 0.01, 0.1, 1])
+    hp('batch_size', 1, [5, 10, 15, 20])
+    hp('n_epochs', 1000)
+    hp('learning_rate', 0.1, [0.001, 0.01, 0.1, 1])
     hp('l1_reg', 0.00, [0.0001, 0.001])
     hp('l2_reg', 0.000)
 

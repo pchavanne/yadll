@@ -1,5 +1,7 @@
 # -*- coding: UTF-8 -*-
+
 import timeit
+
 
 class Network(object):
     def __init__(self, layers=None):
