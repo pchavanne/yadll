@@ -12,8 +12,7 @@ dl
 ==
 
 **dl** is an ultra light deep learning framework based on Theano_.
-It is highly inspired by Lasagne_ and keras_.
-I would therefore recommend considering one or the other in stead of dl.
+If you are looking for a light deep learning API I would recommend Lasagne_ or keras_ in stead of dl.
 
 .. _Theano: https://github.com/Theano/Theano
 .. _Lasagne: https://github.com/Lasagne/Lasagne
@@ -34,7 +33,8 @@ Its main features are:
     * Unsupervised Layer:
 
       * Autoencoder (denoising autoencoder)
-      * Restricted Boltzmann Machines
+      * Restricted Boltzmann Machine
+    *LSTM
 
 Installation
 ------------
@@ -49,12 +49,6 @@ Installation
   pip install git+git@github.com:pchavanne/dl.git
 
 
-Documentation
--------------
-
-not yet implemented
-
-
 Example
 -------
 
@@ -64,3 +58,10 @@ different network tested on mnist:
 * MLP
 * MLP with dropout
 * MLP with dropconnect
+* Auroencoder
+* Denoising Autoencoder
+* Stacked Denoising Autoencoder
+* Restricted Boltzmann Machine
+* Deep Belief Network
+* Convolutional Network
+* LSTM
