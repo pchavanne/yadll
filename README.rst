@@ -34,6 +34,7 @@ Its main features are:
 
       * Autoencoder (denoising autoencoder)
       * Restricted Boltzmann Machine
+
     *LSTM
 
 Installation
