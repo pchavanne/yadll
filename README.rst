@@ -24,12 +24,15 @@ Its main features are:
 * Hyperparameters grid search
 * optimisation: sgd, momentum, Nesterov momentum, adagrad, adadelta, rmsprop
 * Layer:
+
   * Input Layer
   * Dropout Layer
   * Dense Layer:
+
     * Logistic Regression
     * Dropconnect
     * Unsupervised Layer:
+
       * Autoencoder (denoising autoencoder)
       * Restricted Boltzmann Machines
 
