@@ -24,15 +24,18 @@ Its main features are:
 
   * Input Layer
   * Dropout Layer
+  * MaxPool Layer
   * Dense Layer:
 
     * Logistic Regression
     * Dropconnect
+    * Convolutional Layer
     * Unsupervised Layer:
 
       * Autoencoder (denoising autoencoder)
       * Restricted Boltzmann Machine
   * LSTM
+
 
 * Optimisation:
 
@@ -43,6 +46,7 @@ Its main features are:
   * Adadelta
   * Rmsprop
   * Hessian Free
+
 
 * Hyperparameters grid search
 
@@ -62,7 +66,7 @@ Installation
 Example
 -------
 
-different network tested on mnist:
+Different network tested on mnist:
 
 * Linear Regression
 * MLP
