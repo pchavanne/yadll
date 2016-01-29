@@ -52,12 +52,12 @@ def glorot_normal(shape, gain=1,  name=None, borrow=True):
 
 def He_uniform(shape, name=None, borrow=True):
     scale = np.sqrt(6. / shape[0])
-    return normal(shape, scale, name, borrow)
+    return uniform(shape, scale, name, borrow)
 
 
 def He_normal(shape, name=None, borrow=True):
     scale = np.sqrt(2. / shape[0])
-    return uniform(shape, scale, name, borrow)
+    return normal(shape, scale, name, borrow)
 
 
 def orthogonal(shape, gain=1, name=None, borrow=True):
