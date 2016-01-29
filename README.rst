@@ -20,8 +20,6 @@ If you are looking for a light deep learning API I would recommend Lasagne_ or k
 
 Its main features are:
 
-* Hyperparameters grid search
-* optimisation: sgd, momentum, Nesterov momentum, adagrad, adadelta, rmsprop
 * Layer:
 
   * Input Layer
@@ -35,6 +33,18 @@ Its main features are:
       * Autoencoder (denoising autoencoder)
       * Restricted Boltzmann Machine
   * LSTM
+
+* Optimisation:
+
+  * Sgd
+  * Momentum
+  * Nesterov momentum
+  * Adagrad
+  * Adadelta
+  * Rmsprop
+  * Hessian Free
+
+* Hyperparameters grid search
 
 Installation
 ------------
