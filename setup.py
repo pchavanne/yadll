@@ -8,6 +8,6 @@ setup(name="dl",
       author_email="philippe.chavanne@gmail.com",
       url="https://github.com/pchavanne/dl",
       license="MIT",
-      install_requires=['numpy', 'theano'],
+      install_requires=['numpy', 'pandas', 'theano', 'docopt'],
       packages=find_packages()
       )

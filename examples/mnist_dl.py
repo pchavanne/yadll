@@ -1,9 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
+"""
+Example of dl usage on the mnist dataset
 
+Usage:
+    mnist_dl.py [<network>] [default:'logistic_regression']
+    mnist_dl.py (-n | --network_list)
+    mnist_dl.py (-h | --help)
+    mnist_dl.py --version
+
+Options:
+    -n --network_list   Show available networks
+    -h --help           Show this screen
+    --version           Show version
+"""
 import timeit
 import cPickle
-import gzip
+from docopt import docopt
 
 import numpy as np
 import pandas as pd
@@ -13,77 +26,39 @@ import theano.tensor as T
 
 import dl
 
-
 from collections import OrderedDict
 
 
+@dl.utils.timer(' Loading the data')
 def load_data(dataset):
     """
     load_data function should return [train_set, valid_set, test_set]
     """
     print '... Loading the data'
-
-    start_time = timeit.default_timer()
-
-    f = gzip.open(dataset, 'rb')
-    train_set, valid_set, test_set = cPickle.load(f)
-    f.close()
-
-    def shared_dataset(data_xy, borrow=True):
-        data_x, data_y = data_xy
-        shared_x = theano.shared(np.asarray(data_x, dtype=theano.config.floatX), borrow=borrow)
-        shared_y = theano.shared(np.asarray(data_y, dtype=theano.config.floatX), borrow=borrow)
-        return shared_x, T.cast(shared_y, 'int32')
-
-    train_set_x, train_set_y = shared_dataset(train_set)
-    valid_set_x, valid_set_y = shared_dataset(valid_set)
-    test_set_x, test_set_y = shared_dataset(test_set)
-
-    rval = [(train_set_x, train_set_y), (valid_set_x, valid_set_y), (test_set_x, test_set_y)]
-
-    end_time = timeit.default_timer()
-
-    print ' Loading the data took %.2f s' % ((end_time - start_time) / 60.)
-
-    return rval
+    data = dl.data.Data(dataset)
+    return data
 
 
-def build_network(input_var=None, batch_size=None):
-    # Autoencoders hyperparameters
-    hp_ae = dl.hyperparameters.Hyperparameters()
-    hp_ae('batch_size', 1)
-    hp_ae('n_epochs', 15)
-    hp_ae('learning_rate', 0.001)
-    # Create connected layers
-    l_in = dl.layers.InputLayer(shape=(batch_size, 28 * 28), input_var=input_var, name='Input')
-    l_ae1 = dl.layers.AutoEncoder(incoming=l_in, nb_units=500, hyperparameters=hp_ae,
-                                  corruption_level=0.1, name='AutoEncoder 1')
-    l_ae2 = dl.layers.AutoEncoder(incoming=l_ae1, nb_units=500, hyperparameters=hp_ae,
-                                  corruption_level=0.1, name='AutoEncoder 2')
-    l_out = dl.layers.LogisticRegression(incoming=l_ae2, nb_class=10, name='Logistic regression')
-    # Create network and add layers
-    net = dl.model.Network()
-    net.add(l_in)
-    net.add(l_ae1)
-    net.add(l_ae2)
-    net.add(l_out)
-    return net
+def build_network(network_name, input_var=None, shape=None):
+    network_builder = getattr(dl.network, network_name)
+    return network_builder(input_var=input_var, shape=shape)
 
-def train(hp, dataset, save_model=False):
+
+def train(network_name, hp, data, save_model=False):
 ################################################
 ##              LOAD DATA                     ##
 ################################################
 
-    dataset = dataset
+    data = data
 
-    train_set_x, train_set_y = dataset[0]
-    valid_set_x, valid_set_y = dataset[1]
-    test_set_x, test_set_y = dataset[2]
+    #train_set_x, train_set_y = dataset[0]
+    #valid_set_x, valid_set_y = dataset[1]
+    #test_set_x, test_set_y = dataset[2]
 
     # compute number of minibatches for training, validation and testing
-    n_train_batches = train_set_x.get_value(borrow=True).shape[0] / hp.batch_size
-    n_valid_batches = valid_set_x.get_value(borrow=True).shape[0] / hp.batch_size
-    n_test_batches = test_set_x.get_value(borrow=True).shape[0] / hp.batch_size
+    n_train_batches = data.train_set_x.get_value(borrow=True).shape[0] / hp.batch_size
+    n_valid_batches = data.valid_set_x.get_value(borrow=True).shape[0] / hp.batch_size
+    n_test_batches = data.test_set_x.get_value(borrow=True).shape[0] / hp.batch_size
 
 ################################################
 ##             BUILD MODEL                    ##
@@ -101,7 +76,8 @@ def train(hp, dataset, save_model=False):
 
     ################################################
     # construct the network
-    network = build_network(input_var=x, batch_size=hp.batch_size)
+    network = build_network(network_name, input_var=x, shape=(hp.batch_size, 28 * 28))
+    model = dl.model.Model(network, data)
 
     ################################################
     # Train function
@@ -120,8 +96,8 @@ def train(hp, dataset, save_model=False):
 
     # compiling Theano functions for training, validating and testing the model
     train_model = theano.function(inputs=[index], outputs=cost, updates=updates, name='train',
-                                  givens={x: train_set_x[index * hp.batch_size: (index + 1) * hp.batch_size],
-                                          y: train_set_y[index * hp.batch_size: (index + 1) * hp.batch_size]})
+                                  givens={x: data.train_set_x[index * hp.batch_size: (index + 1) * hp.batch_size],
+                                          y: data.train_set_y[index * hp.batch_size: (index + 1) * hp.batch_size]})
 
     ################################################
     # Validation & Test functions
@@ -129,12 +105,12 @@ def train(hp, dataset, save_model=False):
     error = T.neq(prediction, y)
 
     validate_model = theano.function(inputs=[index], outputs=error, name='validate',
-                                     givens={x: valid_set_x[index * hp.batch_size:(index + 1) * hp.batch_size],
-                                             y: valid_set_y[index * hp.batch_size:(index + 1) * hp.batch_size]})
+                                     givens={x: data.valid_set_x[index * hp.batch_size:(index + 1) * hp.batch_size],
+                                             y: data.valid_set_y[index * hp.batch_size:(index + 1) * hp.batch_size]})
 
     test_model = theano.function(inputs=[index], outputs=error, name='test',
-                                 givens={x: test_set_x[index * hp.batch_size:(index + 1) * hp.batch_size],
-                                         y: test_set_y[index * hp.batch_size:(index + 1) * hp.batch_size]})
+                                 givens={x: data.test_set_x[index * hp.batch_size:(index + 1) * hp.batch_size],
+                                         y: data.test_set_y[index * hp.batch_size:(index + 1) * hp.batch_size]})
 
     end_time = timeit.default_timer()
 
@@ -144,24 +120,24 @@ def train(hp, dataset, save_model=False):
 ################################################
 ##   PRETRAINING UNSUPERVISED LAYERS          ##
 ################################################
-    for layer in network.layers:
-        if isinstance(layer, dl.layers.UnsupervisedLayer):
-            start_time = timeit.default_timer()
-            print '... Pretraining the layer: %s' % layer.name
-            n_train_batches = train_set_x.get_value(borrow=True).shape[0] / layer.hp.batch_size
-            cost = layer.get_unsupervised_cost(stochastic=True)
-            updates = dl.updates.sgd_updates(cost, layer.unsupervised_params, layer.hp.learning_rate)
-            pretrain = theano.function(inputs=[index], outputs=cost, updates=updates,
-                                       givens={x: train_set_x[index * layer.hp.batch_size: (index + 1) * layer.hp.batch_size]})
-            for epoch in xrange(layer.hp.n_epochs):
-                c = []
-                for minibatch_index in xrange(n_train_batches):
-                    c.append(pretrain(minibatch_index))
-                print 'Layer: %s, pretraining epoch %d, cost %d' % (layer.name, epoch, np.mean(c))
-            end_time = timeit.default_timer()
-            s = end_time - start_time
-            print ' Pretraining the layer %s took %d h %02d m %02d s' % (layer.name, s / 3600, s / 60 % 60, s % 60)
-
+    # for layer in network.layers:
+    #     if isinstance(layer, dl.layers.UnsupervisedLayer):
+    #         start_time = timeit.default_timer()
+    #         print '... Pretraining the layer: %s' % layer.name
+    #         n_train_batches = data.train_set_x.get_value(borrow=True).shape[0] / layer.hp.batch_size
+    #         cost = layer.get_unsupervised_cost(stochastic=True)
+    #         updates = dl.updates.sgd_updates(cost, layer.unsupervised_params, layer.hp.learning_rate)
+    #         pretrain = theano.function(inputs=[index], outputs=cost, updates=updates,
+    #                                    givens={x: data.train_set_x[index * layer.hp.batch_size: (index + 1) * layer.hp.batch_size]})
+    #         for epoch in xrange(layer.hp.n_epochs):
+    #             c = []
+    #             for minibatch_index in xrange(n_train_batches):
+    #                 c.append(pretrain(minibatch_index))
+    #             print 'Layer: %s, pretraining epoch %d, cost %d' % (layer.name, epoch, np.mean(c))
+    #         end_time = timeit.default_timer()
+    #         s = end_time - start_time
+    #         print ' Pretraining the layer %s took %d h %02d m %02d s' % (layer.name, s / 3600, s / 60 % 60, s % 60)
+    model.pretrain()
 ################################################
 ##         TRAINING THE MODEL                 ##
 ################################################
@@ -266,34 +242,48 @@ def predict(dataset):
 
 
 if __name__ == '__main__':
-    # Load dataset
-    datafile = '/home/philippe/Python/Theano/mnist.pkl.gz'
-    dataset = load_data(datafile)
+    arguments = docopt(__doc__, version='0.0.1')
+    network_name = 'logistic_regression'
+    if arguments['--network_list']:
+        print 'Default network is: %s' % network_name
+        print 'Supported networks are:'
+        for d in dl.network.__all__:
+            print '\t%s' % d
 
-    # Load Hyperparameters
-    hp = dl.hyperparameters.Hyperparameters()
-    hp('batch_size', 1, [5, 10, 15, 20])
-    hp('n_epochs', 1000)
-    hp('learning_rate', 0.1, [0.001, 0.01, 0.1, 1])
-    hp('l1_reg', 0.00, [0.0001, 0.001])
-    hp('l2_reg', 0.000)
-
-    grid_search = False
-
-    # train model or find hyperparameters
-    reports = []
-    if grid_search:
-        for _ in hp:
-            reports.append(train(hp=hp, dataset=dataset, save_model=False))
     else:
-        reports.append(train(hp=hp, dataset=dataset, save_model=False))
+        if arguments['<network>']:
+            network_name = arguments['<network>']
+        if network_name not in dl.network.__all__:
+            raise TypeError('netwok name provided is not supported. Check supported network'
+                            ' with option -n')
+        # Load dataset
+        datafile = '/home/philippe/Python/Theano/mnist.pkl.gz'
+        data = load_data(datafile)
 
-    reports = pd.DataFrame(reports)
-    param_reports = pd.DataFrame.from_records(reports['parameters'])
-    pd_report = pd.DataFrame(reports,
-                             columns=['iteration', 'test', 'validation', 'training time'])
-    reports = pd.concat([param_reports, pd_report], axis=1)
+        # Load Hyperparameters
+        hp = dl.hyperparameters.Hyperparameters()
+        hp('batch_size', 10, [5, 10, 15, 20])
+        hp('n_epochs', 1000)
+        hp('learning_rate', 0.1, [0.001, 0.01, 0.1, 1])
+        hp('l1_reg', 0.00, [0.0001, 0.001])
+        hp('l2_reg', 0.000)
 
-    reports.to_html(open('/home/philippe/Python/dl/report.html', 'w'))
+        grid_search = False
 
-    print reports.loc[reports['validation'].idxmin()]
+        # train model or find hyperparameters
+        reports = []
+        if grid_search:
+            for _ in hp:
+                reports.append(train(network_name, hp=hp, data=data, save_model=False))
+        else:
+            reports.append(train(network_name, hp=hp, data=data, save_model=False))
+
+        reports = pd.DataFrame(reports)
+        param_reports = pd.DataFrame.from_records(reports['parameters'])
+        pd_report = pd.DataFrame(reports,
+                                 columns=['iteration', 'test', 'validation', 'training time'])
+        reports = pd.concat([param_reports, pd_report], axis=1)
+
+        reports.to_html(open('/home/philippe/Python/dl/report.html', 'w'))
+
+        print reports.loc[reports['validation'].idxmin()]
