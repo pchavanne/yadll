@@ -1,12 +1,13 @@
 # -*- coding: UTF-8 -*-
 
-from .hyperparameters import *
-from .model import *
+from dl.hyperparameters import *
+from dl.model import *
 
 __all__ = ['logistic_regression',
            'mlp',
            'dropout',
            'dropconnect',
+           'convpool',
            'autoencoder',
            'denoising_autoencoder',
            'stacked_denoising_autoencoder',
@@ -82,6 +83,22 @@ def dropconnect(input_var=None, shape=None):
     return net
 
 
+def convpool(input_var=None, shape=None):
+    # Create connected layers
+    l_in = InputLayer(shape=shape, input_var=input_var, name='Input')
+    l_rs = ReshapeLayer(incoming=l_in, output_shape=(shape[0], 1, 28, 28))  # ConvLayer needs 4D Tensor
+    l_cp = ConvPoolLayer(incoming=l_rs, poolsize=(2, 2), image_shape=(shape[0], 1, 28, 28), filter_shape=(20, 1, 5, 5),
+                         W=glorot_uniform, activation=tanh, name='ConvPool layer')
+    l_out = LogisticRegression(incoming=l_cp, nb_class=10, name='Logistic regression')
+    # Create network and add layers
+    net = Network('convpool')
+    net.add(l_in)
+    net.add(l_rs)
+    net.add(l_cp)
+    net.add(l_out)
+    return net
+
+
 def autoencoder(input_var=None, shape=None):
     # Unsupervised hyperparameters
     hp_ae = Hyperparameters()
@@ -110,7 +127,7 @@ def denoising_autoencoder(input_var=None, shape=None):
     # Create connected layers
     l_in = InputLayer(shape=shape, input_var=input_var, name='Input')
     l_ae1 = AutoEncoder(incoming=l_in, nb_units=500, hyperparameters=hp_ae,
-                        corruption_level=0.3, name='Denoising AutoEncoder')
+                        corruption_level=0.3, activation=relu, name='Denoising AutoEncoder')
     l_out = LogisticRegression(incoming=l_ae1, nb_class=10, name='Logistic regression')
     # Create network and add layers
     net = Network('denoising_autoencoder')

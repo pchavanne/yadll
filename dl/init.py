@@ -17,6 +17,12 @@ def initializer(init_obj, shape, name):
         return init_obj[0](shape, name=name, **init_obj[1])
 
 
+def get_fans(shape):
+    fan_in = shape[0] if len(shape) == 2 else np.prod(shape[1:])
+    fan_out = shape[1] if len(shape) == 2 else shape[0]
+    return fan_in, fan_out
+
+
 def constant(shape, value=0.0, name=None, borrow=True):
     return shared_variable(np.ones(shape=shape) * value,
                            name=name, borrow=borrow)
@@ -32,16 +38,17 @@ def normal(shape, scale=0.5, name=None, borrow=True):
                            name=name, borrow=borrow)
 
 
-def glorot_uniform(shape, gain=1.0,  name=None, borrow=True):
+def glorot_uniform(shape, gain=1.0, name=None, borrow=True):
     if gain == tanh:
         gain = 1.
     if gain == sigmoid:
         gain = 4.
-    scale = gain * np.sqrt(6. / (shape[0] + shape[1]))
+    fan_in, fan_out = get_fans(shape)
+    scale = gain * np.sqrt(6. / (fan_in + fan_out))
     return uniform(shape, scale, name, borrow)
 
 
-def glorot_normal(shape, gain=1,  name=None, borrow=True):
+def glorot_normal(shape, gain=1, name=None, borrow=True):
     if gain == tanh:
         gain = 1.
     if gain == sigmoid:

@@ -60,13 +60,15 @@ Installation
 
 .. code-block:: bash
 
-  pip install git+git@github.com:pchavanne/dl.git
+  git clone git+git@github.com:pchavanne/dl.git
+  cd dl
+  pip install -e .
 
 
 Example
 -------
 
-Different network tested on mnist:
+Different networks tested on mnist:
 
 * Linear Regression
 * MLP
@@ -79,3 +81,14 @@ Different network tested on mnist:
 * Deep Belief Network
 * Convolutional Network
 * LSTM
+
+get the list of available networks:
+.. code-block:: bash
+
+  python mnist-dl.py --network_list
+
+
+train the model mlp
+.. code-block:: bash
+
+ python mnist-dl.py mlp

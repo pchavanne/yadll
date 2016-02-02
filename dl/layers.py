@@ -8,12 +8,19 @@ from .utils import *
 
 # from theano.tensor.shared_randomstreams import RandomStreams
 from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
+from theano.tensor.signal import downsample
+from theano.tensor.nnet import conv
 
 T_rng = RandomStreams(np_rng.randint(2 ** 30))
 
 
 class Layer(object):
     def __init__(self, incoming, name=None):
+        """
+
+        :param name:
+        :return:
+        """
         if isinstance(incoming, tuple):
             self.input_shape = incoming
             self.input_layer = None
@@ -40,6 +47,16 @@ class InputLayer(Layer):
 
     def get_output(self, **kwargs):
         return self.input
+
+
+class ReshapeLayer(Layer):
+    def __init__(self, incoming, output_shape=None, **kwargs):
+        super(ReshapeLayer, self).__init__(incoming, **kwargs)
+        self.reshape_shape = output_shape
+
+    def get_output(self, **kwargs):
+        X = self.input_layer.get_output(**kwargs)
+        return X.reshape(self.reshape_shape)
 
 
 class DenseLayer(Layer):
@@ -88,11 +105,9 @@ class UnsupervisedLayer(DenseLayer):
         raise NotImplementedError
 
     @timer(' Pretraining the layer')
-    def unsupervised_training(self, train_set_x):
+    def unsupervised_training(self, x, train_set_x):
         print '... Pretraining the layer: %s' % self.name
         index = T.iscalar('index')
-        x = T.matrix('x')
-        print self.hp.n_epochs
         n_train_batches = train_set_x.get_value(borrow=True).shape[0] / self.hp.batch_size
         cost = self.get_unsupervised_cost(stochastic=True)
         updates = sgd_updates(cost, self.unsupervised_params, self.hp.learning_rate)
@@ -123,24 +138,6 @@ class Dropout(Layer):
         return X
 
 
-class MaxPool(Layer):
-    def __init__(self, incoming,  **kwargs):
-        super(Dropout, self).__init__(incoming, **kwargs)
-        # TODO implement MaxPool class
-
-    def get_output(self, stochastic=False, **kwargs):
-        raise NotImplementedError
-
-
-class ConvLayer(DenseLayer):
-    def __init__(self, incoming,  **kwargs):
-        super(ConvLayer, self).__init__(incoming, **kwargs)
-        # TODO implement ConvLayer class
-
-    def get_output(self, stochastic=False, **kwargs):
-        raise NotImplementedError
-
-
 class Dropconnect(DenseLayer):
     def __init__(self, incoming, nb_units, corruption_level=0.5, **kwargs):
         super(Dropconnect, self).__init__(incoming, nb_units, **kwargs)
@@ -153,11 +150,70 @@ class Dropconnect(DenseLayer):
         return self.activation(T.dot(X, self.W) + self.b)
 
 
+class PoolLayer(Layer):
+    def __init__(self, incoming, poolsize, stride=None, ignore_border=True,
+                 padding=(0, 0), mode='max', **kwargs):
+        super(PoolLayer, self).__init__(incoming, **kwargs)
+        self.poolsize = poolsize
+        self.stride = stride    # If st is None, it is considered equal to ds
+        self.ignore_border = ignore_border
+        self.padding = padding
+        self.mode = mode    # {'max', 'sum', 'average_inc_pad', 'average_exc_pad'}
+
+    @staticmethod
+    def pool(input, ds, st, ignore_border, padding, mode):
+        return downsample.max_pool_2d(input=input, ds=ds, st=st, ignore_border=ignore_border,
+                                      padding=padding, mode=mode)
+
+    def get_output(self, stochastic=False, **kwargs):
+        X = self.input_layer.get_output(stochastic=stochastic, **kwargs)
+        return self.pool(input=X, ds=self.poolsize, st=self.stride, ignore_border=self.ignore_border,
+                         padding=self.padding, mode=self.mode)
+
+
+class ConvLayer(DenseLayer):
+    def __init__(self, incoming, image_shape=None, filter_shape=None,
+                 border_mode='valid', subsample=(1, 1), **kwargs):
+        super(ConvLayer, self).__init__(incoming, nb_units=filter_shape, **kwargs)
+        self.image_shape = image_shape      # (batch size, num input feature maps, image height, image width)
+        self.filter_shape = filter_shape    # (number of filters, num input feature maps, filter height, filter width)
+        self.border_mode = border_mode      # {'valid', 'full'}
+        self.subsample = subsample
+        assert image_shape[1] == filter_shape[1]
+
+    @staticmethod
+    def conv(input, filters, image_shape, filter_shape, border_mode, subsample):
+        return conv.conv2d(input=input, filters=filters, image_shape=image_shape,
+                           filter_shape=filter_shape, border_mode=border_mode, subsample=subsample)
+
+    def get_output(self, stochastic=False, **kwargs):
+        X = self.input_layer.get_output(stochastic=stochastic, **kwargs)
+        return self.conv(input=X, filters=self.W, image_shape=self.image_shape,
+                         filter_shape=self.filter_shape, border_mode=self.border_mode,subsample=self.subsample)
+
+
+class ConvPoolLayer(ConvLayer, PoolLayer):
+    def __init__(self, incoming, poolsize, image_shape=None, filter_shape=None,
+                 border_mode='valid', subsample=(1, 1), stride=None, ignore_border=True,
+                 padding=(0, 0), mode='max', **kwargs):
+        super(ConvPoolLayer, self).__init__(incoming, poolsize=poolsize, image_shape=image_shape,
+                                            filter_shape=filter_shape, border_mode=border_mode, subsample=subsample,
+                                            stride=stride, ignore_border=ignore_border, padding=padding, mode=mode, **kwargs)
+
+    def get_output(self, stochastic=False, **kwargs):
+        X = self.input_layer.get_output(stochastic=stochastic, **kwargs)
+        conv_X = self.conv(input=X, filters=self.W, image_shape=self.image_shape, filter_shape=self.filter_shape,
+                           border_mode=self.border_mode,subsample=self.subsample)
+        pool_X = self.pool(input=conv_X, ds=self.poolsize, st=self.stride, ignore_border=self.ignore_border,
+                           padding=self.padding, mode=self.mode)
+        return self.activation(pool_X + self.b.dimshuffle('x', 0, 'x', 'x'))
+
+
 class AutoEncoder(UnsupervisedLayer):
-    def __init__(self, incoming, nb_units, hyperparameters, corruption_level=0.5, W=glorot_uniform,
-                 b_prime=constant, activation=sigmoid, **kwargs):
-        super(AutoEncoder, self).__init__(incoming, nb_units, hyperparameters, W=W,
-                                          activation=activation, **kwargs)
+
+    def __init__(self, incoming, nb_units, hyperparameters, corruption_level=0.5,
+                 W=(glorot_uniform, {'gain': sigmoid}), b_prime=constant, **kwargs):
+        super(AutoEncoder, self).__init__(incoming, nb_units, hyperparameters, W=W, **kwargs)
         self.W_prime = self.W.T
         if isinstance(b_prime, theano.compile.SharedVariable):
             self.b_prime = b_prime
@@ -170,8 +226,8 @@ class AutoEncoder(UnsupervisedLayer):
         X = self.input_layer.get_output(stochastic=stochastic, **kwargs)
         if self.p > 0 and stochastic:
             X = X * T_rng.binomial(self.input_shape, n=1, p=self.p, dtype=floatX)
-        Y = self.activation(T.dot(X, self.W) + self.b)
-        Z = self.activation(T.dot(Y, self.W_prime) + self.b_prime)
+        Y = sigmoid(T.dot(X, self.W) + self.b)
+        Z = sigmoid(T.dot(Y, self.W_prime) + self.b_prime)
         return Z
 
     def get_unsupervised_cost(self, stochastic=False, **kwargs):
