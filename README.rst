@@ -83,12 +83,14 @@ Different networks tested on mnist:
 * LSTM
 
 get the list of available networks:
+
 .. code-block:: bash
 
   python mnist-dl.py --network_list
 
 
 train the model mlp
+
 .. code-block:: bash
 
- python mnist-dl.py mlp
+  python mnist-dl.py mlp
