@@ -1,8 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-import timeit
-
-import theano.tensor as T
+import cPickle
 
 from .layers import *
 
@@ -17,6 +15,7 @@ class Network(object):
         self.params = []
         self.reguls = 0
         self.has_unspervised_layer = False
+        self.name = name
 
     def add(self, layer):
         self.layers.append(layer)
@@ -58,7 +57,7 @@ class Model(object):
                 layer.unsupervised_training(self.x, self.data.train_set_x)
 
     @timer(' Training')
-    def train(self, unsupervised_training=True):
+    def train(self, unsupervised_training=True, save_model=False):
 
         if unsupervised_training and self.network.has_unspervised_layer:
             self.pretrain()
@@ -95,7 +94,7 @@ class Model(object):
         print '... Training the model'
 
         # early-stopping parameters
-        patience = 5000  # look at this many batches regardless
+        patience = self.hp.patience  # look at this many batches regardless
         patience_increase = 2  # wait this much longer when a new best is found
         improvement_threshold = 0.995  # a relative improvement of this much is considered significant
         validation_frequency = min(n_train_batches, patience / 2)  # go through this many minibatche before checking the network
@@ -141,8 +140,9 @@ class Model(object):
 
                         # # save the best model
                         # if save_model:
-                        #     with open(network.file, 'wb') as f:
-                        #         cPickle.dump(network, f)
+                        #
+                        #     with open(self.file, 'wb') as f:
+                        #         cPickle.dump(self.network, f)
 
                 if patience <= iter:
                     done_looping = True
@@ -154,6 +154,6 @@ class Model(object):
         print(' Validation score of %.3f %% obtained at iteration %i, with test performance %.3f %%' %
               (best_validation_loss * 100., best_iter + 1, test_score * 100.))
 
-        # print ' Model saved as: ' + network.file if save_model else ' Model not saved!!'
-
+        # if save_model:
+        #     print ' Model saved as: ' + network.file if save_model else ' Model not saved!!'
 

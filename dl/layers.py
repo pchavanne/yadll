@@ -16,11 +16,6 @@ T_rng = RandomStreams(np_rng.randint(2 ** 30))
 
 class Layer(object):
     def __init__(self, incoming, name=None):
-        """
-
-        :param name:
-        :return:
-        """
         if isinstance(incoming, tuple):
             self.input_shape = incoming
             self.input_layer = None
@@ -31,6 +26,9 @@ class Layer(object):
         self.name = name
         self.params = []
         self.reguls = 0
+
+    def get_reguls(self):
+        return self.reguls
 
     @property
     def output_shape(self):
@@ -59,6 +57,15 @@ class ReshapeLayer(Layer):
         return X.reshape(self.reshape_shape)
 
 
+class FlattenLayer(Layer):
+    def __init__(self, incoming, **kwargs):
+        super(FlattenLayer, self).__init__(incoming, **kwargs)
+
+    def get_output(self, **kwargs):
+        X = self.input_layer.get_output(**kwargs)
+        return X.flatten()
+
+
 class DenseLayer(Layer):
     def __init__(self, incoming, nb_units, W=glorot_uniform, b=constant,
                  activation=tanh, l1=None, l2=None, **kwargs):
@@ -83,9 +90,6 @@ class DenseLayer(Layer):
     @property
     def output_shape(self):
         return self.input_shape[0], self.shape[1]
-
-    def get_reguls(self):
-        return self.reguls
 
     def get_output(self, **kwargs):
         X = self.input_layer.get_output(**kwargs)
@@ -171,15 +175,31 @@ class PoolLayer(Layer):
                          padding=self.padding, mode=self.mode)
 
 
-class ConvLayer(DenseLayer):
-    def __init__(self, incoming, image_shape=None, filter_shape=None,
-                 border_mode='valid', subsample=(1, 1), **kwargs):
-        super(ConvLayer, self).__init__(incoming, nb_units=filter_shape, **kwargs)
+class ConvLayer(Layer):
+    def __init__(self, incoming, image_shape=None, filter_shape=None, W=glorot_uniform, b=constant,
+                 border_mode='valid', subsample=(1, 1), l1=None, l2=None, **kwargs):
+        super(ConvLayer, self).__init__(incoming, **kwargs)
+        assert image_shape[1] == filter_shape[1]
         self.image_shape = image_shape      # (batch size, num input feature maps, image height, image width)
         self.filter_shape = filter_shape    # (number of filters, num input feature maps, filter height, filter width)
         self.border_mode = border_mode      # {'valid', 'full'}
         self.subsample = subsample
-        assert image_shape[1] == filter_shape[1]
+        self.fan = (np.prod(filter_shape[1:]), filter_shape[0] * np.prod(filter_shape[2:]))
+        self.W = initializer(W, shape=self.filter_shape, fan=self.fan, name='W')
+        self.params.append(self.W)
+        self.b = initializer(b, shape=(self.filter_shape[0],), name='b')
+        self.params.append(self.b)
+        if l1:
+            self.reguls += l1 * T.mean(T.abs_(self.W))
+        if l2:
+            self.reguls += l2 * T.mean(T.sqr(self.W))
+
+    @property
+    def output_shape(self):
+        return (self.input_shape[0],
+                self.input_shape[1],
+                self.image_shape[2] - self.filter_shape[2] + 1,
+                self.image_shape[2] - self.filter_shape[2] + 1)
 
     @staticmethod
     def conv(input, filters, image_shape, filter_shape, border_mode, subsample):
@@ -195,10 +215,11 @@ class ConvLayer(DenseLayer):
 class ConvPoolLayer(ConvLayer, PoolLayer):
     def __init__(self, incoming, poolsize, image_shape=None, filter_shape=None,
                  border_mode='valid', subsample=(1, 1), stride=None, ignore_border=True,
-                 padding=(0, 0), mode='max', **kwargs):
+                 padding=(0, 0), mode='max', activation=tanh, **kwargs):
         super(ConvPoolLayer, self).__init__(incoming, poolsize=poolsize, image_shape=image_shape,
                                             filter_shape=filter_shape, border_mode=border_mode, subsample=subsample,
                                             stride=stride, ignore_border=ignore_border, padding=padding, mode=mode, **kwargs)
+        self.activation = activation
 
     def get_output(self, stochastic=False, **kwargs):
         X = self.input_layer.get_output(stochastic=stochastic, **kwargs)
@@ -210,7 +231,6 @@ class ConvPoolLayer(ConvLayer, PoolLayer):
 
 
 class AutoEncoder(UnsupervisedLayer):
-
     def __init__(self, incoming, nb_units, hyperparameters, corruption_level=0.5,
                  W=(glorot_uniform, {'gain': sigmoid}), b_prime=constant, **kwargs):
         super(AutoEncoder, self).__init__(incoming, nb_units, hyperparameters, W=W, **kwargs)
