@@ -179,7 +179,10 @@ class PoolLayer(Layer):
 
     @property
     def output_shape(self):
-        return
+        return (self.input_shape[0],
+                self.input_shape[1],
+                self.input_shape[2] / self.poolsize[0],
+                self.input_shape[3] / self.poolsize[1])
 
     def get_output(self, stochastic=False, **kwargs):
         X = self.input_layer.get_output(stochastic=stochastic, **kwargs)
@@ -187,7 +190,7 @@ class PoolLayer(Layer):
 
 
 class ConvLayer(Layer):
-    def __init__(self, incoming, image_shape=None, filter_shape=None, W=glorot_uniform, b=constant,
+    def __init__(self, incoming, image_shape=None, filter_shape=None, W=glorot_uniform,
                  border_mode='valid', subsample=(1, 1), l1=None, l2=None, **kwargs):
         super(ConvLayer, self).__init__(incoming, **kwargs)
         assert image_shape[1] == filter_shape[1]
@@ -198,8 +201,6 @@ class ConvLayer(Layer):
         self.fan = (np.prod(filter_shape[1:]), filter_shape[0] * np.prod(filter_shape[2:]))
         self.W = initializer(W, shape=self.filter_shape, fan=self.fan, name='W')
         self.params.append(self.W)
-        self.b = initializer(b, shape=(self.filter_shape[0],), name='b')
-        self.params.append(self.b)
         if l1:
             self.reguls += l1 * T.mean(T.abs_(self.W))
         if l2:
@@ -224,17 +225,19 @@ class ConvLayer(Layer):
 
 class ConvPoolLayer(ConvLayer, PoolLayer):
     def __init__(self, incoming, poolsize, image_shape=None, filter_shape=None,
-                 activation=tanh, **kwargs):
+                  b=constant, activation=tanh, **kwargs):
         super(ConvPoolLayer, self).__init__(incoming, poolsize=poolsize, image_shape=image_shape,
                                             filter_shape=filter_shape, **kwargs)
+        self.b = initializer(b, shape=(self.filter_shape[0],), name='b')
+        self.params.append(self.b)
         self.activation = activation
 
     @property
     def output_shape(self):
         return (self.input_shape[0],
                 self.input_shape[1],
-                self.image_shape[2] - self.filter_shape[2] + 1,
-                self.image_shape[3] - self.filter_shape[3] + 1)
+                (self.image_shape[2] - self.filter_shape[2] + 1) / self.poolsize[0],
+                (self.image_shape[3] - self.filter_shape[3] + 1) / self.poolsize[1])
 
     def get_output(self, stochastic=False, **kwargs):
         X = self.input_layer.get_output(stochastic=stochastic, **kwargs)
@@ -363,9 +366,46 @@ class RBM(UnsupervisedLayer):
 
 
 class LSTM(Layer):
-    def __init__(self, incoming, **kwargs):
+    def __init__(self, incoming, n_hidden, n_out, activation=tanh, **kwargs):
         super(LSTM, self).__init__(self, incoming, **kwargs)
-        # TODO implement LSTM class
+        self.activation = activation
+        if isinstance(n_hidden, tuple):
+            self.n_hidden, self.n_i, self.n_c, self.n_o, self.n_f = n_hidden
+        else:
+            self.n_hidden = self.n_i = self.n_c = self.n_o = self.n_f = n_hidden
+        self.n_in = self.input_shape[1]
+        self.n_out = n_out
+        self.W_xi = orthogonal(shape=(self.n_in, self.n_i), name='W_xi')
+        self.W_hi = orthogonal(shape=(self.n_hidden, self.n_i), name='W_hi')
+        self.W_ci = orthogonal(shape=(self.n_c, self.n_i), name='W_ci')
+        self.b_i = uniform(shape=self.n_i, scale=(-0.5,.5), name='b_i')
+        self.W_xf = orthogonal(shape=(self.n_in, self.n_f), name='W_xf')
+        self.W_hf = orthogonal(shape=(n_hidden, self.n_f), name='W_hf')
+        self.W_cf = orthogonal(shape=(self.n_c, self.n_f), name='W_cf')
+        self.b_f = uniform(shape= self.n_f, scale=(0, 1.), name='b_f')
+        self.W_xc = orthogonal(shape=(self.n_in, self.n_c), name='W_xc')
+        self.W_hc = orthogonal(shape=(n_hidden, self.n_c), name='W_hc')
+        self.b_c = constant(shape=self.n_c, name='b_c')
+        self.W_xo = orthogonal(shape=(self.n_in, self.n_o), name='W_x0')
+        self.W_ho = orthogonal(shape=(self.n_hidden, self.n_o), name='W_ho')
+        self.W_co = orthogonal(shape=(self.n_c, self.n_o), name='W_co')
+        self.b_o = uniform(shape=self.n_i, scale=(-0.5,.5), name='b_o')
+        self.W_hy = orthogonal(shape=(n_hidden, n_out), name='W_hy')
+        self.b_y = constant(shape=self.n_out, name='b_y')
+        self.params.extend([self.W_xi, self.W_hi, self.W_ci, self.b_i,
+                            self.W_xf, self.W_hf, self.W_cf, self.b_f,
+                            self.W_xc, self.W_hc, self.b_c,
+                            self.W_xo, self.W_ho, self.W_co, self.b_o,
+                            self.W_hy, self.b_y])
+
+    def one_lstm_step(self, x_t, h_tm1, c_tm1):
+        i_t = sigmoid(T.dot(x_t, self.W_xi) + T.dot(h_tm1, self.W_hi) + T.dot(c_tm1, self.W_ci) + self.b_i)
+        f_t = sigmoid(T.dot(x_t, self.W_xf) + T.dot(h_tm1, self.W_hf) + T.dot(c_tm1, self.W_cf) + self.b_f)
+        c_t = f_t * c_tm1 + i_t * self.activation(T.dot(x_t, self.W_xc) + T.dot(h_tm1, self.W_hc) + self.b_c)
+        o_t = sigmoid(T.dot(x_t, self.W_xo)+ T.dot(h_tm1, self.W_ho) + T.dot(c_t, self.W_co) + self.b_o)
+        h_t = o_t * self.activation(c_t)
+        y_t = sigmoid(T.dot(h_t, self.W_hy) + self.b_y)
+        return [h_t, c_t, y_t]
 
     def get_output(self, **kwargs):
         raise NotImplementedError

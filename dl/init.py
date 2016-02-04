@@ -23,7 +23,9 @@ def constant(shape, value=0.0, name=None, borrow=True, **kwargs):
 
 
 def uniform(shape, scale=0.5, name=None, borrow=True, **kwargs):
-    return shared_variable(np_rng.uniform(low=-scale, high=scale, size=shape),
+    if not isinstance(scale, tuple):
+        scale = (-scale, scale)      # (low, high)
+    return shared_variable(np_rng.uniform(low=scale[0], high=scale[1], size=shape),
                            name=name, borrow=borrow)
 
 

@@ -165,8 +165,10 @@ def convpool(input_var=None):
     # ConvLayer needs 4D Tensor
     l_rs = ReshapeLayer(incoming=l_in, output_shape=image_shape)
     # ConvPool Layer
-    l_cp = ConvPoolLayer(incoming=l_rs, poolsize=poolsize, image_shape=image_shape,
-                         filter_shape=filter_shape, name='ConvPool layer')
+    # l_cp = ConvPoolLayer(incoming=l_rs, poolsize=poolsize, image_shape=image_shape,
+    #                      filter_shape=filter_shape, name='ConvPool layer')
+    l_cp = ConvLayer(incoming=l_rs, image_shape=image_shape,
+                     filter_shape=filter_shape, name='ConvPool layer')
     # flatten convpool output
     l_fl = FlattenLayer(incoming=l_cp, ndim=2)
     # Logistic regression Layer
