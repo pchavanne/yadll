@@ -49,7 +49,7 @@ def mlp(input_var=None):
     hp = Hyperparameters()
     hp('batch_size', 20)
     hp('n_epochs', 1000)
-    hp('learning_rate', 0.01)
+    hp('learning_rate', 0.1)
     hp('l1_reg', 0.00)
     hp('l2_reg', 0.0001)
     hp('patience', 5000)
@@ -248,7 +248,7 @@ def autoencoder(input_var=None):
 
     # Unsupervised hyperparameters
     hp_ae = Hyperparameters()
-    hp_ae('batch_size', 10)
+    hp_ae('batch_size', hp.batch_size)
     hp_ae('n_epochs', 15)
     hp_ae('learning_rate', 0.01)
 
@@ -282,7 +282,7 @@ def denoising_autoencoder(input_var=None):
 
     # Unsupervised hyperparameters
     hp_ae = Hyperparameters()
-    hp_ae('batch_size', 10)
+    hp_ae('batch_size', hp.batch_size)
     hp_ae('n_epochs', 15)
     hp_ae('learning_rate', 0.01)
 
@@ -316,7 +316,7 @@ def stacked_denoising_autoencoder(input_var=None):
 
     # Unsupervised hyperparameters
     hp_ae = Hyperparameters()
-    hp_ae('batch_size', 10)
+    hp_ae('batch_size', hp.batch_size)
     hp_ae('n_epochs', 15)
     hp_ae('learning_rate', 0.01)
 
@@ -354,7 +354,7 @@ def rbm(input_var=None):
 
     # Unsupervised hyperparameters
     hp_ae = Hyperparameters()
-    hp_ae('batch_size', 10)
+    hp_ae('batch_size', hp.batch_size)
     hp_ae('n_epochs', 15)
     hp_ae('learning_rate', 0.01)
 
@@ -388,7 +388,7 @@ def dbn(input_var=None):
 
     # Unsupervised hyperparameters
     hp_ae = Hyperparameters()
-    hp_ae('batch_size', 10)
+    hp_ae('batch_size', hp.batch_size)
     hp_ae('n_epochs', 15)
     hp_ae('learning_rate', 0.01)
 

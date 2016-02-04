@@ -52,7 +52,6 @@ def train(network_name, data):
     model.train(unsupervised_training=True)
 
 
-
 def predict(dataset):
     # load the saved model
     model = cPickle.load(open('best_model.pkl'))
