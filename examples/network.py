@@ -423,7 +423,7 @@ def lstm(input_var=None):
 
     # Create connected layers
     l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=input_var, name='Input')
-    l_lstm = RBM(incoming=l_in, nb_units=500, name='Long Short Term Memory')
+    l_lstm = LSTM(incoming=l_in, n_hidden=100, n_out=28 * 28, name='Long Short Term Memory')
     l_out = LogisticRegression(incoming=l_lstm, nb_class=10, name='Logistic regression')
 
     # Create network and add layers
