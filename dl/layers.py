@@ -58,12 +58,13 @@ class ReshapeLayer(Layer):
 
 
 class FlattenLayer(Layer):
-    def __init__(self, incoming, **kwargs):
+    def __init__(self, incoming, ndim=1, **kwargs):
         super(FlattenLayer, self).__init__(incoming, **kwargs)
+        self.ndim = ndim
 
     def get_output(self, **kwargs):
         X = self.input_layer.get_output(**kwargs)
-        return X.flatten()
+        return X.flatten(self.ndim)
 
 
 class DenseLayer(Layer):
@@ -224,7 +225,7 @@ class ConvPoolLayer(ConvLayer, PoolLayer):
     def get_output(self, stochastic=False, **kwargs):
         X = self.input_layer.get_output(stochastic=stochastic, **kwargs)
         conv_X = self.conv(input=X, filters=self.W, image_shape=self.image_shape, filter_shape=self.filter_shape,
-                           border_mode=self.border_mode,subsample=self.subsample)
+                           border_mode=self.border_mode, subsample=self.subsample)
         pool_X = self.pool(input=conv_X, ds=self.poolsize, st=self.stride, ignore_border=self.ignore_border,
                            padding=self.padding, mode=self.mode)
         return self.activation(pool_X + self.b.dimshuffle('x', 0, 'x', 'x'))

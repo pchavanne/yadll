@@ -151,9 +151,9 @@ def convpool(input_var=None):
 
     # Hyperparameters
     hp = Hyperparameters()
-    hp('batch_size', 20)
-    hp('n_epochs', 1000)
-    hp('learning_rate', 0.01)
+    hp('batch_size', 500)
+    hp('n_epochs', 200)
+    hp('learning_rate', 0.1)
     hp('patience', 10000)
 
     # Create connected layers
@@ -168,7 +168,7 @@ def convpool(input_var=None):
     l_cp = ConvPoolLayer(incoming=l_rs, poolsize=poolsize, image_shape=image_shape,
                          filter_shape=filter_shape, name='ConvPool layer')
     # flatten convpool output
-    l_fl = FlattenLayer(incoming=l_cp)
+    l_fl = FlattenLayer(incoming=l_cp, ndim=2)
     # Logistic regression Layer
     l_out = LogisticRegression(incoming=l_fl, nb_class=10, name='Logistic regression')
 
@@ -187,8 +187,8 @@ def lenet5(input_var=None):
 
     # Hyperparameters
     hp = Hyperparameters()
-    hp('batch_size', 20)
-    hp('n_epochs', 1000)
+    hp('batch_size', 500)
+    hp('n_epochs', 200)
     hp('learning_rate', 0.01)
     hp('patience', 10000)
 
@@ -217,7 +217,7 @@ def lenet5(input_var=None):
     l_cp2 = ConvPoolLayer(incoming=l_cp1, poolsize=poolsize, image_shape=image_shape,
                           filter_shape=filter_shape, W=init, activation=tanh, name='ConvPool layer 2')
     # flatten convpool output
-    l_fl = FlattenLayer(incoming=l_cp2)
+    l_fl = FlattenLayer(incoming=l_cp2, ndim=2)
     # Dense Layer
     l_hid1 = DenseLayer(incoming=l_fl, nb_units=500, W=glorot_uniform, activation=tanh, name='Hidden layer 1')
     # Logistic regression Layer
