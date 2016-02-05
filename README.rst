@@ -34,8 +34,8 @@ Its main features are:
     * Dropconnect
     * Unsupervised Layer:
 
-        * Autoencoder (denoising autoencoder)
-        * Restricted Boltzmann Machine
+      * Autoencoder (denoising autoencoder)
+      * Restricted Boltzmann Machine
   * LSTM
 
 
