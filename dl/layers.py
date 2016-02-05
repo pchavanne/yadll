@@ -209,7 +209,7 @@ class ConvLayer(Layer):
     @property
     def output_shape(self):
         return (self.input_shape[0],
-                self.input_shape[1],
+                self.filter_shape[0],
                 self.image_shape[2] - self.filter_shape[2] + 1,
                 self.image_shape[3] - self.filter_shape[3] + 1)
 
@@ -235,7 +235,7 @@ class ConvPoolLayer(ConvLayer, PoolLayer):
     @property
     def output_shape(self):
         return (self.input_shape[0],
-                self.input_shape[1],
+                self.filter_shape[0],
                 (self.image_shape[2] - self.filter_shape[2] + 1) / self.poolsize[0],
                 (self.image_shape[3] - self.filter_shape[3] + 1) / self.poolsize[1])
 
