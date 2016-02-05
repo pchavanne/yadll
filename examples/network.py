@@ -157,9 +157,9 @@ def convpool(input_var=None):
     hp('patience', 10000)
 
     # Create connected layers
-    image_shape = (hp.batch_size, 1, 28, 28)
-    filter_shape = (20, 1, 5, 5)
-    poolsize = (2, 2)
+    image_shape = (hp.batch_size, 1, 28, 28)    # (batch size, nb input feature maps, image height, image width)
+    filter_shape = (20, 1, 5, 5)                # (number of filters, nb input feature maps, filter height, filter width)
+    poolsize = (2, 2)                           # downsampling factor per (row, col)
     # Input layer
     l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=input_var, name='Input')
     # ConvLayer needs 4D Tensor
@@ -189,23 +189,22 @@ def lenet5(input_var=None):
     hp = Hyperparameters()
     hp('batch_size', 500)
     hp('n_epochs', 200)
-    hp('learning_rate', 0.01)
+    hp('learning_rate', 0.1)
     hp('patience', 10000)
 
     # Create connected layers
-    image_shape = (hp.batch_size, 1, 28, 28)
     # Input layer
     l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=input_var, name='Input')
     # ConvLayer needs 4D Tensor
+    image_shape = (hp.batch_size, 1, 28, 28)
     l_rs = ReshapeLayer(incoming=l_in, output_shape=image_shape)
     # first convpool
-    image_shape = (hp.batch_size, 1, 28, 28)
     filter_shape = (20, 1, 5, 5)
     poolsize = (2, 2)
     l_cp1 = ConvPoolLayer(incoming=l_rs, poolsize=poolsize, image_shape=image_shape,
                           filter_shape=filter_shape, name='ConvPool layer 1')
     # second convpool
-    image_shape = (hp.batch_size, 20, 12, 12)
+    image_shape = (hp.batch_size, 20, 12, 12)   # (batch size, nb filters, (28-5)/2, (28-5)/2)
     filter_shape = (50, 20, 5, 5)
     poolsize = (2, 2)
     l_cp2 = ConvPoolLayer(incoming=l_cp1, poolsize=poolsize, image_shape=image_shape,

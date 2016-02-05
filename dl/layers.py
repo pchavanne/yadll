@@ -191,15 +191,18 @@ class PoolLayer(Layer):
 
 class ConvLayer(Layer):
     def __init__(self, incoming, image_shape=None, filter_shape=None, W=glorot_uniform,
-                 border_mode='valid', subsample=(1, 1), l1=None, l2=None, **kwargs):
+                 border_mode='valid', subsample=(1, 1), l1=None, l2=None, pool_scale=None, **kwargs):
         super(ConvLayer, self).__init__(incoming, **kwargs)
         assert image_shape[1] == filter_shape[1]
         self.image_shape = image_shape      # (batch size, num input feature maps, image height, image width)
         self.filter_shape = filter_shape    # (number of filters, num input feature maps, filter height, filter width)
         self.border_mode = border_mode      # {'valid', 'full'}
         self.subsample = subsample
-        self.fan = (np.prod(filter_shape[1:]), filter_shape[0] * np.prod(filter_shape[2:]))
-        self.W = initializer(W, shape=self.filter_shape, fan=self.fan, name='W')
+        self.fan_in = np.prod(filter_shape[1:])
+        self.fan_out = filter_shape[0] * np.prod(filter_shape[2:])
+        if pool_scale:
+            self.fan_out = self.fan_out / np.prod(pool_scale)
+        self.W = initializer(W, shape=self.filter_shape, fan=(self.fan_in, self.fan_out), name='W')
         self.params.append(self.W)
         if l1:
             self.reguls += l1 * T.mean(T.abs_(self.W))
@@ -227,7 +230,7 @@ class ConvPoolLayer(ConvLayer, PoolLayer):
     def __init__(self, incoming, poolsize, image_shape=None, filter_shape=None,
                   b=constant, activation=tanh, **kwargs):
         super(ConvPoolLayer, self).__init__(incoming, poolsize=poolsize, image_shape=image_shape,
-                                            filter_shape=filter_shape, **kwargs)
+                                            filter_shape=filter_shape, pool_scale=poolsize, **kwargs)
         self.b = initializer(b, shape=(self.filter_shape[0],), name='b')
         self.params.append(self.b)
         self.activation = activation
