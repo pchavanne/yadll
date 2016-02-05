@@ -49,6 +49,8 @@ class Model(object):
             self.y = T.ivector('y')      # the output labels are presented as 1D vector of[int] labels
         else:
             self.y = T.matrix('y')
+        self.report = dict()
+
 
     @timer(' Unsupervised Pre-Training')
     def pretrain(self):
@@ -58,6 +60,9 @@ class Model(object):
 
     @timer(' Training')
     def train(self, unsupervised_training=True, save_model=False):
+
+        self.report['test_values'] = []
+        self.report['validation_values'] = []
 
         if unsupervised_training and self.network.has_unspervised_layer:
             self.pretrain()
@@ -121,6 +126,7 @@ class Model(object):
 
                     print('epoch %i, minibatch %i/%i, validation error %.3f %%' %
                           (epoch, minibatch_index + 1, n_train_batches, this_validation_loss * 100.))
+                    self.report['validation_values'].append((iter + 1, this_validation_loss * 100.))
 
                     # if we got the best validation score until now
                     if this_validation_loss < best_validation_loss:
@@ -137,6 +143,7 @@ class Model(object):
 
                         print('  epoch %i, minibatch %i/%i, test error of best model %.3f %%' %
                               (epoch, minibatch_index + 1, n_train_batches, test_score * 100.))
+                        self.report['test_values'].append((epoch, test_score * 100))
 
                         # # save the best model
                         # if save_model:
@@ -156,4 +163,10 @@ class Model(object):
 
         # if save_model:
         #     print ' Model saved as: ' + network.file if save_model else ' Model not saved!!'
+        self.report['epoch'] = epoch
+        self.report['early_stop'] = done_looping
+        self.report['best_valdidation'] = best_validation_loss * 100.
+        self.report['best_iter'] = best_iter + 1
+        self.report['test_score'] = test_score * 100.
 
+        return self.report

@@ -4,6 +4,21 @@ import itertools
 
 
 class Hyperparameters(object):
+    """
+    Hyperparameters
+
+    # Create an Hyperparameters instance
+    hp = Hyperparameters()
+    # Define an hyperparameter
+    hp('batch_size', 500)
+    # Define an hyperparameter with its default value
+    # and the possible values for the grid search
+    hp('n_epochs', 1000, [10, 100, 1000, 1000])
+
+    expected hyperparameters:
+    'batch_size', 'n_epochs', 'learning_rate', 'l1_reg', 'l2_reg', 'patience'
+
+    """
     def __init__(self):
         self.hp_value = dict()
         self.hp_default = dict()
