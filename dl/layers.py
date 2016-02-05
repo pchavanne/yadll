@@ -111,10 +111,10 @@ class UnsupervisedLayer(DenseLayer):
         self.hp = hyperparameters
         self.unsupervised_params = list(self.params)
 
-    def get_encoded_input(self, stochastic=False, **kwargs):
+    def get_encoded_input(self, **kwargs):
         raise NotImplementedError
 
-    def get_unsupervised_cost(self, stochastic=False, **kwargs):
+    def get_unsupervised_cost(self, **kwargs):
         raise NotImplementedError
 
     @timer(' Pretraining the layer')
@@ -122,8 +122,13 @@ class UnsupervisedLayer(DenseLayer):
         print '... Pretraining the layer: %s' % self.name
         index = T.iscalar('index')
         n_train_batches = train_set_x.get_value(borrow=True).shape[0] / self.hp.batch_size
-        cost = self.get_unsupervised_cost(stochastic=True)
-        updates = sgd_updates(cost, self.unsupervised_params, self.hp.learning_rate)
+        unsupervised_cost = self.get_unsupervised_cost()
+        if isinstance(unsupervised_cost, tuple):
+            cost = unsupervised_cost[0]
+            updates = unsupervised_cost[1]
+        else:
+            cost = unsupervised_cost
+            updates = sgd_updates(cost, self.unsupervised_params, self.hp.learning_rate)
         pretrain = theano.function(inputs=[index], outputs=cost, updates=updates,
                                    givens={x: train_set_x[index * self.hp.batch_size: (index + 1) * self.hp.batch_size]})
         for epoch in xrange(self.hp.n_epochs):
@@ -251,7 +256,7 @@ class ConvPoolLayer(ConvLayer, PoolLayer):
 
 
 class AutoEncoder(UnsupervisedLayer):
-    def __init__(self, incoming, nb_units, hyperparameters, corruption_level=0.5,
+    def __init__(self, incoming, nb_units, hyperparameters, corruption_level=0.0,
                  W=(glorot_uniform, {'gain': sigmoid}), b_prime=constant, **kwargs):
         super(AutoEncoder, self).__init__(incoming, nb_units, hyperparameters, W=W, **kwargs)
         self.W_prime = self.W.T
@@ -262,17 +267,17 @@ class AutoEncoder(UnsupervisedLayer):
         self.unsupervised_params.append(self.b_prime)
         self.p = 1 - corruption_level
 
-    def get_encoded_input(self, stochastic=False, **kwargs):
-        X = self.input_layer.get_output(stochastic=stochastic, **kwargs)
-        if self.p > 0 and stochastic:
+    def get_encoded_input(self, **kwargs):
+        X = self.input_layer.get_output(stochastic=False, **kwargs)
+        if self.p > 0:
             X = X * T_rng.binomial(self.input_shape, n=1, p=self.p, dtype=floatX)
         Y = sigmoid(T.dot(X, self.W) + self.b)
         Z = sigmoid(T.dot(Y, self.W_prime) + self.b_prime)
         return Z
 
-    def get_unsupervised_cost(self, stochastic=False, **kwargs):
-        X = self.input_layer.get_output(stochastic=stochastic, **kwargs)
-        Z = self.get_encoded_input(stochastic=stochastic, **kwargs)
+    def get_unsupervised_cost(self, **kwargs):
+        X = self.input_layer.get_output(stochastic=False, **kwargs)
+        Z = self.get_encoded_input(**kwargs)
         cost = T.mean(categorical_crossentropy(Z, X))
         return cost
 
@@ -286,16 +291,16 @@ class RBM(UnsupervisedLayer):
             self.b_hidden = b_hidden
         else:
             self.b_hidden = initializer(b_hidden, shape=(self.shape[0],), name='b_hidden')
-        self.unsupervised_params.append(self.b_prime)
+        self.unsupervised_params.append(self.b_hidden)
 
     def free_energy(self, v_sample):
-        wx_b = T.dot(v_sample, self.W) + self.b_hidden
-        vbias_term = T.dot(v_sample, self.b)
+        wx_b = T.dot(v_sample, self.W) + self.b
+        vbias_term = T.dot(v_sample, self.b_hidden)
         hidden_term = T.sum(T.log(1 + T.exp(wx_b)), axis=1)
         return -hidden_term - vbias_term
 
     def prop_up(self, vis):
-        pre_sigmoid_activation = T.dot(vis, self.W) + self.b_hidden
+        pre_sigmoid_activation = T.dot(vis, self.W) + self.b
         return [pre_sigmoid_activation, sigmoid(pre_sigmoid_activation)]
 
     def sample_h_given_v(self, v0_sample):
@@ -304,7 +309,7 @@ class RBM(UnsupervisedLayer):
         return [pre_sigmoid_h1, h1_min, h1_sample]
 
     def prop_down(self, hid):
-        pre_sigmoid_activation = T.dot(hid, self.W) + self.b
+        pre_sigmoid_activation = T.dot(hid, self.W.T) + self.b_hidden
         return [pre_sigmoid_activation, sigmoid(pre_sigmoid_activation)]
 
     def sample_v_given_h(self, h0_sample):
@@ -322,16 +327,16 @@ class RBM(UnsupervisedLayer):
         pre_sigmoid_v1, v1_mean, v1_sample = self.sample_v_given_h(h1_sample)
         return [pre_sigmoid_h1, h1_mean, h1_sample, pre_sigmoid_v1, v1_mean, v1_sample]
 
-    def get_reconstruction_cost(self, updates, pre_sigmoid_nv, stochastic=False, **kwargs):
-        X = self.input_layer.get_output(stochastic=stochastic, **kwargs)
+    def get_reconstruction_cost(self, updates, pre_sigmoid_nv, **kwargs):
+        X = self.input_layer.get_output(**kwargs)
         cross_entropy = T.mean(T.sum(X * T.log(sigmoid(pre_sigmoid_nv)) +
                 (1 - X) * T.log(1 - sigmoid(pre_sigmoid_nv)), axis=1))
-        # c = binary_crossentropy(X, sigmoid(pre_sigmoid_nv))
+        #cross_entropy = binary_crossentropy(X, sigmoid(pre_sigmoid_nv))
         # TODO compare the two cross entropies and check without updates
         return cross_entropy
 
-    def get_pseudo_likelihood_cost(self, updates, stochastic=False, **kwargs):
-        X = self.input_layer.get_output(stochastic=stochastic, **kwargs)
+    def get_pseudo_likelihood_cost(self, updates, **kwargs):
+        X = self.input_layer.get_output(**kwargs)
         bit_i_idx = theano.shared(value=0, name='bit_i_idx')
         xi = T.round(X)
         fe_xi = self.free_energy(xi)
@@ -344,8 +349,8 @@ class RBM(UnsupervisedLayer):
     def get_encoded_input(self, stochastic=False, **kwargs):
         raise NotImplementedError
 
-    def get_unsupervised_cost(self, persistent=None, k=1, stochastic=False, **kwargs):
-        X = self.input_layer.get_output(stochastic=stochastic, **kwargs)
+    def get_unsupervised_cost(self, persistent=None, k=1, **kwargs):
+        X = self.input_layer.get_output(**kwargs)
         pre_sigmoid_ph, ph_mean, ph_sample = self.sample_h_given_v(X)
         if persistent is None:
             chain_start = ph_sample
@@ -357,7 +362,7 @@ class RBM(UnsupervisedLayer):
                         n_steps=k)
         chain_end = nv_samples[-1]
         cost = T.mean(self.free_energy(X)) - T.mean(self.free_energy(chain_end))
-        gparams = T.grad(cost, self.params, consider_constant=[chain_end])
+        gparams = T.grad(cost, self.unsupervised_params, consider_constant=[chain_end])
         for gparam, param in zip(gparams, self.unsupervised_params):
             updates[param] = param - gparam * T.cast(self.hp.learning_rate, dtype=floatX)
         if persistent:

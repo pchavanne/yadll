@@ -24,16 +24,18 @@ Its main features are:
 
   * Input Layer
   * Dropout Layer
-  * MaxPool Layer
+  * Pool Layer
+  * Conv Layer:
+
+    * ConvPool Layer
   * Dense Layer:
 
     * Logistic Regression
     * Dropconnect
-    * Convolutional Layer
     * Unsupervised Layer:
 
-      * Autoencoder (denoising autoencoder)
-      * Restricted Boltzmann Machine
+        * Autoencoder (denoising autoencoder)
+        * Restricted Boltzmann Machine
   * LSTM
 
 
@@ -74,7 +76,9 @@ Different networks tested on mnist:
 * MLP
 * MLP with dropout
 * MLP with dropconnect
-* Auroencoder
+* Conv Pool
+* LeNet-5
+* Autoencoder
 * Denoising Autoencoder
 * Stacked Denoising Autoencoder
 * Restricted Boltzmann Machine

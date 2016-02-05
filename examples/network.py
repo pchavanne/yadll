@@ -49,7 +49,7 @@ def mlp(input_var=None):
     hp = Hyperparameters()
     hp('batch_size', 20)
     hp('n_epochs', 1000)
-    hp('learning_rate', 0.1)
+    hp('learning_rate', 0.01)
     hp('l1_reg', 0.00)
     hp('l2_reg', 0.0001)
     hp('patience', 5000)
@@ -59,12 +59,13 @@ def mlp(input_var=None):
     l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=input_var, name='Input')
     # Dense Layer
     l_hid1 = DenseLayer(incoming=l_in, nb_units=500, W=glorot_uniform, l1=hp.l1_reg,
-                        l2=hp.l2_reg, activation=relu, name='Hidden layer 1')
+                        l2=hp.l2_reg, activation=tanh, name='Hidden layer 1')
     # Dense Layer
     l_hid2 = DenseLayer(incoming=l_hid1, nb_units=500, W=glorot_uniform, l1=hp.l1_reg,
-                        l2=hp.l2_reg, activation=relu, name='Hidden layer 2')
+                        l2=hp.l2_reg, activation=tanh, name='Hidden layer 2')
     # Logistic regression Layer
-    l_out = LogisticRegression(incoming=l_hid2, nb_class=10, name='Logistic regression')
+    l_out = LogisticRegression(incoming=l_hid2, nb_class=10, l1=hp.l1_reg,
+                               l2=hp.l2_reg, name='Logistic regression')
 
     # Create network and add layers
     net = Network('mlp')
@@ -340,10 +341,10 @@ def rbm(input_var=None):
 
     # Hyperparameters
     hp = Hyperparameters()
-    hp('batch_size', 20)
+    hp('batch_size', 10)
     hp('n_epochs', 1000)
-    hp('learning_rate', 0.01)
-    hp('patience', 10000)
+    hp('learning_rate', 0.1)
+    hp('patience', 100)
 
     # Unsupervised hyperparameters
     hp_ae = Hyperparameters()
@@ -374,10 +375,10 @@ def dbn(input_var=None):
 
     # Hyperparameters
     hp = Hyperparameters()
-    hp('batch_size', 20)
+    hp('batch_size', 10)
     hp('n_epochs', 1000)
-    hp('learning_rate', 0.01)
-    hp('patience', 10000)
+    hp('learning_rate', 0.1)
+    hp('patience', 100)
 
     # Unsupervised hyperparameters
     hp_ae = Hyperparameters()
@@ -389,7 +390,7 @@ def dbn(input_var=None):
     l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=input_var, name='Input')
     l_rbm1 = RBM(incoming=l_in, nb_units=500, hyperparameters=hp_ae,
                  name='Restricted Boltzmann Machine 1')
-    l_rbm2 = RBM(incoming=l_in, nb_units=500, hyperparameters=hp_ae,
+    l_rbm2 = RBM(incoming=l_rbm1, nb_units=500, hyperparameters=hp_ae,
                  name='Restricted Boltzmann Machine 2')
     l_out = LogisticRegression(incoming=l_rbm2, nb_class=10, name='Logistic regression')
 
@@ -397,6 +398,7 @@ def dbn(input_var=None):
     net = Network('dbn')
     net.add(l_in)
     net.add(l_rbm1)
+    net.add(l_rbm2)
     net.add(l_out)
 
     return net, hp
