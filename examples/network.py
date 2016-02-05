@@ -202,20 +202,14 @@ def lenet5(input_var=None):
     image_shape = (hp.batch_size, 1, 28, 28)
     filter_shape = (20, 1, 5, 5)
     poolsize = (2, 2)
-    fan_in = np.prod(filter_shape[1:])
-    fan_out = filter_shape[0] * np.prod(filter_shape[2:]) / np.prod(poolsize)
-    init = (glorot_uniform, {'shape': (fan_in, fan_out), 'gain': 1.})
     l_cp1 = ConvPoolLayer(incoming=l_rs, poolsize=poolsize, image_shape=image_shape,
-                          filter_shape=filter_shape, W=init, activation=tanh, name='ConvPool layer 1')
+                          filter_shape=filter_shape, name='ConvPool layer 1')
     # second convpool
     image_shape = (hp.batch_size, 20, 12, 12)
     filter_shape = (50, 20, 5, 5)
     poolsize = (2, 2)
-    fan_in = np.prod(filter_shape[1:])
-    fan_out = filter_shape[0] * np.prod(filter_shape[2:]) / np.prod(poolsize)
-    init = (glorot_uniform, {'shape': (fan_in, fan_out), 'gain': 1.})
     l_cp2 = ConvPoolLayer(incoming=l_cp1, poolsize=poolsize, image_shape=image_shape,
-                          filter_shape=filter_shape, W=init, activation=tanh, name='ConvPool layer 2')
+                          filter_shape=filter_shape, name='ConvPool layer 2')
     # flatten convpool output
     l_fl = FlattenLayer(incoming=l_cp2, ndim=2)
     # Dense Layer
