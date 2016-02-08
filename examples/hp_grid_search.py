@@ -15,61 +15,56 @@ if not os.path.isfile(datafile):
     urllib.urlretrieve(origin, datafile)
 data = dl.data.Data(datafile)
 
-# create the model
-model = dl.model.Model(name='mlp grid search', data=data)
-
 # Hyperparameters
-hp = Hyperparameters()
-hp('batch_size', 500, [50, 100, 500, 1000])
-hp('n_epochs', 1000)
-hp('learning_rate', 0.1, [0.001, 0.01, 0.1, 1])
-hp('l1_reg', 0.00, [0, 0.0001, 0.001, 0.01])
-hp('l2_reg', 0.0001, [0, 0.0001, 0.001, 0.01])
-hp('activation', tanh, [tanh, sigmoid, relu])
-hp('initialisation', glorot_uniform, [glorot_uniform, glorot_normal])
-hp('patience', 10000)
-# add the hyperparameters to the model
-model.hp = hp
-
-# Create connected layers
-# Input layer
-l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=model.x, name='Input')
-# Dense Layer 1
-l_hid1 = DenseLayer(incoming=l_in, nb_units=500, W=glorot_uniform, l1=hp.l1_reg,
-                    l2=hp.l2_reg, activation=hp.activation, name='Hidden layer 1')
-# Dense Layer 2
-l_hid2 = DenseLayer(incoming=l_hid1, nb_units=500, W=glorot_uniform, l1=hp.l1_reg,
-                    l2=hp.l2_reg, activation=hp.activation, name='Hidden layer 2')
-# Logistic regression Layer
-l_out = LogisticRegression(incoming=l_hid2, nb_class=10, l1=hp.l1_reg,
-                           l2=hp.l2_reg, name='Logistic regression')
-
-# Create network and add layers
-net = Network('mlp')
-net.add(l_in)
-net.add(l_hid1)
-net.add(l_hid2)
-net.add(l_out)
-# add the network to the model
-model.network = net
-
-# updates method
-model.updates = dl.updates.sgd_updates
+hps = Hyperparameters()
+hps('batch_size', 500, [50, 100, 500, 1000])
+hps('n_epochs', 1000)
+hps('learning_rate', 0.1, [0.001, 0.01, 0.1, 1])
+hps('l1_reg', 0.00, [0, 0.0001, 0.001, 0.01])
+hps('l2_reg', 0.0001, [0, 0.0001, 0.001, 0.01])
+hps('activation', tanh, [tanh, sigmoid, relu])
+hps('initialisation', glorot_uniform, [glorot_uniform, glorot_normal])
+hps('patience', 10000)
 
 reports = []
 
 
 @timer(' Grid Search')
 def grid_search():
-    for h in hp:
-        reports.append((h, model.train()))
+    for hp in hps:
+        # create the model
+        model = dl.model.Model(name='mlp grid search', data=data)
+        # add the hyperparameters to the model
+        model.hp = hp
+        # Create connected layers
+        # Input layer
+        l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=model.x, name='Input')
+        # Dense Layer 1
+        l_hid1 = DenseLayer(incoming=l_in, nb_units=500, W=glorot_uniform, l1=hp.l1_reg,
+                            l2=hp.l2_reg, activation=hp.activation, name='Hidden layer 1')
+        # Dense Layer 2
+        l_hid2 = DenseLayer(incoming=l_hid1, nb_units=500, W=glorot_uniform, l1=hp.l1_reg,
+                            l2=hp.l2_reg, activation=hp.activation, name='Hidden layer 2')
+        # Logistic regression Layer
+        l_out = LogisticRegression(incoming=l_hid2, nb_class=10, l1=hp.l1_reg,
+                                   l2=hp.l2_reg, name='Logistic regression')
 
-    report_file = open('/home/philippe/Python/Theano/reports', 'wb')
+        # Create network and add layers
+        net = Network('mlp')
+        net.add(l_in)
+        net.add(l_hid1)
+        net.add(l_hid2)
+        net.add(l_out)
+        # add the network to the model
+        model.network = net
+
+        # updates method
+        model.updates = dl.updates.sgd_updates
+        reports.append((hp, model.train()))
+
+    report_file = open('reports.pkl', 'wb')
     cPickle.dump(reports, report_file)
     report_file.close()
-
-# train the model
-# model.train()
 
 # Grid search
 grid_search()
