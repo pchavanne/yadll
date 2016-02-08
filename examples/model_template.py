@@ -1,12 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
+import os
 
 import dl
 from dl.hyperparameters import *
 from dl.model import *
 
 # load the data
-datafile = '/home/philippe/Python/Theano/mnist.pkl.gz'
+datafile = 'mnist.pkl.gz'
+if not os.path.isfile(datafile):
+    import urllib
+    origin = 'http://www.iro.umontreal.ca/~lisa/deep/data/mnist/mnist.pkl.gz'
+    print 'Downloading data from %s' % origin
+    urllib.urlretrieve(origin, datafile)
 data = dl.data.Data(datafile)
 
 # create the model

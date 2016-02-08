@@ -51,7 +51,6 @@ class Model(object):
             self.y = T.matrix('y')
         self.report = dict()
 
-
     @timer(' Unsupervised Pre-Training')
     def pretrain(self):
         for layer in self.network.layers:

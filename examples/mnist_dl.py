@@ -15,6 +15,7 @@ Options:
     -h --help           Show this screen
     --version           Show version
 """
+import os
 import cPickle
 
 import theano
@@ -84,7 +85,13 @@ if __name__ == '__main__':
             raise TypeError('netwok name provided is not supported. Check supported network'
                             ' with option -n')
         # Load dataset
-        datafile = '/home/philippe/Python/Theano/mnist.pkl.gz'
+        datafile = 'mnist.pkl.gz'
+        if not os.path.isfile(datafile):
+            import urllib
+            origin = 'http://www.iro.umontreal.ca/~lisa/deep/data/mnist/mnist.pkl.gz'
+            print 'Downloading data from %s' % origin
+            urllib.urlretrieve(origin, datafile)
+
         data = load_data(datafile)
 
         train(network_name, data=data)
