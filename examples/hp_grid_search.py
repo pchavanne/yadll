@@ -62,9 +62,10 @@ def grid_search():
         model.updates = dl.updates.sgd_updates
         reports.append((hp, model.train()))
 
-    report_file = open('reports.pkl', 'wb')
-    cPickle.dump(reports, report_file)
-    report_file.close()
+        report_file = open('reports.pkl', 'wb')
+        cPickle.dump(reports, report_file)
+        report_file.close()
+
 
 # Grid search
 grid_search()
