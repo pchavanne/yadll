@@ -59,7 +59,7 @@ def grid_search():
         model.network = net
 
         # updates method
-        model.updates = dl.updates.sgd_updates
+        model.updates = dl.updates.sgd
         reports.append((hp, model.train()))
 
         report_file = open('reports.pkl', 'wb')

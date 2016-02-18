@@ -5,13 +5,20 @@ import theano.tensor as T
 from .utils import *
 
 
-def sgd_updates(cost, params, learning_rate):
+def sgd(cost, params, learning_rate):
+    """Stochastic Gradient Descent (SGD) updates
+    * ``param := param - learning_rate * gradient``
+    """
     gparams = [T.grad(cost, param) for param in params]
     updates = [(param, param - learning_rate * gparam) for param, gparam in zip(params, gparams)]
     return updates
 
 
-def momentum_updates(cost, params, learning_rate, momentum=0.9):
+def momentum(cost, params, learning_rate, momentum=0.9):
+    """Stochastic Gradient Descent (SGD) updates with momentum
+    * ``velocity := momentum * velocity - learning_rate * gradient``
+    * ``param := param + velocity``
+    """
     updates = []
     for param in params:
         param_update = shared_variable(np.zeros(param.get_value().shape))
@@ -20,7 +27,7 @@ def momentum_updates(cost, params, learning_rate, momentum=0.9):
     return updates
 
 
-def nesterov_momentum_updates(cost, params, learning_rate, momentum=0.9):
+def nesterov_momentum(cost, params, learning_rate, momentum=0.9):
     updates = []
     for param in params:
         param_update = shared_variable(np.zeros(param.get_value().shape))
@@ -30,21 +37,21 @@ def nesterov_momentum_updates(cost, params, learning_rate, momentum=0.9):
     return updates
 
 
-def adagrad_updates(cost, params, learning_rate=1.0, epsilon=0.9):
-    # TODO implement adagrad_updates method
+def adagrad(cost, params, learning_rate=1.0, epsilon=0.9):
+    # TODO implement adagrad method
     raise NotImplementedError
 
 
-def adadelta_updates(cost, params, learning_rate=1.0, rho=0.95, epsilon=1e-6):
-    # TODO implement adadelta_updates method
+def adadelta(cost, params, learning_rate=1.0, rho=0.95, epsilon=1e-6):
+    # TODO implement adadelta method
     raise NotImplementedError
 
 
-def rmsprop_updates(cost, params, learning_rate=1.0, rho=0.9, epsilon=1e-6):
-    # TODO implement rmsprop_updates method
+def rmsprop(cost, params, learning_rate=1.0, rho=0.9, epsilon=1e-6):
+    # TODO implement rmsprop method
     raise NotImplementedError
 
 
-def hessian_free_updates(cost, parms):
-    # TODO implement hessian_free_updates method
+def hessian_free(cost, parms):
+    # TODO implement hessian_free method
     raise NotImplementedError

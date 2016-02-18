@@ -8,7 +8,7 @@ from .utils import *
 
 # from theano.tensor.shared_randomstreams import RandomStreams
 from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
-from theano.tensor.signal import downsample
+from theano.tensor.signal import pool
 from theano.tensor.nnet import conv
 
 T_rng = RandomStreams(np_rng.randint(2 ** 30))
@@ -128,7 +128,7 @@ class UnsupervisedLayer(DenseLayer):
             updates = unsupervised_cost[1]
         else:
             cost = unsupervised_cost
-            updates = sgd_updates(cost, self.unsupervised_params, self.hp.learning_rate)
+            updates = sgd(cost, self.unsupervised_params, self.hp.learning_rate)
         pretrain = theano.function(inputs=[index], outputs=cost, updates=updates,
                                    givens={x: train_set_x[index * self.hp.batch_size: (index + 1) * self.hp.batch_size]})
         for epoch in xrange(self.hp.n_epochs):
@@ -179,7 +179,7 @@ class PoolLayer(Layer):
         self.mode = mode    # {'max', 'sum', 'average_inc_pad', 'average_exc_pad'}
 
     def pool(self, input, ds):
-        return downsample.max_pool_2d(input=input, ds=ds, st=self.stride, ignore_border=self.ignore_border,
+        return pool.max_pool_2d(input=input, ds=ds, st=self.stride, ignore_border=self.ignore_border,
                                       padding=self.padding, mode=self.mode)
 
     @property

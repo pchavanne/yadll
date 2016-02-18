@@ -48,7 +48,7 @@ def train(network_name, data):
     # add the hyperparameters to the model
     model.hp = hp
     # updates method
-    model.updates = dl.updates.sgd_updates
+    model.updates = dl.updates.sgd
     # train the model
     model.train(unsupervised_training=True)
 
