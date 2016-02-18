@@ -52,7 +52,7 @@ net.add(l_out)
 model.network = net
 
 # updates method
-model.updates = dl.updates.sgd_updates
+model.updates = dl.updates.nesterov_momentum_updates
 
 # train the model
 model.train()

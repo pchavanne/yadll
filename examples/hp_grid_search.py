@@ -71,16 +71,17 @@ def grid_search():
 grid_search()
 
 
-# import cPickle
-# import pandas as pd
-# report_file = open('/home/philippe/Python/Theano/reports', 'rb')
-# reports = cPickle.load(report_file)
-# reports = pd.DataFrame(reports)
-# param_reports = pd.DataFrame.from_records(reports['parameters'])
-# pd_report = pd.DataFrame(reports,
-#                          columns=['iteration', 'test', 'validation', 'training time'])
-# reports = pd.concat([param_reports, pd_report], axis=1)
-#
-# reports.to_html(open('/home/philippe/Python/Theano/report.html', 'w'))
-#
-# print reports.loc[reports['validation'].idxmin()]
+# Report Analysis
+import cPickle
+import pandas as pd
+report_file = open('reports.pkl', 'rb')
+reports = cPickle.load(report_file)
+reports = pd.DataFrame(reports)
+param_reports = pd.DataFrame.from_records(reports['parameters'])
+pd_report = pd.DataFrame(reports,
+                         columns=['iteration', 'test', 'validation', 'training time'])
+reports = pd.concat([param_reports, pd_report], axis=1)
+
+reports.to_html(open('/home/philippe/Python/Theano/report.html', 'w'))
+
+print reports.loc[reports['validation'].idxmin()]
