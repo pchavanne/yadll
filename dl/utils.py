@@ -20,7 +20,7 @@ def shared_variable(value, dtype=floatX, name=None, borrow=True):
     if value is None:
         return None
     value = np.asarray(value, dtype=dtype)
-    return theano.shared(value=value, name=name, borrow=True)
+    return theano.shared(value=value, name=name, borrow=borrow)
 
 
 def format_sec(sec):

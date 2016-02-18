@@ -75,7 +75,16 @@ class Model(object):
         cost += self.network.reguls
 
         # updates of the model as a list of (variable, update expression) pairs
-        updates = self.updates(cost, self.network.params, self.hp.learning_rate)
+        update_param = {}
+        if hasattr(self.hp, 'learning_rate'):
+            update_param['learning_rate'] = self.hp.learning_rate
+        if hasattr(self.hp, 'momentum'):
+            update_param['momentum'] = self.hp.momentum
+        if hasattr(self.hp, 'epsilon'):
+            update_param['epsilon'] = self.hp.epsilon
+        if hasattr(self.hp, 'rho'):
+            update_param['rho'] = self.hp.rho
+        updates = self.updates(cost, self.network.params, **update_param)
 
         # compiling Theano functions for training, validating and testing the model
         train_model = theano.function(inputs=[self.index], outputs=cost, updates=updates, name='train',

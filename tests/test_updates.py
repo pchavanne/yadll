@@ -6,33 +6,6 @@ import theano
 import dl
 
 
-def test_sgd():
-    # TODO implement sgd test
-    pass
-
-
-def test_momentum():
-    # TODO implement momentum test
-    pass
-
-
-def test_nesterov_momentum():
-    # TODO implement nesterov_momentum test
-    pass
-
-
-def test_adagrad():
-    pytest.raises(NotImplementedError, dl.updates.adagrad, 'cost', 'params')
-
-
-def test_adadelta():
-    pytest.raises(NotImplementedError, dl.updates.adadelta, 'cost', 'params')
-
-
-def test_rmsprop():
-    pytest.raises(NotImplementedError, dl.updates.rmsprop, 'cost', 'params')
-
-
 def test_hessian_free():
     pytest.raises(NotImplementedError, dl.updates.hessian_free, 'cost', 'params')
 
@@ -73,11 +46,11 @@ class TestUpdateFunctions(object):
 
     @pytest.mark.parametrize('method, kwargs', [
         ['sgd', {'learning_rate': 0.1}],
-        # ['momentum', {'learning_rate': 0.1, 'momentum': 0.5}],
-        # ['nesterov_momentum', {'learning_rate': 0.1, 'momentum': 0.5}],
-        # ['adagrad', {'learning_rate': 0.1}],
-        # ['rmsprop', {'learning_rate': 0.01}],
-        # ['adadelta', {}],
+        ['momentum', {'learning_rate': 0.1, 'momentum': 0.5}],
+        ['nesterov_momentum', {'learning_rate': 0.1, 'momentum': 0.5}],
+        ['adagrad', {'learning_rate': 0.1}],
+        ['rmsprop', {'learning_rate': 0.01}],
+        ['adadelta', {}],
         # ['adam', {'learning_rate': 0.01}],
         # ['adamax', {'learning_rate': 0.01}],
         ])
