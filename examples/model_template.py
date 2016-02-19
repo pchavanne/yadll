@@ -59,3 +59,8 @@ model.updates = dl.updates.sgd  # nesterov_momentum
 model.train()
 
 print model.report
+
+def toto():
+    a = input("Donne moi un chiffre?")
+    b = input("Donne moi un autre chiffre?")
+    print str(a) + ' + ' + str(b) + ' = ' + str(a + b)
