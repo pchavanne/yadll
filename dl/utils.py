@@ -16,11 +16,11 @@ def to_float_X(arr):
     return np.asarray(arr, dtype=floatX)
 
 
-def shared_variable(value, dtype=floatX, name=None, borrow=True):
+def shared_variable(value, dtype=floatX, name=None, borrow=True, broadcastable=None):
     if value is None:
         return None
     value = np.asarray(value, dtype=dtype)
-    return theano.shared(value=value, name=name, borrow=borrow)
+    return theano.shared(value=value, name=name, borrow=borrow, broadcastable=broadcastable)
 
 
 def format_sec(sec):

@@ -95,7 +95,7 @@ def rmsprop(cost, params, learning_rate=1.0, rho=0.95, epsilon=1e-6):
     gparams = T.grad(cost, params)
     updates = OrderedDict()
     for param, gparam in zip(params, gparams):
-        accu = shared_variable(np.zeros(param.get_value(borrow=True).shape))
+        accu = shared_variable(np.zeros(param.get_value(borrow=True).shape), broadcastable=param.broadcastable)
         accu_new = rho * accu + (1 - rho) * gparam ** 2
         updates[accu] = accu_new
         updates[param] = param - learning_rate * gparam / T.sqrt(accu_new + epsilon)

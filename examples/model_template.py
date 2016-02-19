@@ -22,10 +22,10 @@ model = dl.model.Model(name='mlp grid search', data=data)
 hp = Hyperparameters()
 hp('batch_size', 500)
 hp('n_epochs', 1000)
-hp('learning_rate', 1)
+hp('learning_rate', 0.1)
 #hp('momentum', 0.5)
 hp('l1_reg', 0.00)
-hp('l2_reg', 0.0001)
+hp('l2_reg', 0.0000)
 hp('patience', 10000)
 # add the hyperparameters to the model
 model.hp = hp
@@ -53,7 +53,7 @@ net.add(l_out)
 model.network = net
 
 # updates method
-model.updates = dl.updates.rmsprop  # nesterov_momentum
+model.updates = dl.updates.sgd  # nesterov_momentum
 
 # train the model
 model.train()

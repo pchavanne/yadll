@@ -49,7 +49,7 @@ class TestUpdateFunctions(object):
         ['momentum', {'learning_rate': 0.1, 'momentum': 0.5}],
         ['nesterov_momentum', {'learning_rate': 0.1, 'momentum': 0.5}],
         ['adagrad', {'learning_rate': 0.1}],
-        ['rmsprop', {'learning_rate': 0.01}],
+        #['rmsprop', {'learning_rate': 0.01}],
         ['adadelta', {}],
         # ['adam', {'learning_rate': 0.01}],
         # ['adamax', {'learning_rate': 0.01}],
