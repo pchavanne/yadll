@@ -92,11 +92,18 @@ get the list of available networks:
 
 .. code-block:: bash
 
-  python mnist-dl.py --network_list
+  python mnist_dl.py --network_list
 
 
-train the model mlp
+trainning a model for example lenet5:
 
 .. code-block:: bash
 
-  python mnist-dl.py mlp
+  python mnist_dl.py lenet5
+
+
+grid search on the hyperparameters:
+
+.. code-block:: bash
+
+  python hp_grid_search.py
