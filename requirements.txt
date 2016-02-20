@@ -1,3 +1,6 @@
+git+git://github.com/Theano/Theano.git
 pandas
 docopt
-git+git://github.com/Theano/Theano.git
+pytest
+pytest-cov
+
