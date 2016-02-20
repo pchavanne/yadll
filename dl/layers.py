@@ -257,7 +257,8 @@ class ConvPoolLayer(ConvLayer, PoolLayer):
 
 class AutoEncoder(UnsupervisedLayer):
     def __init__(self, incoming, nb_units, hyperparameters, corruption_level=0.0,
-                 W=(glorot_uniform, {'gain': sigmoid}), b_prime=constant, **kwargs):
+                 W=(glorot_uniform, {'gain': sigmoid}), b_prime=constant,
+                 sigma=None, contraction_level= None, **kwargs):
         super(AutoEncoder, self).__init__(incoming, nb_units, hyperparameters, W=W, **kwargs)
         self.W_prime = self.W.T
         if isinstance(b_prime, theano.compile.SharedVariable):
@@ -266,19 +267,32 @@ class AutoEncoder(UnsupervisedLayer):
             self.b_prime = initializer(b_prime, shape=(self.shape[0],), name='b_prime')
         self.unsupervised_params.append(self.b_prime)
         self.p = 1 - corruption_level
+        self.sigma = sigma  # standard deviation if gaussian noise.
+        self.contraction_level = contraction_level #
+
 
     def get_encoded_input(self, **kwargs):
         X = self.input_layer.get_output(stochastic=False, **kwargs)
         if self.p > 0:
-            X = X * T_rng.binomial(self.input_shape, n=1, p=self.p, dtype=floatX)
+            if self.sigma:
+                X = X + T_rng.normal(self.input_shape, avg=0.0, std=self.sigma, dtype=floatX)
+            else:
+                X = X * T_rng.binomial(self.input_shape, n=1, p=self.p, dtype=floatX)
         Y = sigmoid(T.dot(X, self.W) + self.b)
         Z = sigmoid(T.dot(Y, self.W_prime) + self.b_prime)
-        return Z
+        return Y, Z
 
     def get_unsupervised_cost(self, **kwargs):
         X = self.input_layer.get_output(stochastic=False, **kwargs)
-        Z = self.get_encoded_input(**kwargs)
+        Y, Z = self.get_encoded_input(**kwargs)
         cost = T.mean(categorical_crossentropy(Z, X))
+        if self.contraction_level:
+            # For sigmoid: J = Y * (1 - Y) * W
+            # For tanh: J = (1 + Y) * (1 - Y) * W
+            J = T.reshape(Y * (1 - Y), (self.hp.batch_size, 1, self.shape[1])) \
+                * T.reshape(self.W, (1, self.shape[0], self.shape[1]))
+            Lj = T.sum(J**2) / self.hp.batch_size
+            cost = cost + self.contraction_level * T.mean(Lj)
         return cost
 
 

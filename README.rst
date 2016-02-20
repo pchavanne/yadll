@@ -80,6 +80,8 @@ Different networks tested on mnist:
 * LeNet-5
 * Autoencoder
 * Denoising Autoencoder
+* Gaussian Denoising Autoencoder
+* Contractive Denoising Autoencoder
 * Stacked Denoising Autoencoder
 * Restricted Boltzmann Machine
 * Deep Belief Network

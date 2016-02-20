@@ -11,6 +11,8 @@ __all__ = ['logistic_regression',
            'lenet5',
            'autoencoder',
            'denoising_autoencoder',
+           'gaussian_denoising_autoencoder',
+           'contractive_denoising_autoencoder',
            'stacked_denoising_autoencoder',
            'rbm',
            'dbn',
@@ -291,6 +293,74 @@ def denoising_autoencoder(input_var=None):
 
     # Create network and add layers
     net = Network('denoising_autoencoder')
+    net.add(l_in)
+    net.add(l_ae1)
+    net.add(l_out)
+
+    return net, hp
+
+
+def gaussian_denoising_autoencoder(input_var=None):
+    """Gaussian Denoising Autoencoder"""
+
+    # Hyperparameters
+    hp = Hyperparameters()
+    hp('batch_size', 20)
+    hp('n_epochs', 1000)
+    hp('learning_rate', 0.01)
+    hp('patience', 10000)
+
+    # Unsupervised hyperparameters
+    hp_ae = Hyperparameters()
+    hp_ae('batch_size', hp.batch_size)
+    hp_ae('n_epochs', 15)
+    hp_ae('learning_rate', 0.01)
+
+    # Create connected layers
+    # Input layer
+    l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=input_var, name='Input')
+    # Auto Encoder Layer
+    l_ae1 = AutoEncoder(incoming=l_in, nb_units=500, hyperparameters=hp_ae, sigma=0.3,
+                        activation=relu, name='Gaussian Denoising AutoEncoder')
+    # Logistic regression Layer
+    l_out = LogisticRegression(incoming=l_ae1, nb_class=10, name='Logistic regression')
+
+    # Create network and add layers
+    net = Network('gaussian_denoising_autoencoder')
+    net.add(l_in)
+    net.add(l_ae1)
+    net.add(l_out)
+
+    return net, hp
+
+
+def contractive_denoising_autoencoder(input_var=None):
+    """Contractive Denoising Autoencoder"""
+
+    # Hyperparameters
+    hp = Hyperparameters()
+    hp('batch_size', 20)
+    hp('n_epochs', 1000)
+    hp('learning_rate', 0.01)
+    hp('patience', 10000)
+
+    # Unsupervised hyperparameters
+    hp_ae = Hyperparameters()
+    hp_ae('batch_size', hp.batch_size)
+    hp_ae('n_epochs', 15)
+    hp_ae('learning_rate', 0.01)
+
+    # Create connected layers
+    # Input layer
+    l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=input_var, name='Input')
+    # Auto Encoder Layer
+    l_ae1 = AutoEncoder(incoming=l_in, nb_units=500, hyperparameters=hp_ae, contraction_level=0.3,
+                        activation=relu, name='Contractive Denoising AutoEncoder')
+    # Logistic regression Layer
+    l_out = LogisticRegression(incoming=l_ae1, nb_class=10, name='Logistic regression')
+
+    # Create network and add layers
+    net = Network('contractive_denoising_autoencoder')
     net.add(l_in)
     net.add(l_ae1)
     net.add(l_out)
