@@ -3,4 +3,3 @@ source = dl
 omit =
     dl/tests/*
     */python?.?/*
-    */site-packages/nose/*

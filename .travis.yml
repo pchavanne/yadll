@@ -8,12 +8,10 @@ before_install:
   - pip install --upgrade pip
 install:
   - pip install -r requirements.txt
-  - pip install pytest pytest-cov
   - pip install python-coveralls
-  - pip install coverage
   - python setup.py install
 script:
-  - py.test coveralls --ignore=build
+  - py.test
 after_success:
   - coveralls
 notifications:
