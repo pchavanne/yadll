@@ -1,12 +1,10 @@
 # -*- coding: UTF-8 -*-
-import timeit
 
 from .init import *
 from .objectives import *
 from .updates import *
 from .utils import *
 
-# from theano.tensor.shared_randomstreams import RandomStreams
 from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 from theano.tensor.signal import pool
 from theano.tensor.nnet import conv
@@ -26,6 +24,9 @@ class Layer(object):
         self.name = name
         self.params = []
         self.reguls = 0
+
+    def get_params(self):
+        return self.params
 
     def get_reguls(self):
         return self.reguls
@@ -62,7 +63,7 @@ class ReshapeLayer(Layer):
 
 
 class FlattenLayer(Layer):
-    def __init__(self, incoming, ndim=1, **kwargs):
+    def __init__(self, incoming, ndim=2, **kwargs):
         super(FlattenLayer, self).__init__(incoming, **kwargs)
         self.ndim = ndim
 
@@ -179,7 +180,7 @@ class PoolLayer(Layer):
         self.mode = mode    # {'max', 'sum', 'average_inc_pad', 'average_exc_pad'}
 
     def pool(self, input, ds):
-        return pool.max_pool_2d(input=input, ds=ds, st=self.stride, ignore_border=self.ignore_border,
+        return pool.pool_2d(input=input, ds=ds, st=self.stride, ignore_border=self.ignore_border,
                                       padding=self.padding, mode=self.mode)
 
     @property
@@ -270,7 +271,6 @@ class AutoEncoder(UnsupervisedLayer):
         self.sigma = sigma  # standard deviation if gaussian noise.
         self.contraction_level = contraction_level #
 
-
     def get_encoded_input(self, **kwargs):
         X = self.input_layer.get_output(stochastic=False, **kwargs)
         if self.p > 0:
@@ -345,7 +345,7 @@ class RBM(UnsupervisedLayer):
         X = self.input_layer.get_output(**kwargs)
         cross_entropy = T.mean(T.sum(X * T.log(sigmoid(pre_sigmoid_nv)) +
                 (1 - X) * T.log(1 - sigmoid(pre_sigmoid_nv)), axis=1))
-        #cross_entropy = binary_crossentropy(X, sigmoid(pre_sigmoid_nv))
+        # cross_entropy = binary_crossentropy(X, sigmoid(pre_sigmoid_nv))
         # TODO compare the two cross entropies and check without updates
         return cross_entropy
 

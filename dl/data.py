@@ -34,12 +34,19 @@ class Data(object):
         else:
                 raise TypeError
 
-        self.train_set_x = shared_variable(train_set_x, name='train_set_x', borrow=borrow)
-        self.train_set_y = shared_variable(train_set_y, name='train_set_x', borrow=borrow)
-        self.valid_set_x = shared_variable(valid_set_x, name='train_set_x', borrow=borrow)
-        self.valid_set_y = shared_variable(valid_set_y, name='train_set_x', borrow=borrow)
-        self.test_set_x = shared_variable(test_set_x, name='train_set_x', borrow=borrow)
-        self.test_set_y = shared_variable(test_set_y, name='train_set_x', borrow=borrow)
+        if shared:
+            self.train_set_x = shared_variable(train_set_x, name='train_set_x',
+                                               borrow=borrow)
+            self.train_set_y = shared_variable(train_set_y, name='train_set_x',
+                                               borrow=borrow)
+            self.valid_set_x = shared_variable(valid_set_x, name='train_set_x',
+                                               borrow=borrow)
+            self.valid_set_y = shared_variable(valid_set_y, name='train_set_x',
+                                               borrow=borrow)
+            self.test_set_x = shared_variable(test_set_x, name='train_set_x',
+                                              borrow=borrow)
+            self.test_set_y = shared_variable(test_set_y, name='train_set_x',
+                                              borrow=borrow)
 
         if cast_y:
             self.train_set_y = T.cast(self.train_set_y, intX)
