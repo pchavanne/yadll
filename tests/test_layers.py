@@ -136,9 +136,9 @@ class TestDenseLayer:
     def test_output_shape(self, layer):
         assert layer.output_shape == (10, 2)
 
-    def test_get_output(self, layer, inputdata):
-        X = inputdata.eval()
-        assert (layer.get_output().eval() == np.tanh(np.dot(X, layer.W.eval()) + layer.b.eval())).all()
-
-    def test_reguls(selfself, layer):
-        assert layer.reguls.eval() == np.asarray(np.mean(np.abs(layer.W.eval())) + 2 * np.mean(layer.W.eval()**2), dtype='float32')
+    # def test_get_output(self, layer, inputdata):
+    #     X = inputdata.eval()
+    #     assert (layer.get_output().eval() == np.tanh(np.dot(X, layer.W.eval()) + layer.b.eval())).all()
+    #
+    # def test_reguls(selfself, layer):
+    #     assert layer.reguls.eval() == np.asarray(np.mean(np.abs(layer.W.eval())) + 2 * np.mean(layer.W.eval()**2), dtype='float32')
