@@ -2,7 +2,7 @@
 import pytest
 from mock import Mock
 import numpy as np
-
+from numpy.testing import assert_allclose
 
 class TestLayer:
     @pytest.fixture
@@ -105,7 +105,7 @@ class TestFlattenLayer:
     def test_get_output(self, flattenlayer, inputlayer, inputdata):
         layer = flattenlayer(inputlayer)
         result = layer.get_output().eval()
-        input = inputdata.eval()
+        input = np.asarray(inputdata.eval())
         assert (result == input.reshape(input.shape[0], -1)).all()
 
 
@@ -136,9 +136,15 @@ class TestDenseLayer:
     def test_output_shape(self, layer):
         assert layer.output_shape == (10, 2)
 
-    # def test_get_output(self, layer, inputdata):
-    #     X = inputdata.eval()
-    #     assert (layer.get_output().eval() == np.tanh(np.dot(X, layer.W.eval()) + layer.b.eval())).all()
-    #
-    # def test_reguls(selfself, layer):
-    #     assert layer.reguls.eval() == np.asarray(np.mean(np.abs(layer.W.eval())) + 2 * np.mean(layer.W.eval()**2), dtype='float32')
+    def test_get_output(self, layer, inputdata):
+        X = inputdata.eval()
+        W = layer.W.eval()
+        b = layer.b.eval()
+        assert_allclose(layer.get_output().eval(), np.tanh(np.dot(X, W) + b), rtol=1e-4)
+
+    def test_reguls(self, layer):
+        W = layer.W.eval()
+        assert_allclose(layer.reguls.eval(), np.mean(np.abs(W)) + 2 * np.mean(np.power(W, 2)), rtol=1e-4)
+
+
+
