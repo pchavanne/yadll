@@ -1,7 +1,4 @@
 # -*- coding: UTF-8 -*-
-
-import cPickle
-
 from .layers import *
 
 

@@ -40,7 +40,12 @@ class Testdata:
         assert data.valid_set_y.name == 'valid_set_y'
         assert data.test_set_x.name == 'test_set_x'
         assert data.test_set_y.name == 'test_set_y'
-        #assert (np.asarray(data.dataset()) == [[1., 2.], [3., 4.], [5., 6.]]).all()
+        assert data.dataset()[0][0].eval() == 1
+        assert data.dataset()[0][1].eval() == 2
+        assert data.dataset()[1][0].eval() == 3
+        assert data.dataset()[1][1].eval() == 4
+        assert data.dataset()[2][0].eval() == 5
+        assert data.dataset()[2][1].eval() == 6
         data = Data(train_valid_test_data_file, cast_y=True)
         assert np.asarray(data.train_set_x.eval()) == 1.
         assert np.asarray(data.train_set_y.eval()) == 2.
@@ -54,6 +59,12 @@ class Testdata:
         assert data.train_set_x.name == 'train_set_x'
         assert data.valid_set_x.name == 'valid_set_x'
         assert data.test_set_x.name == 'test_set_x'
+        assert data.dataset()[0][0].eval() == 1
+        assert data.dataset()[0][1].eval() == 2
+        assert data.dataset()[1][0].eval() == 3
+        assert data.dataset()[1][1].eval() == 4
+        assert data.dataset()[2][0].eval() == 5
+        assert data.dataset()[2][1].eval() == 6
 
     def test_train_valid_test_data(self, train_valid_test_data):
         from dl.data import Data
@@ -86,6 +97,12 @@ class Testdata:
         assert data.train_set_x.name == 'train_set_x'
         assert data.valid_set_x.name == 'valid_set_x'
         assert data.test_set_x.name == 'test_set_x'
+        assert data.dataset()[0][0].eval() == 1
+        assert data.dataset()[0][1].eval() == 2
+        assert data.dataset()[1][0].eval() == 3
+        assert data.dataset()[1][1].eval() == 4
+        assert data.dataset()[2][0].eval() == 5
+        assert data.dataset()[2][1].eval() == 6
 
     def test_train_test_data(self, train_test_data):
         from dl.data import Data
@@ -102,6 +119,10 @@ class Testdata:
         assert data.train_set_y.name == 'train_set_y'
         assert data.test_set_x.name == 'test_set_x'
         assert data.test_set_y.name == 'test_set_y'
+        assert data.dataset()[0][0].eval() == 1
+        assert data.dataset()[0][1].eval() == 2
+        assert data.dataset()[2][0].eval() == 5
+        assert data.dataset()[2][1].eval() == 6
         data = Data(train_test_data, cast_y=True)
         assert np.asarray(data.train_set_x.eval()) == 1.
         assert np.asarray(data.train_set_y.eval()) == 2.
@@ -113,6 +134,10 @@ class Testdata:
         assert data.test_set_y.eval().dtype == 'int32'
         assert data.train_set_x.name == 'train_set_x'
         assert data.test_set_x.name == 'test_set_x'
+        assert data.dataset()[0][0].eval() == 1
+        assert data.dataset()[0][1].eval() == 2
+        assert data.dataset()[2][0].eval() == 5
+        assert data.dataset()[2][1].eval() == 6
 
     def test_len_raise_error(self):
         from dl.data import Data
