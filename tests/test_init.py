@@ -31,27 +31,27 @@ def test_init():
     assert np.abs(np.std(w.get_value()) - 0.5) < eps
 
     # Glorot
-    init_obj = (dl.init.glorot_uniform, {'gain':dl.activation.tanh})
+    init_obj = (dl.init.glorot_uniform, {'gain': dl.activation.tanh})
     w = dl.init.initializer(init_obj=init_obj, shape=shape, name='w')
     scale = 1 * np.sqrt(6. / (shape[0] + shape[1]))
     assert np.abs(np.mean(w.get_value()) - 0.0) < eps
     assert np.abs(np.max(w.get_value()) - scale) < eps
     assert np.abs(np.min(w.get_value()) - (-scale)) < eps
 
-    init_obj = (dl.init.glorot_uniform, {'gain':dl.activation.sigmoid})
+    init_obj = (dl.init.glorot_uniform, {'gain': dl.activation.sigmoid})
     w = dl.init.initializer(init_obj=init_obj, shape=shape, name='w')
     scale = 4 * np.sqrt(6. / (shape[0] + shape[1]))
     assert np.abs(np.mean(w.get_value()) - 0.0) < eps
     assert np.abs(np.max(w.get_value()) - scale) < eps
     assert np.abs(np.min(w.get_value()) - (-scale)) < eps
 
-    init_obj = (dl.init.glorot_normal, {'gain':dl.activation.tanh})
+    init_obj = (dl.init.glorot_normal, {'gain': dl.activation.tanh})
     w = dl.init.initializer(init_obj=init_obj, shape=shape, name='w')
     scale = 1 * np.sqrt(2. / (shape[0] + shape[1]))
     assert np.abs(np.mean(w.get_value()) - 0.0) < eps
     assert np.abs(np.std(w.get_value()) - scale) < eps
 
-    init_obj = (dl.init.glorot_normal, {'gain':dl.activation.sigmoid})
+    init_obj = (dl.init.glorot_normal, {'gain': dl.activation.sigmoid})
     w = dl.init.initializer(init_obj=init_obj, shape=shape, name='w')
     scale = 4 * np.sqrt(2. / (shape[0] + shape[1]))
     assert np.abs(np.mean(w.get_value()) - 0.0) < eps

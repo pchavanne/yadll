@@ -4,6 +4,7 @@ from mock import Mock
 import numpy as np
 from numpy.testing import assert_allclose
 
+
 class TestLayer:
     @pytest.fixture
     def layer(self):

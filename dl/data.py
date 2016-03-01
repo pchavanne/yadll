@@ -37,20 +37,21 @@ class Data(object):
         if shared:
             self.train_set_x = shared_variable(train_set_x, name='train_set_x',
                                                borrow=borrow)
-            self.train_set_y = shared_variable(train_set_y, name='train_set_x',
+            self.train_set_y = shared_variable(train_set_y, name='train_set_y',
                                                borrow=borrow)
-            self.valid_set_x = shared_variable(valid_set_x, name='train_set_x',
+            self.valid_set_x = shared_variable(valid_set_x, name='valid_set_x',
                                                borrow=borrow)
-            self.valid_set_y = shared_variable(valid_set_y, name='train_set_x',
+            self.valid_set_y = shared_variable(valid_set_y, name='valid_set_y',
                                                borrow=borrow)
-            self.test_set_x = shared_variable(test_set_x, name='train_set_x',
+            self.test_set_x = shared_variable(test_set_x, name='test_set_x',
                                               borrow=borrow)
-            self.test_set_y = shared_variable(test_set_y, name='train_set_x',
+            self.test_set_y = shared_variable(test_set_y, name='test_set_y',
                                               borrow=borrow)
 
         if cast_y:
             self.train_set_y = T.cast(self.train_set_y, intX)
-            self.valid_set_y = T.cast(self.valid_set_y, intX)
+            if self.valid_set_y is not None:
+                self.valid_set_y = T.cast(self.valid_set_y, intX)
             self.test_set_y = T.cast(self.test_set_y, intX)
 
     def dataset(self):
