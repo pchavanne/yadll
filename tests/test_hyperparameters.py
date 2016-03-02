@@ -13,6 +13,8 @@ def test_hyperparameters():
     assert hp.param2 == 20
     assert hp.param3 == 300
 
+    assert str(hp) == "{'param3': 300, 'param2': 20, 'param1': 1}"
+
     hp_iterations = [[h.param1, h.param2, h.param3] for h in hp]
     assert hp_iterations == [[1, 10, 100], [2, 10, 100], [3, 10, 100],
                              [1, 20, 100], [2, 20, 100], [3, 20, 100],
@@ -33,4 +35,8 @@ def test_hyperparameters():
     assert hp.param1 == 1
     assert hp.param2 == 20
     assert hp.param3 == 300
+
+    hp('param4', 1000)
+
+    assert hp.param4 == 1000
 

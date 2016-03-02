@@ -3,7 +3,7 @@ import numpy as np
 
 import dl
 
-eps = 1e-3
+eps = 1e-2
 shape = (1000, 1000)
 
 
@@ -24,6 +24,12 @@ def test_init():
     assert np.abs(np.mean(w.get_value()) - 0.0) < eps
     assert np.abs(np.max(w.get_value()) - 0.5) < eps
     assert np.abs(np.min(w.get_value()) - (-0.5)) < eps
+
+    init_obj = (dl.init.uniform, {'scale': (-2.0, 2.0)})
+    w = dl.init.initializer(init_obj=init_obj, shape=shape, name='w')
+    assert np.abs(np.mean(w.get_value()) - 0.0) < eps
+    assert np.abs(np.max(w.get_value()) - 2.0) < eps
+    assert np.abs(np.min(w.get_value()) - (-2.0)) < eps
 
     init_obj = dl.init.normal
     w = dl.init.initializer(init_obj=init_obj, shape=shape, name='w')
