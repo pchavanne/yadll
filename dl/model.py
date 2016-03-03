@@ -4,22 +4,21 @@ from .layers import *
 
 class Network(object):
     def __init__(self, name=None, layers=None):
-        if not layers:
-            self.layers = []
-        else:
-            for layer in layers:
-                self.add(layer)
+        self.layers = []
         self.params = []
         self.reguls = 0
-        self.has_unspervised_layer = False
+        self.has_unsupervised_layer = False
         self.name = name
+        if layers:
+            for layer in layers:
+                self.add(layer)
 
     def add(self, layer):
         self.layers.append(layer)
         self.params.extend(layer.params)
         self.reguls += layer.reguls
         if isinstance(layer, UnsupervisedLayer):
-            self.has_unspervised_layer = True
+            self.has_unsupervised_layer = True
 
     def params(self):
         return self.params
@@ -170,7 +169,7 @@ class Model(object):
         #     print ' Model saved as: ' + network.file if save_model else ' Model not saved!!'
         self.report['epoch'] = epoch
         self.report['early_stop'] = done_looping
-        self.report['best_valdidation'] = best_validation_loss * 100.
+        self.report['best_validation'] = best_validation_loss * 100.
         self.report['best_iter'] = best_iter + 1
         self.report['test_score'] = test_score * 100.
 
