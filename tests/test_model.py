@@ -63,8 +63,11 @@ class TestModel:
         hp = Hyperparameters()
         hp = Hyperparameters()
         hp('batch_size', 10)
-        hp('n_epochs', 10)
+        hp('n_epochs', 105)
         hp('learning_rate', 0.1)
+        hp('momentum', 0.9)
+        hp('epsilon', 1e-6)
+        hp('rho', 0.95)
         hp('l1_reg', 0.00)
         hp('l2_reg', 0.000)
         hp('patience', 1000)
@@ -83,7 +86,7 @@ class TestModel:
     @pytest.fixture(scope='module')
     def layer(self, input):
         from dl.layers import DenseLayer
-        return DenseLayer(incoming=input, nb_units=25)
+        return DenseLayer(incoming=input, nb_units=25, l1=0.1)
 
     @pytest.fixture(scope='module')
     def unsupervised_layer(self, layer, hp):
@@ -103,7 +106,8 @@ class TestModel:
     def test_model(self, model, network):
         model.network = network
         assert model.name == 'test_model'
-        model.train()
+        #model.train()
+
 
 
 
