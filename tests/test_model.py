@@ -106,7 +106,7 @@ class TestModel:
     def test_model(self, model, network):
         model.network = network
         assert model.name == 'test_model'
-        #model.train()
+        model.train()
 
 
 
