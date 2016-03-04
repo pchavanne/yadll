@@ -46,7 +46,7 @@ def timer(what_to_show="Function execution"):
             s = end_time - start_time
             try:
                 msg = what_to_show + ' ' + args[0].name
-            except (AttributeError, IndexError):
+            except (AttributeError, IndexError, TypeError):
                 msg = what_to_show
             print '%s took %s' % (msg, format_sec(s))
             return res

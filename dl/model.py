@@ -59,7 +59,7 @@ class Model(object):
         self.report['test_values'] = []
         self.report['validation_values'] = []
 
-        if unsupervised_training and self.network.has_unspervised_layer:
+        if unsupervised_training and self.network.has_unsupervised_layer:
             self.pretrain()
 
         n_train_batches = self.data.train_set_x.get_value(borrow=True).shape[0] / self.hp.batch_size
