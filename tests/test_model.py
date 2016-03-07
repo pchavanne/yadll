@@ -61,7 +61,6 @@ class TestModel:
     def hp(self):
         from dl.hyperparameters import Hyperparameters
         hp = Hyperparameters()
-        hp = Hyperparameters()
         hp('batch_size', 10)
         hp('n_epochs', 105)
         hp('learning_rate', 0.1)
@@ -89,8 +88,14 @@ class TestModel:
         return DenseLayer(incoming=input, nb_units=25, l1=0.1)
 
     @pytest.fixture(scope='module')
-    def unsupervised_layer(self, layer, hp):
+    def unsupervised_layer(self, layer):
         from dl.layers import AutoEncoder
+        from dl.hyperparameters import Hyperparameters
+        hp = Hyperparameters()
+        hp('batch_size', 10)
+        hp('n_epochs', 10)
+        hp('learning_rate', 0.1)
+        hp('patience', 1000)
         return AutoEncoder(incoming=layer, nb_units=25, hyperparameters=hp)
 
     @pytest.fixture(scope='module')
