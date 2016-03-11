@@ -269,7 +269,7 @@ class AutoEncoder(UnsupervisedLayer):
         self.unsupervised_params.append(self.b_prime)
         self.p = 1 - corruption_level
         self.sigma = sigma  # standard deviation if gaussian noise.
-        self.contraction_level = contraction_level #
+        self.contraction_level = contraction_level  # for Contractive Autoencoders
 
     def get_encoded_input(self, **kwargs):
         X = self.input_layer.get_output(stochastic=False, **kwargs)
@@ -387,6 +387,45 @@ class RBM(UnsupervisedLayer):
         return monitoring_cost, updates
 
 
+class RNN(Layer):
+    def __init__(self, incoming, n_hidden, n_out, activation=tanh, **kwargs):
+        super(RNN, self).__init__(incoming, **kwargs)
+        self.activation = activation
+        if isinstance(n_hidden, tuple):
+            self.n_hidden, self.n_i, self.n_c, self.n_o, self.n_f = n_hidden
+        else:
+            self.n_hidden = self.n_i = self.n_c = self.n_o = self.n_f = n_hidden
+        self.n_in = self.input_shape[1]
+        self.n_out = n_out
+
+        self.W_x = orthogonal(shape=(self.n_in, self.n_f), name='W_x')
+        self.W_h = orthogonal(shape=(n_hidden, self.n_f), name='W_h')
+        self.b_h = uniform(shape=self.n_f, scale=(0, 1.), name='b_h')
+        self.W_y = orthogonal(shape=(n_hidden, n_out), name='W_y')
+        self.b_y = constant(shape=self.n_out, name='b_y')
+
+        self.params.extend([self.W_x, self.W_h, self.b_h,
+                            self.W_y, self.b_y])
+
+        self.c0 = constant(shape=self.n_hidden, name='c0')
+        self.h0 = activation(self.c0)
+
+    def one_step(self, x_t, h_tm1):
+        ha_t = T.dot(x_t, self.W_x) + T.dot(h_tm1, self.W_h) + self.b_h
+        h_t = self.activation(ha_t)
+        s_t = T.dot(h_t, self.W_y) + self.b_y
+
+        return [ha_t, h_t, s_t]
+
+    def get_output(self, **kwargs):
+        X = self.input_layer.get_output(**kwargs)
+        [ha, h, activation], updates = theano.scan(fn=self.one_step,
+                                                   sequences=dict(input=X, taps=[0]),
+                                                   outputs_info=[self.h0, self.c0, None],
+                                                   non_sequences=self.params)
+        return y_vals
+
+
 class LSTM(Layer):
     def __init__(self, incoming, n_hidden, n_out, peephole=False, tied_i_f=False, activation=tanh, **kwargs):
         super(LSTM, self).__init__(incoming, **kwargs)
@@ -433,7 +472,7 @@ class LSTM(Layer):
         self.c0 = constant(shape=self.n_hidden, name='c0')
         self.h0 = activation(self.c0)
 
-    def one_lstm_step(self, x_t, h_tm1, c_tm1):
+    def one_step(self, x_t, h_tm1, c_tm1):
         # forget gate
         f_t = sigmoid(T.dot(x_t, self.W_xf) + T.dot(h_tm1, self.W_hf) + self.b_f)
         # input gate
@@ -466,5 +505,4 @@ class LSTM(Layer):
                                              outputs_info=[self.h0, self.c0, None],
                                              non_sequences=self.params)
         return y_vals
-
 

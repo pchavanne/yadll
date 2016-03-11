@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 import pytest
-from mock import Mock
+from mock import MagicMock as mock
 import numpy as np
 from numpy.testing import assert_allclose
 
@@ -9,12 +9,12 @@ class TestLayer:
     @pytest.fixture
     def layer(self):
         from dl.layers import Layer
-        return Layer(Mock())
+        return Layer(mock())
 
     @pytest.fixture
     def named_layer(self):
         from dl.layers import Layer
-        return Layer(Mock(), name='layer_name')
+        return Layer(mock(), name='layer_name')
 
     def test_input_shape(self, layer):
         assert layer.input_shape == layer.input_layer.output_shape
@@ -148,4 +148,58 @@ class TestDenseLayer:
         assert_allclose(layer.reguls.eval(), np.mean(np.abs(W)) + 2 * np.mean(np.power(W, 2)), rtol=1e-4)
 
 
+class TestUnsupervisedLayer:
+    @pytest.fixture
+    def unsupervisedlayer(self):
+        from dl.layers import UnsupervisedLayer
+        return UnsupervisedLayer
 
+    @pytest.fixture
+    def inputdata(self):
+        from dl.utils import shared_variable
+        return shared_variable(np.random.random((10, 20)))
+
+    @pytest.fixture
+    def inputlayer(self, inputdata):
+        from dl.layers import InputLayer
+        shape = (10, 20)
+        return InputLayer(shape, input_var=inputdata)
+
+    @pytest.fixture
+    def hp(self):
+        from dl.hyperparameters import Hyperparameters
+        hp = Hyperparameters()
+        hp('batch_size', 10)
+        hp('n_epochs', 10)
+        hp('learning_rate', 0.1)
+        hp('patience', 1000)
+        return hp
+
+    @pytest.fixture
+    def layer(self, unsupervisedlayer, inputlayer, hp):
+        return unsupervisedlayer(inputlayer, nb_units=2, hyperparameters=hp)
+
+    def test_get_params(self, layer):
+        assert layer.get_params() == [layer.W, layer.b]
+
+    def test_output_shape(self, layer):
+        assert layer.output_shape == (10, 2)
+
+    def test_get_output(self, layer, inputdata):
+        X = inputdata.eval()
+        W = layer.W.eval()
+        b = layer.b.eval()
+        assert_allclose(layer.get_output().eval(), np.tanh(np.dot(X, W) + b), rtol=1e-3)
+
+
+class TestLogisticRegression:
+    @pytest.fixture
+    def logisticregression(self):
+        from dl.layers import LogisticRegression
+        return LogisticRegression
+
+class TestDropout:
+    @pytest.fixture
+    def dropout(self):
+        from dl.layers import Dropout
+        return Dropout
