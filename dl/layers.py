@@ -410,20 +410,20 @@ class RNN(Layer):
         self.c0 = constant(shape=self.n_hidden, name='c0')
         self.h0 = activation(self.c0)
 
-    def one_step(self, x_t, h_tm1):
-        ha_t = T.dot(x_t, self.W_x) + T.dot(h_tm1, self.W_h) + self.b_h
+    def one_step(self, x_t, h_tm1, W_x, W_h, b_h, W_y, b_y):
+        ha_t = T.dot(x_t, W_x) + T.dot(h_tm1, W_h) + b_h
         h_t = self.activation(ha_t)
-        s_t = T.dot(h_t, self.W_y) + self.b_y
+        s_t = T.dot(h_t, W_y) + b_y
 
         return [ha_t, h_t, s_t]
 
     def get_output(self, **kwargs):
         X = self.input_layer.get_output(**kwargs)
-        [ha, h, activation], updates = theano.scan(fn=self.one_step,
-                                                   sequences=dict(input=X, taps=[0]),
-                                                   outputs_info=[self.h0, self.c0, None],
-                                                   non_sequences=self.params)
-        return y_vals
+        [ha, h, s_t], updates = theano.scan(fn=self.one_step,
+                                            sequences=dict(input=X, taps=[0]),
+                                            outputs_info=[self.h0, self.c0, None],
+                                            non_sequences=self.params)
+        return s_t
 
 
 class LSTM(Layer):
@@ -500,7 +500,7 @@ class LSTM(Layer):
 
     def get_output(self, **kwargs):
         X = self.input_layer.get_output(**kwargs)
-        [h_vals, _, y_vals], _ = theano.scan(fn=self.one_lstm_step,
+        [h_vals, _, y_vals], _ = theano.scan(fn=self.one_step,
                                              sequences=dict(input=X, taps=[0]),
                                              outputs_info=[self.h0, self.c0, None],
                                              non_sequences=self.params)

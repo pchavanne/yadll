@@ -16,6 +16,7 @@ __all__ = ['logistic_regression',
            'stacked_denoising_autoencoder',
            'rbm',
            'dbn',
+           'rnn'
            'lstm'
            ]
 
@@ -474,15 +475,39 @@ def dbn(input_var=None):
     return net, hp
 
 
+def rnn(input_var=None):
+    """Recurrent Neural Network"""
+
+    # Hyperparameters
+    hp = Hyperparameters()
+    hp('batch_size', 20)
+    hp('n_epochs', 100)
+    hp('learning_rate', 0.1)
+    hp('patience', 500)
+
+    # Create connected layers
+    l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=input_var, name='Input')
+    l_rnn= RNN(incoming=l_in, n_hidden=100, n_out=28 * 28, name='Recurrent Neural Network')
+    l_out = LogisticRegression(incoming=l_rnn, nb_class=10, name='Logistic regression')
+
+    # Create network and add layers
+    net = Network('rnn')
+    net.add(l_in)
+    net.add(l_rnn)
+    net.add(l_out)
+
+    return net, hp
+
+
 def lstm(input_var=None):
     """Long Short Term Memory"""
 
     # Hyperparameters
     hp = Hyperparameters()
     hp('batch_size', 20)
-    hp('n_epochs', 1000)
-    hp('learning_rate', 0.01)
-    hp('patience', 10000)
+    hp('n_epochs', 100)
+    hp('learning_rate', 0.1)
+    hp('patience', 500)
 
     # Create connected layers
     l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=input_var, name='Input')
