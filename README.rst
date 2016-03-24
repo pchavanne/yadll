@@ -36,6 +36,7 @@ Its main features are:
 
       * Autoencoder (denoising autoencoder)
       * Restricted Boltzmann Machine
+  * RNN
   * LSTM
 
 
@@ -86,6 +87,7 @@ Different networks tested on mnist:
 * Restricted Boltzmann Machine
 * Deep Belief Network
 * Convolutional Network
+* RNN
 * LSTM
 
 get the list of available networks:
