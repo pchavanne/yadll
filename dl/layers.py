@@ -14,6 +14,14 @@ T_rng = RandomStreams(np_rng.randint(2 ** 30))
 
 class Layer(object):
     def __init__(self, incoming, name=None):
+        """
+        The :class:'layer' is the base class that represent a single layer of
+        a neural network. It has to be subclassed by any kind of layer.
+
+        :param incoming: a :class:'layer' or a tuple setting the input shape
+        :param name: a string or None
+                    Optional name for the layer
+        """
         if isinstance(incoming, tuple):
             self.input_shape = incoming
             self.input_layer = None
@@ -26,16 +34,46 @@ class Layer(object):
         self.reguls = 0
 
     def get_params(self):
+        """
+        Return a list of Theano shared variables representing the parameters of
+        this layer.
+
+        :return: list of Theano shared variables that parametrize the layer
+        """
         return self.params
 
     def get_reguls(self):
+        """
+        Return Theano expression representing the sum of the regulators of
+        this layer.
+
+        :return: Theano expression representing the sum of the regulators
+         of this layer
+        """
         return self.reguls
 
     @property
     def output_shape(self):
+        """
+        Compute the output shape of this layer given the input shape.
+
+        :return: a tuple representing the shape of the output of this layer.
+
+        ..note:: This method has to be overriden by new layer implementation or
+        will return the input shape.
+        """
         return self.input_shape
 
     def get_output(self, **kwargs):
+        """
+        Return the output of this layer
+
+        :return: Theano expression
+            The output of this layer
+
+        ..note:: This method has to be overriden by new layer implementation or
+        will raise 'NotImplementedError'.
+        """
         raise NotImplementedError
 
 
