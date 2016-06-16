@@ -1,5 +1,7 @@
 # -*- coding: UTF-8 -*-
-
+"""
+Activation function
+"""
 
 import theano.tensor as T
 
