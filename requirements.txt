@@ -4,3 +4,5 @@ docopt
 pytest
 pytest-cov
 pytest-capturelog
+sphinx_rtd_theme
+numpydoc
