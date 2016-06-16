@@ -7,6 +7,9 @@
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg
     :target: https://github.com/pchavanne/dl/blob/master/LICENSE
 
+.. image:: https://readthedocs.org/projects/dl/badge/?version=latest
+    :target: http://dl.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
 
 dl
 ==
