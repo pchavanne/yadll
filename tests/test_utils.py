@@ -3,6 +3,8 @@ import time
 import numpy as np
 import theano
 
+import logging
+
 
 def test_to_float_X():
     from dl.utils import to_float_X
@@ -29,17 +31,20 @@ def test_format_sec():
     assert format_sec(s) == '19.346 s'
 
 
-def test_timer(capsys):
+def test_timer(caplog):
     from dl.utils import timer
+    caplog.setLevel(logging.INFO)
 
     @timer('test_function')
     def func():
         time.sleep(1)
+
     func()
-    out, err = capsys.readouterr()
-    out_split = out.split()
-    assert out_split[0] == 'test_function'
-    assert out_split[1] == 'took'
-    assert float(out_split[2]) >= 1.
-    assert out_split[3] == 's'
+    last_record = list(caplog.records())[-1]
+    msg = last_record.getMessage()
+    msg_split = msg.split()
+    assert msg_split[0] == 'test_function'
+    assert msg_split[1] == 'took'
+    assert float(msg_split[2]) >= 1.
+    assert msg_split[3] == 's'
 

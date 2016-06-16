@@ -3,4 +3,4 @@ pandas
 docopt
 pytest
 pytest-cov
-
+pytest-capturelog
