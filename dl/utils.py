@@ -6,6 +6,9 @@ import numpy as np
 
 import theano
 
+import logging
+
+logger = logging.getLogger(__name__)
 
 floatX = theano.config.floatX
 intX = 'int32'
@@ -48,7 +51,7 @@ def timer(what_to_show="Function execution"):
                 msg = what_to_show + ' ' + args[0].name
             except (AttributeError, IndexError, TypeError):
                 msg = what_to_show
-            print '%s took %s' % (msg, format_sec(s))
+            logger.info('%s took %s' % (msg, format_sec(s)))
             return res
         return wrapper
     return func_wrapper

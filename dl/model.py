@@ -1,33 +1,10 @@
 # -*- coding: UTF-8 -*-
 from .layers import *
+from .exceptions import *
 
+import logging
 
-class Network(object):
-    def __init__(self, name=None, layers=None):
-        self.layers = []
-        self.params = []
-        self.reguls = 0
-        self.has_unsupervised_layer = False
-        self.name = name
-        if layers:
-            for layer in layers:
-                self.add(layer)
-
-    def add(self, layer):
-        self.layers.append(layer)
-        self.params.extend(layer.params)
-        self.reguls += layer.reguls
-        if isinstance(layer, UnsupervisedLayer):
-            self.has_unsupervised_layer = True
-
-    def params(self):
-        return self.params
-
-    def reguls(self):
-        return self.reguls
-
-    def get_output(self, **kwargs):
-        return self.layers[-1].get_output(**kwargs)
+logger = logging.getLogger(__name__)
 
 
 class Model(object):
@@ -49,12 +26,16 @@ class Model(object):
 
     @timer(' Unsupervised Pre-Training')
     def pretrain(self):
+        if self.data is None:
+            raise NoDataFoundException
         for layer in self.network.layers:
             if isinstance(layer, UnsupervisedLayer):
                 layer.unsupervised_training(self.x, self.data.train_set_x)
 
     @timer(' Training')
     def train(self, unsupervised_training=True, save_model=False):
+        if self.data is None:
+            raise NoDataFoundException
 
         self.report['test_values'] = []
         self.report['validation_values'] = []
@@ -100,7 +81,7 @@ class Model(object):
                                      givens={self.x: self.data.test_set_x[self.index * self.hp.batch_size:(self.index + 1) * self.hp.batch_size],
                                              self.y: self.data.test_set_y[self.index * self.hp.batch_size:(self.index + 1) * self.hp.batch_size]})
 
-        print '... Training the model'
+        logger.info('... Training the model')
 
         # early-stopping parameters
         patience = self.hp.patience  # look at this many batches regardless
@@ -128,8 +109,8 @@ class Model(object):
                                          in xrange(n_valid_batches)]
                     this_validation_loss = np.mean(validation_losses)
 
-                    print('epoch %i, minibatch %i/%i, validation error %.3f %%' %
-                          (epoch, minibatch_index + 1, n_train_batches, this_validation_loss * 100.))
+                    logger.info('epoch %i, minibatch %i/%i, validation error %.3f %%' %
+                                (epoch, minibatch_index + 1, n_train_batches, this_validation_loss * 100.))
                     self.report['validation_values'].append((iter + 1, this_validation_loss * 100.))
 
                     # if we got the best validation score until now
@@ -145,8 +126,8 @@ class Model(object):
                         test_losses = [test_model(i) for i in xrange(n_test_batches)]
                         test_score = np.mean(test_losses)
 
-                        print('  epoch %i, minibatch %i/%i, test error of best model %.3f %%' %
-                              (epoch, minibatch_index + 1, n_train_batches, test_score * 100.))
+                        logger.info('  epoch %i, minibatch %i/%i, test error of best model %.3f %%' %
+                                    (epoch, minibatch_index + 1, n_train_batches, test_score * 100.))
                         self.report['test_values'].append((epoch, test_score * 100))
 
                         # # save the best model
@@ -159,11 +140,11 @@ class Model(object):
                     done_looping = True
                     break
 
-        print '\n Optimization completed. ' + ('Early stopped at epoch: %i' % epoch) \
-            if done_looping else 'Optimization completed. ' + ('Trained on all %i epochs' % epoch)
+        logger.info('\n Optimization completed. ' + ('Early stopped at epoch: %i' % epoch)
+                    if done_looping else 'Optimization completed. ' + ('Trained on all %i epochs' % epoch))
 
-        print(' Validation score of %.3f %% obtained at iteration %i, with test performance %.3f %%' %
-              (best_validation_loss * 100., best_iter + 1, test_score * 100.))
+        logger.info(' Validation score of %.3f %% obtained at iteration %i, with test performance %.3f %%' %
+                    (best_validation_loss * 100., best_iter + 1, test_score * 100.))
 
         # if save_model:
         #     print ' Model saved as: ' + network.file if save_model else ' Model not saved!!'

@@ -1,7 +1,8 @@
 # -*- coding: UTF-8 -*-
 
 from dl.hyperparameters import *
-from dl.model import *
+from dl.network import Network
+from dl.layers import *
 
 __all__ = ['logistic_regression',
            'mlp',
@@ -81,7 +82,7 @@ def mlp(input_var=None):
 
 
 def dropout(input_var=None):
-    """Dropout"""
+    """MLP with Dropout layers"""
 
     # Hyperparameters
     hp = Hyperparameters()
@@ -119,7 +120,7 @@ def dropout(input_var=None):
 
 
 def dropconnect(input_var=None):
-    """DropConnect"""
+    """DropConnect MLP"""
 
     # Hyperparameters
     hp = Hyperparameters()

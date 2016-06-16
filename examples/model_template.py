@@ -2,9 +2,12 @@
 # -*- coding: UTF-8 -*-
 import os
 
-import dl
+from dl.model import Model
+from dl.data import Data
 from dl.hyperparameters import *
-from dl.model import *
+from dl.updates import *
+from dl.network import Network
+from dl.layers import *
 
 # load the data
 datafile = 'mnist.pkl.gz'
@@ -13,17 +16,17 @@ if not os.path.isfile(datafile):
     origin = 'http://www.iro.umontreal.ca/~lisa/deep/data/mnist/mnist.pkl.gz'
     print 'Downloading data from %s' % origin
     urllib.urlretrieve(origin, datafile)
-data = dl.data.Data(datafile)
+data = Data(datafile)
 
 # create the model
-model = dl.model.Model(name='mlp grid search', data=data)
+model = Model(name='mlp grid search', data=data)
 
 # Hyperparameters
 hp = Hyperparameters()
 hp('batch_size', 500)
 hp('n_epochs', 1000)
 hp('learning_rate', 0.1)
-#hp('momentum', 0.5)
+# hp('momentum', 0.5)
 hp('l1_reg', 0.00)
 hp('l2_reg', 0.0000)
 hp('patience', 10000)
@@ -53,7 +56,7 @@ net.add(l_out)
 model.network = net
 
 # updates method
-model.updates = dl.updates.sgd  # nesterov_momentum
+model.updates = sgd  # nesterov_momentum
 
 # train the model
 model.train()

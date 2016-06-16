@@ -17,12 +17,15 @@ Options:
 """
 import os
 import cPickle
+import logging
 
 import theano
 from docopt import docopt
 
 import dl
-import examples.network as network
+import examples.networks as networks
+
+logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
 
 @dl.utils.timer(' Loading the data')
@@ -32,7 +35,7 @@ def load_data(dataset):
 
 
 def build_network(network_name='Logistic_regression', input_var=None):
-    network_builder = getattr(network, network_name)
+    network_builder = getattr(networks, network_name)
     return network_builder(input_var=input_var)
 
 
@@ -42,7 +45,7 @@ def train(network_name, data):
     # construct the model
     model = dl.model.Model(name=network_name, data=data)
     # construct the network
-    network , hp = build_network(network_name, input_var=model.x)
+    network, hp = build_network(network_name, input_var=model.x)
     # add the network to the model
     model.network = network
     # add the hyperparameters to the model
@@ -75,13 +78,13 @@ if __name__ == '__main__':
     if arguments['--network_list']:
         print 'Default network is: %s' % network_name
         print 'Supported networks are:'
-        for d in network.__all__:
+        for d in networks.__all__:
             print '\t%s' % d
 
     else:
         if arguments['<network>']:
             network_name = arguments['<network>']
-        if network_name not in network.__all__:
+        if network_name not in networks.__all__:
             raise TypeError('netwok name provided is not supported. Check supported network'
                             ' with option -n')
         # Load dataset
@@ -95,4 +98,3 @@ if __name__ == '__main__':
         data = load_data(datafile)
 
         train(network_name, data=data)
-

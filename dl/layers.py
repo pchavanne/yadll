@@ -1,4 +1,7 @@
 # -*- coding: UTF-8 -*-
+"""
+All the neural network layers currently supported by dl.
+"""
 from .init import *
 from .objectives import *
 from .updates import *
@@ -8,19 +11,35 @@ from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 from theano.tensor.signal import pool
 from theano.tensor.nnet import conv
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 T_rng = RandomStreams(np_rng.randint(2 ** 30))
 
 
 class Layer(object):
+    """
+    Layer is the base class of any neural network layer.
+    It has to be subclassed by any kind of layer.
+
+    Parameters
+    ----------
+    incoming : a `Layer` or a `tuple` of `int`
+        The incoming layer or shape if input layer
+    name : `string`, optional
+        The layer name.
+
+
+    """
     def __init__(self, incoming, name=None):
         """
-        The :class:'layer' is the base class that represent a single layer of
-        a neural network. It has to be subclassed by any kind of layer.
+        The base class that represent a single layer of any neural network.
+        It has to be subclassed by any kind of layer.
 
-        :param incoming: a :class:'layer' or a tuple setting the input shape
-        :param name: a string or None
-                    Optional name for the layer
+
         """
+
         if isinstance(incoming, tuple):
             self.input_shape = incoming
             self.input_layer = None
@@ -46,7 +65,8 @@ class Layer(object):
         Return Theano expression representing the sum of the regulators of
         this layer.
 
-        :return: Theano expression representing the sum of the regulators
+        Returns
+         Theano expression representing the sum of the regulators
          of this layer
         """
         return self.reguls
@@ -67,17 +87,26 @@ class Layer(object):
         """
         Return the output of this layer
 
-        :return: Theano expression
-            The output of this layer
-
-        ..note:: This method has to be overriden by new layer implementation or
-        will raise 'NotImplementedError'.
+        Raises
+        ------
+        NotImplementedError
+            This method has to be overriden by new layer implementation.
         """
         raise NotImplementedError
 
 
 class InputLayer(Layer):
     def __init__(self, shape, input_var=None, **kwargs):
+        """
+        The input layer of any network
+
+        Parameters
+        ----------
+        shape : `tuple` of `int`
+            The shape of the input layer
+        input_var : `Theano shared Variables`, optional
+            The input data of the network
+        """
         super(InputLayer, self).__init__(shape, **kwargs)
         self.input = input_var
 
@@ -157,7 +186,7 @@ class UnsupervisedLayer(DenseLayer):
 
     @timer(' Pretraining the layer')
     def unsupervised_training(self, x, train_set_x):
-        print '... Pretraining the layer: %s' % self.name
+        logger.info('... Pretraining the layer: %s' % self.name)
         index = T.iscalar('index')
         n_train_batches = train_set_x.get_value(borrow=True).shape[0] / self.hp.batch_size
         unsupervised_cost = self.get_unsupervised_cost()
@@ -173,7 +202,7 @@ class UnsupervisedLayer(DenseLayer):
             c = []
             for minibatch_index in xrange(n_train_batches):
                 c.append(pretrain(minibatch_index))
-            print 'Layer: %s, pretraining epoch %d, cost %d' % (self.name, epoch, np.mean(c))
+            logger.info('Layer: %s, pretraining epoch %d, cost %d' % (self.name, epoch, np.mean(c)))
 
 
 class LogisticRegression(DenseLayer):
