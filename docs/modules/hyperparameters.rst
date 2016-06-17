@@ -1,6 +1,8 @@
 :mod:`yadll.hyperparameters`
 
+Hyperparameters
+---------------
 
 .. automodule:: yadll.hyperparameters
 
-.. autoclass:: yadll.Hyperparameters
+.. autoclass:: Hyperparameters
