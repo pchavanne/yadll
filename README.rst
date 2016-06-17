@@ -1,4 +1,4 @@
-.. image:: https://travis-ci.org/pchavanne/yadll.svg?branch=master
+.. image:: https://travis-ci.org/pchavanne/yadll.svg
     :target: https://travis-ci.org/pchavanne/yadll
 
 .. image:: https://coveralls.io/repos/github/pchavanne/yadll/badge.svg?branch=master
@@ -7,9 +7,9 @@
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg
     :target: https://github.com/pchavanne/yadll/blob/master/LICENSE
 
-.. image:: https://readthedocs.org/projects/yadll/badge/?version=latest
-    :target: http://yadll.readthedocs.io/en/latest/?badge=latest
-    :alt: Documentation Status
+.. image:: https://readthedocs.org/projects/yadll/badge/
+    :target: http://yadll.readthedocs.io/en/latest/
+
 
 
 Yadll
