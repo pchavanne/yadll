@@ -68,7 +68,7 @@ author = u'Philippe Chavanne'
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
-import dl
+# import dl
 # The short X.Y version.
 version = '0.0'  # '.'.join(dl.__version__.split('.', 2)[:2])
 # The full version, including alpha/beta/rc tags.
