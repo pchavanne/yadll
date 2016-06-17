@@ -1,5 +1,5 @@
 [run]
-source = dl
+source = yadll
 omit =
-    dl/tests/*
+    yadll/tests/*
     */python?.?/*

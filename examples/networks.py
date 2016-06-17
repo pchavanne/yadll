@@ -1,8 +1,7 @@
 # -*- coding: UTF-8 -*-
-
-from dl.hyperparameters import *
-from dl.network import Network
-from dl.layers import *
+from yadll.network import Network
+from yadll.hyperparameters import *
+from yadll.layers import *
 
 __all__ = ['logistic_regression',
            'mlp',

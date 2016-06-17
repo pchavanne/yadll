@@ -2,12 +2,12 @@
 # -*- coding: UTF-8 -*-
 import os
 
-from dl.model import Model
-from dl.data import Data
-from dl.hyperparameters import *
-from dl.updates import *
-from dl.network import Network
-from dl.layers import *
+from yadll.model import Model
+from yadll.data import Data
+from yadll.hyperparameters import *
+from yadll.updates import *
+from yadll.network import Network
+from yadll.layers import *
 
 # load the data
 datafile = 'mnist.pkl.gz'

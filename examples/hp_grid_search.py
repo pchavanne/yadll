@@ -2,9 +2,11 @@
 # -*- coding: UTF-8 -*-
 import os
 
-import dl
-from dl.hyperparameters import *
-from dl.model import *
+import yadll
+from yadll.hyperparameters import *
+from yadll.model import Model
+from yadll.network import Network
+from yadll.layers import *
 
 # load the data
 datafile = 'mnist.pkl.gz'
@@ -13,7 +15,7 @@ if not os.path.isfile(datafile):
     origin = 'http://www.iro.umontreal.ca/~lisa/deep/data/mnist/mnist.pkl.gz'
     print 'Downloading data from %s' % origin
     urllib.urlretrieve(origin, datafile)
-data = dl.data.Data(datafile)
+data = yadll.data.Data(datafile)
 
 # Hyperparameters
 hps = Hyperparameters()
@@ -33,7 +35,7 @@ reports = []
 def grid_search():
     for hp in hps:
         # create the model
-        model = dl.model.Model(name='mlp grid search', data=data)
+        model = Model(name='mlp grid search', data=data)
         # add the hyperparameters to the model
         model.hp = hp
         # Create connected layers
@@ -59,7 +61,7 @@ def grid_search():
         model.network = net
 
         # updates method
-        model.updates = dl.updates.sgd
+        model.updates = yadll.updates.sgd
         reports.append((hp, model.train()))
 
         report_file = open('reports.pkl', 'wb')

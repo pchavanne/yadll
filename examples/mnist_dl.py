@@ -22,16 +22,16 @@ import logging
 import theano
 from docopt import docopt
 
-import dl
+import yadll
 import examples.networks as networks
 
 logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
 
-@dl.utils.timer(' Loading the data')
+@yadll.utils.timer(' Loading the data')
 def load_data(dataset):
     print '... Loading the data'
-    return dl.data.Data(dataset)
+    return yadll.data.Data(dataset)
 
 
 def build_network(network_name='Logistic_regression', input_var=None):
@@ -43,7 +43,7 @@ def train(network_name, data):
 
     ################################################
     # construct the model
-    model = dl.model.Model(name=network_name, data=data)
+    model = yadll.model.Model(name=network_name, data=data)
     # construct the network
     network, hp = build_network(network_name, input_var=model.x)
     # add the network to the model
@@ -51,7 +51,7 @@ def train(network_name, data):
     # add the hyperparameters to the model
     model.hp = hp
     # updates method
-    model.updates = dl.updates.sgd
+    model.updates = yadll.updates.sgd
     # train the model
     model.train(unsupervised_training=True)
 

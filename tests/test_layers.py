@@ -8,12 +8,12 @@ from numpy.testing import assert_allclose
 class TestLayer:
     @pytest.fixture
     def layer(self):
-        from dl.layers import Layer
+        from yadll.layers import Layer
         return Layer(mock())
 
     @pytest.fixture
     def named_layer(self):
-        from dl.layers import Layer
+        from yadll.layers import Layer
         return Layer(mock(), name='layer_name')
 
     def test_input_shape(self, layer):
@@ -30,7 +30,7 @@ class TestLayer:
 
     @pytest.fixture
     def layer_from_shape(self):
-        from dl.layers import Layer
+        from yadll.layers import Layer
         return Layer((None, 20))
 
     def test_layer_from_shape(self, layer_from_shape):
@@ -42,7 +42,7 @@ class TestLayer:
 class TestInputLayer:
     @pytest.fixture
     def inputlayer(self):
-        from dl.layers import InputLayer
+        from yadll.layers import InputLayer
         return InputLayer((3, 2))
 
     def test_input_layer(self, inputlayer):
@@ -61,17 +61,17 @@ class TestInputLayer:
 class TestReshapeLayer:
     @pytest.fixture
     def reshapelayer(self):
-        from dl.layers import ReshapeLayer
+        from yadll.layers import ReshapeLayer
         return ReshapeLayer
 
     @pytest.fixture
     def inputdata(self):
-        from dl.utils import shared_variable
+        from yadll.utils import shared_variable
         return shared_variable(np.ones((16, 3, 5, 7, 10)))
 
     @pytest.fixture
     def inputlayer(self, inputdata):
-        from dl.layers import InputLayer
+        from yadll.layers import InputLayer
         shape = (16, 3, None, None, 10)
         return InputLayer(shape, input_var=inputdata)
 
@@ -85,17 +85,17 @@ class TestReshapeLayer:
 class TestFlattenLayer:
     @pytest.fixture
     def flattenlayer(self):
-        from dl.layers import FlattenLayer
+        from yadll.layers import FlattenLayer
         return FlattenLayer
 
     @pytest.fixture
     def inputdata(self):
-        from dl.utils import shared_variable
+        from yadll.utils import shared_variable
         return shared_variable(np.random.random((2, 3, 4, 5)))
 
     @pytest.fixture
     def inputlayer(self, inputdata):
-        from dl.layers import InputLayer
+        from yadll.layers import InputLayer
         shape = (2, 3, 4, 5,)
         return InputLayer(shape, input_var=inputdata)
 
@@ -113,17 +113,17 @@ class TestFlattenLayer:
 class TestDenseLayer:
     @pytest.fixture
     def denselayer(self):
-        from dl.layers import DenseLayer
+        from yadll.layers import DenseLayer
         return DenseLayer
 
     @pytest.fixture
     def inputdata(self):
-        from dl.utils import shared_variable
+        from yadll.utils import shared_variable
         return shared_variable(np.random.random((10, 20)))
 
     @pytest.fixture
     def inputlayer(self, inputdata):
-        from dl.layers import InputLayer
+        from yadll.layers import InputLayer
         shape = (10, 20)
         return InputLayer(shape, input_var=inputdata)
 
@@ -151,23 +151,23 @@ class TestDenseLayer:
 class TestUnsupervisedLayer:
     @pytest.fixture
     def unsupervisedlayer(self):
-        from dl.layers import UnsupervisedLayer
+        from yadll.layers import UnsupervisedLayer
         return UnsupervisedLayer
 
     @pytest.fixture
     def inputdata(self):
-        from dl.utils import shared_variable
+        from yadll.utils import shared_variable
         return shared_variable(np.random.random((10, 20)))
 
     @pytest.fixture
     def inputlayer(self, inputdata):
-        from dl.layers import InputLayer
+        from yadll.layers import InputLayer
         shape = (10, 20)
         return InputLayer(shape, input_var=inputdata)
 
     @pytest.fixture
     def hp(self):
-        from dl.hyperparameters import Hyperparameters
+        from yadll.hyperparameters import Hyperparameters
         hp = Hyperparameters()
         hp('batch_size', 10)
         hp('n_epochs', 10)
@@ -195,11 +195,11 @@ class TestUnsupervisedLayer:
 class TestLogisticRegression:
     @pytest.fixture
     def logisticregression(self):
-        from dl.layers import LogisticRegression
+        from yadll.layers import LogisticRegression
         return LogisticRegression
 
 class TestDropout:
     @pytest.fixture
     def dropout(self):
-        from dl.layers import Dropout
+        from yadll.layers import Dropout
         return Dropout

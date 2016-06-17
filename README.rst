@@ -11,10 +11,11 @@
     :target: http://dl.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-dl
-==
+yadll
+=====
 
-**dl** is an ultra light deep learning framework based on Theano_.
+**yadll** **y**et **a**nother **d**eep **l**earning **l**ab.
+This is an ultra light deep learning framework based on Theano_.
 If you are looking for a light deep learning API I would recommend Lasagne_ or keras_ in stead of dl.
 
 .. _Theano: https://github.com/Theano/Theano
@@ -58,7 +59,7 @@ Its main features are:
 
 Installation
 ------------
-**dl** uses the following dependencies:
+**yadll** uses the following dependencies:
 
 * **Python 2.7**
 * scipy
@@ -66,8 +67,8 @@ Installation
 
 .. code-block:: bash
 
-  git clone git+git@github.com:pchavanne/dl.git
-  cd dl
+  git clone git+git@github.com:pchavanne/yadll.git
+  cd yadll
   pip install -e .
 
 

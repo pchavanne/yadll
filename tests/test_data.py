@@ -23,7 +23,7 @@ class Testdata:
         return data_file
 
     def test_train_valid_test_data_file(self, train_valid_test_data_file):
-        from dl.data import Data
+        from yadll.data import Data
         data = Data(train_valid_test_data_file, cast_y=False)
         assert np.asarray(data.train_set_x.eval()) == 1.
         assert np.asarray(data.train_set_y.eval()) == 2.
@@ -67,7 +67,7 @@ class Testdata:
         assert np.asarray(data.dataset()[2][1].eval()) == 6
 
     def test_train_valid_test_data(self, train_valid_test_data):
-        from dl.data import Data
+        from yadll.data import Data
         data = Data(train_valid_test_data, cast_y=False)
         assert np.asarray(data.train_set_x.eval()) == 1.
         assert np.asarray(data.train_set_y.eval()) == 2.
@@ -105,7 +105,7 @@ class Testdata:
         assert np.asarray(data.dataset()[2][1].eval()) == 6
 
     def test_train_test_data(self, train_test_data):
-        from dl.data import Data
+        from yadll.data import Data
         data = Data(train_test_data, cast_y=False)
         assert np.asarray(data.train_set_x.eval()) == 1.
         assert np.asarray(data.train_set_y.eval()) == 2.
@@ -140,12 +140,12 @@ class Testdata:
         assert np.asarray(data.dataset()[2][1].eval()) == 6
 
     def test_len_raise_error(self):
-        from dl.data import Data
+        from yadll.data import Data
         with pytest.raises(TypeError):
             data = Data([[1, 2]], cast_y=False)
 
     def test_raise_error(self):
-        from dl.data import Data
+        from yadll.data import Data
         with pytest.raises(TypeError):
             data = Data(1, cast_y=False)
 

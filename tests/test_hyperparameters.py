@@ -1,10 +1,9 @@
 # -*- coding: UTF-8 -*-
-
-import dl
+import yadll
 
 
 def test_hyperparameters():
-    hp = dl.hyperparameters.Hyperparameters()
+    hp = yadll.hyperparameters.Hyperparameters()
     hp('param1', 1, [1, 2, 3])
     hp('param2', 20, [10, 20, 30])
     hp('param3', 300, [100, 200, 300])

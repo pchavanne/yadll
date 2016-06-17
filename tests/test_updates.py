@@ -1,13 +1,16 @@
 # -*- coding: UTF-8 -*-
 
 import pytest
+
 import numpy as np
+
 import theano
-import dl
+
+import yadll
 
 
 def test_hessian_free():
-    pytest.raises(NotImplementedError, dl.updates.hessian_free, 'cost', 'params')
+    pytest.raises(NotImplementedError, yadll.updates.hessian_free, 'cost', 'params')
 
 
 PCT_TOLERANCE = 1E-5
@@ -55,9 +58,9 @@ class TestUpdateFunctions(object):
         # ['adamax', {'learning_rate': 0.01}],
         ])
     def test_updates(self, method, kwargs):
-        A = dl.utils.shared_variable([1, 1, 1])
-        B = dl.utils.shared_variable([1, 1, 1])
-        update_func = getattr(dl.updates, method)
+        A = yadll.utils.shared_variable([1, 1, 1])
+        B = yadll.utils.shared_variable([1, 1, 1])
+        update_func = getattr(yadll.updates, method)
         updates = update_func(self.f(A) + self.f(B),
                               [A, B],
                               **kwargs)

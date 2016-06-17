@@ -1,12 +1,11 @@
-.. dl documentation master file, created by
+.. yadll documentation master file, created by
    sphinx-quickstart on Thu Jun 16 15:24:44 2016.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-:github_url:
 
-Welcome to dl!
-==============
+Welcome to yadll!
+=================
 
 Contents:
 
@@ -22,4 +21,4 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
-.. _GitHub: https://github.com/pchavanne/dl
+.. _GitHub: https://github.com/pchavanne/yadll
