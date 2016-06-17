@@ -19,13 +19,9 @@ class Hyperparameters(object):
 
     Examples
     --------
-    # Create an Hyperparameters instance
-    >>>hp = Hyperparameters()
-    # Define an hyperparameter
-    >>>>hp('batch_size', 500)
-    # Define an hyperparameter with its default value
-    # and the possible values for the grid search
-    >>>hp('n_epochs', 1000, [10, 100, 1000, 1000])
+    >>>hp = Hyperparameters()   # Create an Hyperparameters instance
+    >>>hp('batch_size', 500)    # Define an hyperparameter with its default value
+    >>>hp('n_epochs', 1000, [10, 100, 1000, 1000])    # default value and range for the grid search
 
     """
     def __init__(self):
