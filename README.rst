@@ -14,11 +14,11 @@
 Yadll
 =====
 
-**Yadll**. **Y**\ et **a**\ nother **d**\ eep **l**\ earning **l**\ ab.
+**Y**\ et **a**\ nother **d**\ eep **l**\ earning **l**\ ab.
 
 This is an ultra light deep learning framework based on Theano_.
 
-If you are looking for a light deep learning API I would recommend Lasagne_ or keras_ in stead of dl.
+If you are looking for a light deep learning API I would recommend Lasagne_ or keras_ in stead of yadll.
 
 .. _Theano: https://github.com/Theano/Theano
 .. _Lasagne: https://github.com/Lasagne/Lasagne
