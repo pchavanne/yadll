@@ -11,10 +11,10 @@
     :target: http://dl.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-yadll
+Yadll
 =====
 
-**yadll** **y**et **a**nother **d**eep **l**earning **l**ab.
+**Yadll** **Y**\ et **A**\ nother **D**\ eep **L**\ earning **L**\ ab.
 This is an ultra light deep learning framework based on Theano_.
 If you are looking for a light deep learning API I would recommend Lasagne_ or keras_ in stead of dl.
 
