@@ -3,3 +3,4 @@
 
 .. automodule:: yadll.hyperparameters
 
+.. autoclass:: yadll.Hyperparameters
