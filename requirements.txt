@@ -1,8 +1,9 @@
 git+git://github.com/Theano/Theano.git
+mock
+numpydoc
 pandas
 docopt
 pytest
 pytest-cov
 pytest-capturelog
 sphinx_rtd_theme
-numpydoc

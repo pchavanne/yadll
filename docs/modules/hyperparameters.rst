@@ -1,4 +1,5 @@
-.. _hyperparameters:
+:mod:`yadll.hyperparameters`
+=======================
 
-Hyperparameters
----------------
+.. automodule:: yadll.hyperparameters
+

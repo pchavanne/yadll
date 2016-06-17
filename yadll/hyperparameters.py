@@ -4,18 +4,32 @@ import itertools
 
 class Hyperparameters(object):
     """
-    Hyperparameters
+    Define hyperparameters with a default value
+    and optionaly a list of possible values.
 
+    Parameters
+    ----------
+    name : `string`
+        The name of the hyperparameter.
+    value : `float`
+        The default value of the hyperparameter.
+    range : `list` of `float`
+        A list of values itterated over during the gris search
+
+    Example
+    -------
     # Create an Hyperparameters instance
-    hp = Hyperparameters()
+    >>>hp = Hyperparameters()
+
     # Define an hyperparameter
-    hp('batch_size', 500)
+    >>>>hp('batch_size', 500)
+
     # Define an hyperparameter with its default value
     # and the possible values for the grid search
-    hp('n_epochs', 1000, [10, 100, 1000, 1000])
+    >>>hp('n_epochs', 1000, [10, 100, 1000, 1000])
 
     expected hyperparameters:
-    'batch_size', 'n_epochs', 'learning_rate', 'l1_reg', 'l2_reg', 'patience'
+    {'batch_size', 'n_epochs', 'learning_rate', 'l1_reg', 'l2_reg', 'patience'}
 
     """
     def __init__(self):
@@ -24,7 +38,7 @@ class Hyperparameters(object):
         self.hp_range = dict()
         self.iteration = 0
 
-    def __call__(self, name, value=None, range=None):
+    def __call__(self, name, value, range=None):
         self.__setattr__(name, value)
         self.hp_value[name] = value
         self.hp_default[name] = value
