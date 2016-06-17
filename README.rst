@@ -1,14 +1,14 @@
-.. image:: https://travis-ci.org/pchavanne/dl.svg
-    :target: https://travis-ci.org/pchavanne/dl
+.. image:: https://travis-ci.org/pchavanne/yadll.svg
+    :target: https://travis-ci.org/pchavanne/yadll
 
-.. image:: https://img.shields.io/coveralls/pchavanne/dl.svg
-    :target: https://coveralls.io/r/pchavanne/dl
+.. image:: https://img.shields.io/coveralls/pchavanne/yadll.svg
+    :target: https://coveralls.io/r/pchavanne/yadll
 
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg
-    :target: https://github.com/pchavanne/dl/blob/master/LICENSE
+    :target: https://github.com/pchavanne/yadll/blob/master/LICENSE
 
-.. image:: https://readthedocs.org/projects/dl/badge/?version=latest
-    :target: http://dl.readthedocs.io/en/latest/?badge=latest
+.. image:: https://readthedocs.org/projects/yadll/badge/?version=latest
+    :target: http://yadll.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
 Yadll
