@@ -6,3 +6,5 @@ Hyperparameters
 .. automodule:: yadll.hyperparameters
 
 .. autoclass:: Hyperparameters
+    :members:
+
