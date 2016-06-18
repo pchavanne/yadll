@@ -71,7 +71,7 @@ Installation
 
 .. code-block:: bash
 
-  git clone git+git@github.com:pchavanne/yadll.git
+  git clone git@github.com:pchavanne/yadll.git
   cd yadll
   pip install -e .
 
