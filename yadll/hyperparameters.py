@@ -9,19 +9,23 @@ class Hyperparameters(object):
 
     Parameters
     ----------
-    name : `string`
+    name : `string`, {'batch_size', 'n_epochs', 'learning_rate', 'l1_reg', 'l2_reg', 'patience'}
         The name of the hyperparameter.
-        expected hyperparameters: {'batch_size', 'n_epochs', 'learning_rate', 'l1_reg', 'l2_reg', 'patience'}
     value : `float`
         The default value of the hyperparameter.
     range : `list` of `float`
-        A list of values itterated over during the gris search
+        A list of values iterated over during the gris search
 
     Examples
     --------
+    Define the hyperparameters of the model:
     >>> hp = Hyperparameters()   # Create an Hyperparameters instance
     >>> hp('batch_size', 500)    # Define an hyperparameter with its default value
     >>> hp('n_epochs', 1000, [10, 100, 1000, 1000])    # and range for the grid search
+
+    Grid search on the hyperparameters space:
+    >>> for param in hp:
+    >>>     # Do something with this set of hyperparameters
 
     """
     def __init__(self):

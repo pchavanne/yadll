@@ -86,7 +86,7 @@ Example
 
 Different networks tested on mnist:
 
-* Linear Regression
+* logisitic Regression
 * Multi Layer Perceptron
 * MLP with dropout
 * MLP with dropconnect
@@ -99,7 +99,6 @@ Different networks tested on mnist:
 * Stacked Denoising Autoencoder
 * Restricted Boltzmann Machine
 * Deep Belief Network
-* Convolutional Network
 * RNN
 * LSTM
 
