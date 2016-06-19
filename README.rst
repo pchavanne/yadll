@@ -23,14 +23,12 @@ It allows you to very quickly start building Deep Learning models. It was origin
 
 If you are looking for a light deep learning API I would recommend using Lasagne_ or keras_ in stead of yadll, both are mature projects.
 
+Read the documentation at `Read the doc`_
+
 .. _Theano: https://github.com/Theano/Theano
 .. _`Theano's Deep Learning Tutorials`: http://deeplearning.net/tutorial/contents.html
 .. _Lasagne: https://github.com/Lasagne/Lasagne
 .. _keras: https://github.com/fchollet/keras
-
-
-Read the documentation at `Read the doc`_
-
 .. _`Read the doc`: http://yadll.readthedocs.io/en/latest/
 
 
