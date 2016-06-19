@@ -10,9 +10,11 @@
 .. image:: https://readthedocs.org/projects/yadll/badge/
     :target: http://yadll.readthedocs.io/en/latest/
 
+
 =====
 Yadll
 =====
+
 
 **Y**\ et **a**\ nother **d**\ eep **l**\ earning **l**\ ab.
 
@@ -20,8 +22,7 @@ This is an ultra light deep learning framework written in Python and based on Th
 It allows you to very quickly start building Deep Learning models. It was originally the code, notes and references I gathered when following the
 `Theano's Deep Learning Tutorials`_ tutorial then I used Lasagne_ and keras_ and restructured this code based on it.
 
-If you are looking for a light deep learning API I would recommend using Lasagne_ or keras_ in stead of yadll, both are mature,
- well documented and contributed projects.
+If you are looking for a light deep learning API I would recommend using Lasagne_ or keras_ in stead of yadll, both are mature, well documented and contributed projects.
 
 Read the documentation at `Read the doc`_
 
@@ -79,7 +80,6 @@ Installation
   git clone git@github.com:pchavanne/yadll.git
   cd yadll
   pip install -e .
-
 
 Example
 -------
