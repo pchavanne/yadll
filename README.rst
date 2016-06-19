@@ -30,6 +30,7 @@ If you are looking for a light deep learning API I would recommend using Lasagne
 
 
 Read the documentation at `Read the doc`_
+
 .. _`Read the doc`: http://yadll.readthedocs.io/en/latest/
 
 
