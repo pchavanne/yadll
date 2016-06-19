@@ -10,18 +10,18 @@
 .. image:: https://readthedocs.org/projects/yadll/badge/
     :target: http://yadll.readthedocs.io/en/latest/
 
-
-
+=====
 Yadll
 =====
 
 **Y**\ et **a**\ nother **d**\ eep **l**\ earning **l**\ ab.
 
-This is an ultra light deep learning framework based on Theano_.
+This is an ultra light deep learning framework written in Python and based on Theano_.
 It allows you to very quickly start building Deep Learning models. It was originally the code, notes and references I gathered when following the
 `Theano's Deep Learning Tutorials`_ tutorial then I used Lasagne_ and keras_ and restructured this code based on it.
 
-If you are looking for a light deep learning API I would recommend using Lasagne_ or keras_ in stead of yadll, both are mature projects.
+If you are looking for a light deep learning API I would recommend using Lasagne_ or keras_ in stead of yadll, both are mature,
+ well documented and contributed projects.
 
 Read the documentation at `Read the doc`_
 
@@ -52,8 +52,6 @@ Its main features are:
       * Restricted Boltzmann Machine
   * RNN
   * LSTM
-
-
 
 * Optimisation:
 
@@ -89,7 +87,7 @@ Example
 Different networks tested on mnist:
 
 * Linear Regression
-* MLP
+* Multi Layer Perceptron
 * MLP with dropout
 * MLP with dropconnect
 * Conv Pool
