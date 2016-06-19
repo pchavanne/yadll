@@ -34,7 +34,7 @@ Read the documentation at `Read the doc`_
 
 Its main features are:
 
-* Layer:
+* **Layers**:
 
   * Input Layer
   * Dropout Layer
@@ -53,7 +53,7 @@ Its main features are:
   * RNN
   * LSTM
 
-* Optimisation:
+* **Optimisation**:
 
   * Sgd
   * Momentum
@@ -64,7 +64,7 @@ Its main features are:
   * Hessian Free
 
 
-* Hyperparameters grid search
+* **Hyperparameters grid search**
 
 Installation
 ------------
