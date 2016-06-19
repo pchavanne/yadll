@@ -19,11 +19,13 @@ class Hyperparameters(object):
     Examples
     --------
     Define the hyperparameters of the model:
+
     >>> hp = Hyperparameters()   # Create an Hyperparameters instance
     >>> hp('batch_size', 500)    # Define an hyperparameter with its default value
     >>> hp('n_epochs', 1000, [10, 100, 1000, 1000])    # and range for the grid search
 
     Grid search on the hyperparameters space:
+
     >>> for param in hp:
     >>>     # Do something with this set of hyperparameters
 
@@ -63,4 +65,3 @@ class Hyperparameters(object):
         for name, value in self.hp_default.iteritems():
             self.__setattr__(name, value)
         self.iteration = 0
-
