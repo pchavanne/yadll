@@ -40,6 +40,8 @@ def ultra_fast_sigmoid(x):
 
     Notes
     _____
+    Use the Theano flag optimizer_including=local_ultra_fast_sigmoid to use
+    ultra_fast_sigmoid systematically instead of sigmoid.
 
     """
     return T.nnet.ultra_fast_sigmoid(x)
