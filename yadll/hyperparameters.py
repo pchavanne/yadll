@@ -4,8 +4,11 @@ import itertools
 
 class Hyperparameters(object):
     """
-    Define hyperparameters with a default value
-    and optionaly a list of possible values.
+    Container class for the hyperparameters.
+    Define each parameters with a name and a default value and optionally
+    a list of values that will be iterated over during a grid search.
+
+    It create an iterable of all the different parameters values combination.
 
     Parameters
     ----------
@@ -15,6 +18,11 @@ class Hyperparameters(object):
         The default value of the hyperparameter.
     range : `list` of `float`
         A list of values iterated over during the gris search
+
+    Methods
+    -------
+    reset
+        reset all hyperparameters to default values.
 
     Examples
     --------
