@@ -19,6 +19,11 @@ class Network(object):
         the list of layers in the network
     params : list of `theano shared variables`
         the list of all the parameters of the network
+    reguls : symbolic expression
+        regularization cost for the network
+    has_unsupervised_layer : `bool`
+        True if one of the layer is a subclass of :class: UnsupervisedLayer
+
     """
     def __init__(self, name=None, layers=None):
         self.layers = []
