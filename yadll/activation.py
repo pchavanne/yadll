@@ -131,7 +131,9 @@ def relu(x, alpha=0):
 
     References
     ----------
-    Xavier Glorot, Antoine Bordes and Yoshua Bengio (2011). Deep sparse rectifier neural networks (PDF). AISTATS.
+    .. [1] Xavier Glorot, Antoine Bordes and Yoshua Bengio (2011).
+            Deep sparse rectifier neural networks. AISTATS.
+            http://jmlr.org/proceedings/papers/v15/glorot11a/glorot11a.pdf
     """
     return T.nnet.relu(x, alpha)
 
