@@ -129,6 +129,9 @@ def relu(x, alpha=0):
     (or ``T.maximum(x, alpha * x)`` for ``alpha < 1``), but uses a faster
     formulation or an optimized Op, so we encourage to use this function.
 
+    References
+    ----------
+    Xavier Glorot, Antoine Bordes and Yoshua Bengio (2011). Deep sparse rectifier neural networks (PDF). AISTATS.
     """
     return T.nnet.relu(x, alpha)
 
