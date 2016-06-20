@@ -12,13 +12,13 @@ def sigmoid(x):
 
     Parameters
     ----------
-    x : float32
-        The activation (the summed, weighted input of a neuron).
+    x : symbolic tensor
+        Tensor to compute the activation function for.
 
     Returns
     -------
-    float32 in [0, 1]
-        The output of the sigmoid function applied to the activation.
+    symbolic tensor of value in [0, 1]
+        The output of the sigmoid function applied to the activation `x`.
 
     """
     return T.nnet.sigmoid(x)
@@ -30,13 +30,13 @@ def ultra_fast_sigmoid(x):
 
     Parameters
     ----------
-    x : float32
-        The activation (the summed, weighted input of a neuron).
+    x : symbolic tensor
+        Tensor to compute the activation function for.
 
     Returns
     -------
-    float32 in [0, 1]
-        The output of the sigmoid function applied to the activation.
+    symbolic tensor of value in [0, 1]
+        The output of the sigmoid function applied to the activation `x`.
 
     Notes
     _____
@@ -51,13 +51,13 @@ def tanh(x):
 
     Parameters
     ----------
-    x : float32
-        The activation (the summed, weighted input of a neuron).
+    x : symbolic tensor
+        Tensor to compute the activation function for.
 
     Returns
     -------
-    float32 in [-1, 1]
-        The output of the tanh function applied to the activation.
+    symbolic tensor of value in [-1, 1]
+        The output of the tanh function applied to the activation `x`.
 
     """
     return T.tanh(x)
@@ -72,13 +72,13 @@ def softmax(x):
 
     Parameters
     ----------
-    x : float32
-        The activation (the summed, weighted input of a neuron).
+    x : symbolic tensor
+        Tensor to compute the activation function for.
 
     Returns
     -------
-    float32 where the sum of the row is 1 and each single value is in [0, 1]
-        The output of the softmax function applied to the activation.
+    symbolic tensor where the sum of the row is 1 and each single value is in [0, 1]
+        The output of the softmax function applied to the activation `x`.
 
     """
     return T.nnet.softmax(x)
@@ -89,13 +89,13 @@ def softplus(x):
 
     Parameters
     ----------
-    x : float32
-        The activation (the summed, weighted input of a neuron).
+    x : symbolic tensor
+        Tensor to compute the activation function for.
 
     Returns
     -------
-    float32
-        The output of the softplus function applied to the activation.
+    symbolic tensor
+        The output of the softplus function applied to the activation `x`.
 
     """
     return T.nnet.softplus(x)
@@ -103,17 +103,23 @@ def softplus(x):
 
 def relu(x, alpha=0):
     """Rectified linear unit activation function
-    :math:`\\varphi(x) = \\max(0, x)`
+    :math:`\\varphi(x) = \\max(alpha * x, x)`
 
     Parameters
     ----------
-    x : float32
-        The activation (the summed, weighted input of a neuron).
+    x : symbolic tensor
+        Tensor to compute the activation function for.
+    alpha : scalar or tensor, optional
+        Slope for negative input, usually between 0 and 1. The default value
+        of 0 will lead to the standard rectifier, 1 will lead to
+        a linear activation function, and any value in between will give a
+        leaky rectifier. A shared variable (broadcastable against `x`) will
+        result in a parameterized rectifier with learnable slope(s).
 
     Returns
     -------
-    float32
-        The output of the rectify function applied to the activation.
+    symbolic tensor
+        Element-wise rectifier applied to the activation `x`.
 
     Notes
     -----
@@ -131,13 +137,13 @@ def linear(x):
 
     Parameters
     ----------
-    x : float32
-        The activation (the summed, weighted input of a neuron).
+    x : symbolic tensor
+        Tensor to compute the activation function for.
 
     Returns
     -------
-    float32
-        The output of the identity applied to the activation.
+    symbolic tensor
+        The output of the identity applied to the activation `x`.
 
     """
     return x
