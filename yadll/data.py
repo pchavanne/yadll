@@ -8,6 +8,36 @@ from .utils import *
 
 
 class Data(object):
+    """
+    Load gziped pickled data.
+    data is made of train_set, valid_set, test_set
+    and  set_x, set_y = set
+
+    Parameters
+    ----------
+    data : `string`
+        data file name (with path)
+    shared : `bool`
+        theano shared variable
+    borrow : `bool`
+        theano borrowable variable
+    cast_y : `bool`
+        cast y to `intX`
+
+    Methods
+    -------
+    dataset :
+        return the dataset as [(self.train_set_x, self.train_set_y),
+                               (self.valid_set_x, self.valid_set_y),
+                               (self.test_set_x, self.test_set_y)]
+
+    Examples
+    --------
+    Load data
+
+    >>> yadll.data.Data('data/mnist/mnist.pkl.gz')
+
+    """
     def __init__(self, data, shared=True, borrow=True, cast_y=True):
         if isinstance(data, str):
             f = gzip.open(data, 'rb')
