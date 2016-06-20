@@ -41,7 +41,7 @@ class Network(object):
 
         Parameters
         ----------
-        layer: :class: `Layer`
+        layer : :class: `Layer`
 
         """
         self.layers.append(layer)
@@ -56,7 +56,7 @@ class Network(object):
 
         Returns
         -------
-        params:
+        params :
             list of parameters of the network
 
         """
@@ -68,7 +68,7 @@ class Network(object):
 
         Returns
         -------
-        reguls: symbolic expresssion
+        reguls : symbolic expresssion
             regularization cost for the network
 
         """

@@ -9,6 +9,22 @@ logger = logging.getLogger(__name__)
 
 class Model(object):
     """
+    The :class: `Model` containes the data, the network, the hyperparameters,
+    and the report.
+    It pretrains unsupervised layers, trains the network and save to file.
+
+    Parameters
+    ----------
+    network : :class:`Network`
+        the network to be trained
+    data : :class:`Data`
+        the training, validating and testing set
+    name : `string`
+        the name of the model
+    updates : :function:`Updates`
+        an update function
+    file : `string`
+        name of the file to save the model
 
     """
     def __init__(self, network=None, data=None, hyperparameters=None, name=None,
