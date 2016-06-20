@@ -22,7 +22,7 @@ class Network(object):
     reguls : symbolic expression
         regularization cost for the network
     has_unsupervised_layer : `bool`
-        True if one of the layer is a subclass of :class: UnsupervisedLayer
+        True if one of the layer is a subclass of :class: `UnsupervisedLayer`
 
     """
     def __init__(self, name=None, layers=None):
