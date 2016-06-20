@@ -10,6 +10,7 @@ from .utils import *
 class Data(object):
     """
     Load gziped pickled data.
+
     data is made of train_set, valid_set, test_set
     and  set_x, set_y = set
 
@@ -27,9 +28,7 @@ class Data(object):
     Methods
     -------
     dataset :
-        return the dataset as [(self.train_set_x, self.train_set_y),
-                               (self.valid_set_x, self.valid_set_y),
-                               (self.test_set_x, self.test_set_y)]
+        return the dataset
 
     Examples
     --------

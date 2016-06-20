@@ -8,6 +8,9 @@ logger = logging.getLogger(__name__)
 
 
 class Model(object):
+    """
+
+    """
     def __init__(self, network=None, data=None, hyperparameters=None, name=None,
                  updates=sgd, file=None):
         self.network = network
