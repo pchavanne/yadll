@@ -10,6 +10,20 @@ np_rng = np.random.RandomState(1234)
 
 
 def initializer(init_obj, shape, name, fan=None):
+    """
+    Call an Initializer from an init_obj
+
+    Parameters
+    ----------
+    init_obj : `init_obj`
+            an init_obj is an initializer function or the tuple of (initializer function, dict of args)
+            example : init_obj = glorot_uniform  or init_obj = (glorot_uniform, {'gain':tanh, 'borrow':False})
+    shape : `tuple` or int
+        shape of the return shared variables
+    Returns
+    -------
+        Initialized shared variables
+    """
     if not isinstance(init_obj, tuple):
         return init_obj(shape, name=name, fan=fan)
     else:
@@ -17,11 +31,34 @@ def initializer(init_obj, shape, name, fan=None):
 
 
 def constant(shape, value=0.0, name=None, borrow=True, **kwargs):
+    """
+    Initialize all the weights to a constant value
+
+    Parameters
+    ----------
+    shape
+    scale
+    """
     return shared_variable(np.ones(shape=shape) * value,
                            name=name, borrow=borrow)
 
 
 def uniform(shape, scale=0.5, name=None, borrow=True, **kwargs):
+    """
+    Initialize all the weights from the uniform distribution
+
+    Parameters
+    ----------
+    shape
+    scale
+    name
+    borrow
+    kwargs
+
+    Returns
+    -------
+
+    """
     if not isinstance(scale, tuple):
         scale = (-scale, scale)      # (low, high)
     return shared_variable(np_rng.uniform(low=scale[0], high=scale[1], size=shape),

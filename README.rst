@@ -99,8 +99,8 @@ Different networks tested on mnist:
 * Stacked Denoising Autoencoder
 * Restricted Boltzmann Machine
 * Deep Belief Network
-* RNN
-* LSTM
+* Recurent Neural Networks
+* Long Short-Term Memory
 
 get the list of available networks:
 
