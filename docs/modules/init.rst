@@ -20,26 +20,11 @@ Initializers
 Detailed description
 --------------------
 
-.. autoclass:: initializer
-   :members:
-
-.. autoclass:: constant
-   :members:
-
-.. autoclass:: uniform
-   :members:
-
-.. autoclass:: normal
-   :members:
-
-.. autoclass:: glorot_uniform
-   :members:
-
-.. autoclass:: glorot_normal
-   :members:
-
-.. autoclass:: he_uniform
-   :members:
-
-.. autoclass:: he_normal
-   :members:
+.. autofunction:: initializer
+.. autofunction:: constant
+.. autofunction:: uniform
+.. autofunction:: normal
+.. autofunction:: glorot_uniform
+.. autofunction:: glorot_normal
+.. autofunction:: he_uniform
+.. autofunction:: he_normal
