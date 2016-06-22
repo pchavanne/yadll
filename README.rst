@@ -70,11 +70,6 @@ Its main features are:
 
 Installation
 ------------
-**yadll** uses the following dependencies:
-
-* **Python 2.7**
-* scipy
-* theano
 
 .. code-block:: bash
 
