@@ -9,7 +9,8 @@ Build your first network
 
 Let's build our first MLP with dropout on the MNIST example
 
-.. code-block:: Python
+.. code-block:: python
+
     import os
 
     from yadll.model import Model
