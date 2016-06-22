@@ -20,7 +20,7 @@ Yadll
 
 This is an ultra light deep learning framework written in Python and based on Theano_.
 It allows you to very quickly start building Deep Learning models. It was originally the code, notes and references I gathered when following the
-`Theano's Deep Learning Tutorials`_ tutorial then I used Lasagne_ and keras_ and restructured this code based on it.
+`Theano's Deep Learning Tutorials`_ tutorial then I used Lasagne_, keras_ or blocks_ and restructured this code based on it.
 
 If you are looking for a light deep learning API I would recommend using Lasagne_ or keras_ in stead of yadll, both are mature, well documented and contributed projects.
 
@@ -30,6 +30,7 @@ Read the documentation at `Read the doc`_
 .. _`Theano's Deep Learning Tutorials`: http://deeplearning.net/tutorial/contents.html
 .. _Lasagne: https://github.com/Lasagne/Lasagne
 .. _keras: https://github.com/fchollet/keras
+.. _blocks: https://github.com/mila-udem/blocks
 .. _`Read the doc`: http://yadll.readthedocs.io/en/latest/
 
 
@@ -86,7 +87,7 @@ Example
 
 Different networks tested on mnist:
 
-* logisitic Regression
+* Logisitic Regression
 * Multi Layer Perceptron
 * MLP with dropout
 * MLP with dropconnect
