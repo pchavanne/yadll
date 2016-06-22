@@ -7,5 +7,76 @@ Tutorial
 Build your first network
 ------------------------
 
+Let's build our first MLP with dropout on the MNIST example
+
+.. code-block:: Python
+    import os
+
+    from yadll.model import Model
+    from yadll.data import Data
+    from yadll.hyperparameters import *
+    from yadll.updates import *
+    from yadll.network import Network
+    from yadll.layers import *
+
+    # load the data
+    datafile = 'mnist.pkl.gz'
+    if not os.path.isfile(datafile):
+        import urllib
+        origin = 'http://www.iro.umontreal.ca/~lisa/deep/data/mnist/mnist.pkl.gz'
+        print 'Downloading data from %s' % origin
+        urllib.urlretrieve(origin, datafile)
+    data = Data(datafile)
+
+    # create the model
+    model = Model(name='mlp', data=data)
+
+    # Hyperparameters
+    hp = Hyperparameters()
+    hp('batch_size', 500)
+    hp('n_epochs', 1000)
+    hp('learning_rate', 0.1)
+    hp('l1_reg', 0.00)
+    hp('l2_reg', 0.0000)
+    hp('patience', 10000)
+
+    # add the hyperparameters to the model
+    model.hp = hp
+
+    # Create connected layers
+    # Input layer
+    l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=model.x, name='Input')
+
+    # Dense Layer 1
+    l_hid1 = DenseLayer(incoming=l_in, nb_units=500, W=glorot_uniform, l1=hp.l1_reg,
+                        l2=hp.l2_reg, activation=tanh, name='Hidden layer 1')
+
+    # Dense Layer 2
+    l_hid2 = DenseLayer(incoming=l_hid1, nb_units=500, W=glorot_uniform, l1=hp.l1_reg,
+                        l2=hp.l2_reg, activation=tanh, name='Hidden layer 2')
+
+    # Logistic regression Layer
+    l_out = LogisticRegression(incoming=l_hid2, nb_class=10, l1=hp.l1_reg,
+                               l2=hp.l2_reg, name='Logistic regression')
+
+    # Create network and add layers
+    net = Network('mlp')
+    net.add(l_in)
+    net.add(l_hid1)
+    net.add(l_hid2)
+    net.add(l_out)
+
+    # add the network to the model
+    model.network = net
+
+    # updates method
+    model.updates = sgd  # nesterov_momentum
+
+    # train the model
+    model.train()
+
+    print model.report
+
+
 Run the examples
 ----------------
