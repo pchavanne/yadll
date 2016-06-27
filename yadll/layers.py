@@ -235,6 +235,9 @@ class LogisticRegression(DenseLayer):
 
 
 class Dropout(Layer):
+    """
+    Dropout layer
+    """
     def __init__(self, incoming, corruption_level=0.5, **kwargs):
         super(Dropout, self).__init__(incoming, **kwargs)
         self.p = 1 - corruption_level
@@ -247,6 +250,9 @@ class Dropout(Layer):
 
 
 class Dropconnect(DenseLayer):
+    """
+    DropConnect layer
+    """
     def __init__(self, incoming, nb_units, corruption_level=0.5, **kwargs):
         super(Dropconnect, self).__init__(incoming, nb_units, **kwargs)
         self.p = 1 - corruption_level
@@ -259,6 +265,9 @@ class Dropconnect(DenseLayer):
 
 
 class PoolLayer(Layer):
+    """
+    Pooling layer, default is maxpooling
+    """
     def __init__(self, incoming, poolsize, stride=None, ignore_border=True,
                  padding=(0, 0), mode='max', **kwargs):
         super(PoolLayer, self).__init__(incoming, **kwargs)
@@ -285,6 +294,9 @@ class PoolLayer(Layer):
 
 
 class ConvLayer(Layer):
+    """
+    Convolutional layer
+    """
     def __init__(self, incoming, image_shape=None, filter_shape=None, W=glorot_uniform,
                  border_mode='valid', subsample=(1, 1), l1=None, l2=None, pool_scale=None, **kwargs):
         super(ConvLayer, self).__init__(incoming, **kwargs)
@@ -322,6 +334,9 @@ class ConvLayer(Layer):
 
 
 class ConvPoolLayer(ConvLayer, PoolLayer):
+    """
+    Convolutional and pooling layer
+    """
     def __init__(self, incoming, poolsize, image_shape=None, filter_shape=None,
                   b=constant, activation=tanh, **kwargs):
         super(ConvPoolLayer, self).__init__(incoming, poolsize=poolsize, image_shape=image_shape,
@@ -346,6 +361,9 @@ class ConvPoolLayer(ConvLayer, PoolLayer):
 
 
 class AutoEncoder(UnsupervisedLayer):
+    """
+    Autoencoder
+    """
     def __init__(self, incoming, nb_units, hyperparameters, corruption_level=0.0,
                  W=(glorot_uniform, {'gain': sigmoid}), b_prime=constant,
                  sigma=None, contraction_level= None, **kwargs):
@@ -386,6 +404,9 @@ class AutoEncoder(UnsupervisedLayer):
 
 
 class RBM(UnsupervisedLayer):
+    """
+    Restricted Boltzmann Machines
+    """
     def __init__(self, incoming, nb_units, hyperparameters, W=glorot_uniform,
                  b_hidden=constant, activation=sigmoid, **kwargs):
         super(RBM, self).__init__(incoming, nb_units, hyperparameters, W=W,
@@ -477,6 +498,9 @@ class RBM(UnsupervisedLayer):
 
 
 class RNN(Layer):
+    """
+    Recurrent Neural Network
+    """
     def __init__(self, incoming, n_hidden, n_out, activation=tanh, **kwargs):
         super(RNN, self).__init__(incoming, **kwargs)
         self.activation = activation
@@ -518,6 +542,9 @@ class RNN(Layer):
 
 
 class LSTM(Layer):
+    """
+    Long Short Term Memory
+    """
     def __init__(self, incoming, n_hidden, n_out, peephole=False, tied_i_f=False, activation=tanh, **kwargs):
         super(LSTM, self).__init__(incoming, **kwargs)
         self.peephole = peephole    # gate layers look at the cell state
