@@ -96,6 +96,11 @@ class Layer(object):
 
 
 class InputLayer(Layer):
+    """
+    Layer of the data it has no parameters, it just shapes the data as the input
+    for any network.
+    an ::class:InputLayer is always the first layer of any network.
+    """
     def __init__(self, shape, input_var=None, **kwargs):
         """
         The input layer of any network
@@ -115,6 +120,10 @@ class InputLayer(Layer):
 
 
 class ReshapeLayer(Layer):
+    """
+    Reshape the incoming layer to the output_shape.
+    No parameters on this layer.
+    """
     def __init__(self, incoming, output_shape=None, **kwargs):
         super(ReshapeLayer, self).__init__(incoming, **kwargs)
         self.reshape_shape = output_shape
@@ -129,6 +138,9 @@ class ReshapeLayer(Layer):
 
 
 class FlattenLayer(Layer):
+    """
+    Reshape layers back to flat
+    """
     def __init__(self, incoming, ndim=2, **kwargs):
         super(FlattenLayer, self).__init__(incoming, **kwargs)
         self.ndim = ndim
@@ -143,6 +155,9 @@ class FlattenLayer(Layer):
 
 
 class DenseLayer(Layer):
+    """
+    Fully connected neural network layer
+    """
     def __init__(self, incoming, nb_units, W=glorot_uniform, b=constant,
                  activation=tanh, l1=None, l2=None, **kwargs):
         super(DenseLayer, self).__init__(incoming, **kwargs)
@@ -173,6 +188,11 @@ class DenseLayer(Layer):
 
 
 class UnsupervisedLayer(DenseLayer):
+    """
+    Base class for all unsupervised layers.
+    Unsupervised layers are pre-trained against its own input.
+
+    """
     def __init__(self, incoming, nb_units, hyperparameters, **kwargs):
         super(UnsupervisedLayer, self).__init__(incoming, nb_units, **kwargs)
         self.hp = hyperparameters
@@ -202,10 +222,13 @@ class UnsupervisedLayer(DenseLayer):
             c = []
             for minibatch_index in xrange(n_train_batches):
                 c.append(pretrain(minibatch_index))
-            logger.info('Layer: %s, pretraining epoch %d, cost %d' % (self.name, epoch, np.mean(c)))
+            logger.info('Layer: %s, pre-training epoch %d, cost %d' % (self.name, epoch, np.mean(c)))
 
 
 class LogisticRegression(DenseLayer):
+    """
+    Dense layer with softmax activation
+    """
     def __init__(self, incoming, nb_class, W=constant, activation=softmax, **kwargs):
         super(LogisticRegression, self).__init__(incoming, nb_class, W=W,
                                                  activation=activation, **kwargs)
