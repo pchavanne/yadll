@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 """
-All the neural network layers currently supported by dl.
+All the neural network layers currently supported by yaddll.
 """
 from .init import *
 from .objectives import *
