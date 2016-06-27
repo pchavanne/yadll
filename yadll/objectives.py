@@ -2,9 +2,30 @@
 import theano.tensor as T
 
 from .utils import EPSILON
+"""
+Objectives function are Theano function computing differences between
+prediction and target
+"""
 
 
 def mean_squared_error(prediction, target):
+    """
+    Mean squared error
+
+    .. math:: L_i = - \\sum_j{p_{i,j} - t_{i,j}}
+
+    Parameters
+    ----------
+    prediction : Theano tensor
+        The predicted values
+    target : Theano tensor
+        The target values
+
+    Returns
+    -------
+
+
+    """
     return T.mean(T.square(prediction - target), axis=-1)
 
 

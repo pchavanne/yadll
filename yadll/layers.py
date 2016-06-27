@@ -406,6 +406,10 @@ class AutoEncoder(UnsupervisedLayer):
 class RBM(UnsupervisedLayer):
     """
     Restricted Boltzmann Machines
+
+    References
+    ----------
+    .. [1] http://deeplearning.net/tutorial/rbm.html
     """
     def __init__(self, incoming, nb_units, hyperparameters, W=glorot_uniform,
                  b_hidden=constant, activation=sigmoid, **kwargs):
