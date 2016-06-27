@@ -12,7 +12,7 @@ def mean_squared_error(prediction, target):
     """
     Mean squared error
 
-    .. math:: L_i = - \\sum_j{p_{i,j} - t_{i,j}}
+    .. math:: \sum_{i=1}^{n_batch}{\sqrt{\sum_{i=1}^{n_feature}{(prediction_{i,j} - target_{i,j})²}}}
 
     Parameters
     ----------
