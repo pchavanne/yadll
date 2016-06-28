@@ -52,7 +52,7 @@ def mean_absolute_error(prediction, target):
     """
     Mean Absolute Error
 
-    .. math:: MAE_i = \\frac{1}{n} \\sum_{j}{\\norm{target_{i,j} - predicition_{i,j}}}
+    .. math:: MAE_i = \\frac{1}{n} \\sum_{j}{|target_{i,j} - predicition_{i,j}|}
 
     Parameters
     ----------
@@ -72,7 +72,7 @@ def hinge(prediction, target):
     """
     Hinge Error
 
-    .. math:: MAE_i = \\frac{1}{n} \\sum_{j}{\\norm{target_{i,j} - predicition_{i,j}}}
+    .. math:: MAE_i = \\frac{1}{n} \\sum_{j}{\\max(1. - target_{i,j} * predicition_{i,j}, 0.)}
 
     Parameters
     ----------
