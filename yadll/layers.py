@@ -102,9 +102,8 @@ class Layer(object):
 
 class InputLayer(Layer):
     """
-    Layer of the data it has no parameters, it just shapes the data as the input
-    for any network.
-    an ::class:`InputLayer` is always the first layer of any network.
+    Input layer of the data, it has no parameters, it just shapes the data as
+     the input for any network. An ::class:`InputLayer` is always the first layer of any network.
     """
     def __init__(self, shape, input_var=None, **kwargs):
         """
@@ -209,9 +208,9 @@ class UnsupervisedLayer(DenseLayer):
     def get_unsupervised_cost(self, **kwargs):
         raise NotImplementedError
 
-    @timer(' Pretraining the layer')
+    @timer(' Pre-training the layer')
     def unsupervised_training(self, x, train_set_x):
-        logger.info('... Pretraining the layer: %s' % self.name)
+        logger.info('... Pre-training the layer: %s' % self.name)
         index = T.iscalar('index')
         n_train_batches = train_set_x.get_value(borrow=True).shape[0] / self.hp.batch_size
         unsupervised_cost = self.get_unsupervised_cost()
