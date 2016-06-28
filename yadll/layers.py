@@ -228,6 +228,10 @@ class UnsupervisedLayer(DenseLayer):
 class LogisticRegression(DenseLayer):
     """
     Dense layer with softmax activation
+
+    References
+    ----------
+    .. [1] http://deeplearning.net/tutorial/logreg.html
     """
     def __init__(self, incoming, nb_class, W=constant, activation=softmax, **kwargs):
         super(LogisticRegression, self).__init__(incoming, nb_class, W=W,
@@ -336,6 +340,10 @@ class ConvLayer(Layer):
 class ConvPoolLayer(ConvLayer, PoolLayer):
     """
     Convolutional and pooling layer
+
+    References
+    ----------
+    .. [1] http://deeplearning.net/tutorial/lenet.html
     """
     def __init__(self, incoming, poolsize, image_shape=None, filter_shape=None,
                   b=constant, activation=tanh, **kwargs):
@@ -363,6 +371,10 @@ class ConvPoolLayer(ConvLayer, PoolLayer):
 class AutoEncoder(UnsupervisedLayer):
     """
     Autoencoder
+
+    References
+    ----------
+    .. [1] http://deeplearning.net/tutorial/dA.html
     """
     def __init__(self, incoming, nb_units, hyperparameters, corruption_level=0.0,
                  W=(glorot_uniform, {'gain': sigmoid}), b_prime=constant,
@@ -504,6 +516,11 @@ class RBM(UnsupervisedLayer):
 class RNN(Layer):
     """
     Recurrent Neural Network
+
+    References
+    ----------
+
+    .. [1] http://deeplearning.net/tutorial/rnnslu.html
     """
     def __init__(self, incoming, n_hidden, n_out, activation=tanh, **kwargs):
         super(RNN, self).__init__(incoming, **kwargs)
@@ -548,6 +565,13 @@ class RNN(Layer):
 class LSTM(Layer):
     """
     Long Short Term Memory
+
+    References
+    ----------
+    .. [1] http://deeplearning.net/tutorial/lstm.html
+    .. [2] http://christianherta.de/lehre/dataScience/machineLearning/neuralNetworks/LSTM.php
+    .. [3] http://people.idsia.ch/~juergen/lstm/
+    .. [4] http://colah.github.io/posts/2015-08-Understanding-LSTMs/
     """
     def __init__(self, incoming, n_hidden, n_out, peephole=False, tied_i_f=False, activation=tanh, **kwargs):
         super(LSTM, self).__init__(incoming, **kwargs)
