@@ -12,7 +12,7 @@ def mean_squared_error(prediction, target):
     """
     Mean squared error
 
-    .. math:: MSE = \sum{1}_{2}
+    .. math:: MSE = \frac{1}{2}
 
     Parameters
     ----------
