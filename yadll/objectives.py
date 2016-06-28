@@ -52,7 +52,7 @@ def mean_absolute_error(prediction, target):
     """
     Mean Absolute Error
 
-    .. math:: MAE_i = \\frac{1}{n} \\sum_{j}{\abs{target_{i,j} - predicition_{i,j}}}
+    .. math:: MAE_i = \\frac{1}{n} \\sum_{j}{\\abs{target_{i,j} - predicition_{i,j}}}
 
     Parameters
     ----------
@@ -69,6 +69,22 @@ def mean_absolute_error(prediction, target):
 
 
 def hinge(prediction, target):
+    """
+    Hinge Error
+
+    .. math:: MAE_i = \\frac{1}{n} \\sum_{j}{\\abs{target_{i,j} - predicition_{i,j}}}
+
+    Parameters
+    ----------
+    prediction : Theano tensor
+        The predicted values
+    target : Theano tensor
+        The target values
+
+    Returns
+    -------
+        Hinge
+    """
     return T.mean(T.maximum(1. - target * prediction, 0.), axis=-1)
 
 
