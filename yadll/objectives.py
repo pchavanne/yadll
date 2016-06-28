@@ -12,7 +12,7 @@ def mean_squared_error(prediction, target):
     """
     Mean squared error
 
-    .. math:: MSE = \frac{1}{n_b}
+    .. math:: MSE = \frac{1}{2}
 
     Parameters
     ----------
@@ -23,7 +23,6 @@ def mean_squared_error(prediction, target):
 
     Returns
     -------
-
 
     """
     return T.mean(T.square(prediction - target), axis=-1)

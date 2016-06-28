@@ -30,13 +30,11 @@ class Layer(object):
     name : `string`, optional
         The layer name.
 
-
     """
     def __init__(self, incoming, name=None):
         """
         The base class that represent a single layer of any neural network.
         It has to be subclassed by any kind of layer.
-
 
         """
 
@@ -56,7 +54,9 @@ class Layer(object):
         Return a list of Theano shared variables representing the parameters of
         this layer.
 
-        :return: list of Theano shared variables that parametrize the layer
+        Returns
+        -------
+            list of Theano shared variables that parametrize the layer
         """
         return self.params
 
@@ -66,7 +66,8 @@ class Layer(object):
         this layer.
 
         Returns
-         Theano expression representing the sum of the regulators
+        -------
+            Theano expression representing the sum of the regulators
          of this layer
         """
         return self.reguls
@@ -76,9 +77,13 @@ class Layer(object):
         """
         Compute the output shape of this layer given the input shape.
 
-        :return: a tuple representing the shape of the output of this layer.
+        Returns
+        -------
+            a tuple representing the shape of the output of this layer.
 
-        ..note:: This method has to be overriden by new layer implementation or
+        Notes
+        -----
+        This method has to be overriden by new layer implementation or
         will return the input shape.
         """
         return self.input_shape
@@ -99,7 +104,7 @@ class InputLayer(Layer):
     """
     Layer of the data it has no parameters, it just shapes the data as the input
     for any network.
-    an ::class:InputLayer is always the first layer of any network.
+    an ::class:`InputLayer` is always the first layer of any network.
     """
     def __init__(self, shape, input_var=None, **kwargs):
         """
