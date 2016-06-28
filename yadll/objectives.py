@@ -10,9 +10,9 @@ prediction and target
 
 def mean_squared_error(prediction, target):
     """
-    Mean squared error
+    Mean Squared Error
 
-    .. math:: MSE = \\frac{1}{n_{batch}}
+    .. math:: MSE_i = \\frac{1}{n} \\sum{j}{(target_{i,j} - predicition_{i,j})^2}
 
     Parameters
     ----------
@@ -29,6 +29,22 @@ def mean_squared_error(prediction, target):
 
 
 def root_mean_squared_error(prediction, target):
+    """
+    Root Mean Squared Error
+
+    .. math:: RMSE = \\frac{1}{n_{batch}}
+
+    Parameters
+    ----------
+    prediction : Theano tensor
+        The predicted values
+    target : Theano tensor
+        The target values
+
+    Returns
+    -------
+
+    """
     return T.sqrt(T.mean(T.square(prediction - target), axis=-1))
 
 
