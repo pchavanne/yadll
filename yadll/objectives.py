@@ -14,7 +14,7 @@ def mean_squared_error(prediction, target):
 
     .. math::
 
-        MSE = \frac{1}{n_{batch}} \sum_{i=1}^{n_{batch}} {\sqrt{ \sum_{j=1}^{n_{feature}}{(prediction_{i,j} - target_{i,j})²}}}
+        MSE = \frac{1}{n_b} \sum_{i=1}^{n_b}{ \sqrt{ \sum_{j=1}^{n_f}{(prediction_{i,j} - target_{i,j})²}}}
 
     Parameters
     ----------
