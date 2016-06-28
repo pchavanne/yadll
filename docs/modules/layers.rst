@@ -28,6 +28,8 @@ by any new layer.
    RNN
    LSTM
 
+.. inheritance-diagram:: yadll.layers
+
 Detailed description
 --------------------
 

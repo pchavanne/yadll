@@ -117,3 +117,40 @@ Here is the output when trained on NVIDIA Geforce Titan X card:
 
 Run the examples
 ----------------
+Different networks are tested on MNIST dataset on the examples/mnist_dl.py
+
+* Logisitic Regression
+* Multi Layer Perceptron
+* MLP with dropout
+* MLP with dropconnect
+* Conv Pool
+* LeNet-5
+* Autoencoder
+* Denoising Autoencoder
+* Gaussian Denoising Autoencoder
+* Contractive Denoising Autoencoder
+* Stacked Denoising Autoencoder
+* Restricted Boltzmann Machine
+* Deep Belief Network
+* Recurrent Neural Networks
+* Long Short-Term Memory
+
+You can get the list of all available networks:
+
+.. code-block:: bash
+
+  python mnist_dl.py --network_list
+
+
+Trainning a model for example lenet5:
+
+.. code-block:: bash
+
+  python mnist_dl.py lenet5
+
+
+grid search on the hyperparameters:
+
+.. code-block:: bash
+
+  python hp_grid_search.py
