@@ -12,7 +12,7 @@ def mean_squared_error(prediction, target):
     """
     Mean Squared Error
 
-    .. math:: MSE_i = \\frac{1}{n} \\sum{j}{(target_{i,j} - predicition_{i,j})^2}
+    .. math:: MSE_i = \\frac{1}{n} \\sum_{j}{(target_{i,j} - predicition_{i,j})^2}
 
     Parameters
     ----------
@@ -32,7 +32,7 @@ def root_mean_squared_error(prediction, target):
     """
     Root Mean Squared Error
 
-    .. math:: RMSE = \\frac{1}{n_{batch}}
+    .. math:: RMSE = \\sqrt{\\frac{1}{n} \\sum_{j}{(target_{i,j} - predicition_{i,j})^2}}
 
     Parameters
     ----------
