@@ -21,7 +21,7 @@ class Model(object):
         the training, validating and testing set
     name : `string`
         the name of the model
-    updates : :function:`Updates`
+    updates : :func:`Updates`
         an update function
     file : `string`
         name of the file to save the model

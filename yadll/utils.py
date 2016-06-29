@@ -25,14 +25,14 @@ def to_float_X(arr):
 
     Returns
     -------
-        numpy array of flotX
+        numpy array of floatX
     """
     return np.asarray(arr, dtype=floatX)
 
 
 def shared_variable(value, dtype=floatX, name=None, borrow=True, **kwargs):
     """
-    Create a Theano *shared Variable
+    Create a Theano Shared Variable
 
     Parameters
     ----------
