@@ -21,7 +21,7 @@ class Model(object):
         the training, validating and testing set
     name : `string`
         the name of the model
-    updates : :func:`Updates`
+    updates : :func:`yadll.updates`
         an update function
     file : `string`
         name of the file to save the model
