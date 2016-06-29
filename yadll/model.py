@@ -15,7 +15,7 @@ class Model(object):
 
     Parameters
     ----------
-    network : :class:`yaddll.network.Network`
+    network : :class:`yadll.network.Network`
         the network to be trained
     data : :class:`Data`
         the training, validating and testing set
