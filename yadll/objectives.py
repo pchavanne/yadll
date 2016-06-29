@@ -3,8 +3,8 @@ import theano.tensor as T
 
 from .utils import EPSILON
 """
-Objectives function are Theano function computing differences between
-prediction and target
+Objectives functions are Theano functions for building loss expressions that
+quantify how far prediction and target distributions are.
 """
 
 

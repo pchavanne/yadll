@@ -9,7 +9,7 @@ np_rng = np.random.RandomState(1234)
 # init_obj = glorot_uniform  or init_obj = (glorot_uniform, {'gain':tanh, 'borrow':False})
 
 
-def initializer(init_obj, shape, name, fan=None, **kwargs):
+def initializer(init_obj, shape, name, **kwargs):
     """
     Call an Initializer from an init_obj
 
@@ -25,10 +25,10 @@ def initializer(init_obj, shape, name, fan=None, **kwargs):
         Initialized shared variables
     """
     if not isinstance(init_obj, tuple):
-        return init_obj(shape, name=name, fan=fan, **kwargs)
+        return init_obj(shape, name=name, **kwargs)
     else:
         kwargs.update(init_obj[1])
-        return init_obj[0](shape, name=name, fan=fan, **kwargs)
+        return init_obj[0](shape, name=name, **kwargs)
 
 
 def constant(shape, value=0.0, name=None, borrow=True, **kwargs):
@@ -108,6 +108,25 @@ def He_normal(shape, name=None, borrow=True, **kwargs):
 
 
 def orthogonal(shape, gain=1, name=None, borrow=True, **kwargs):
+    """
+    Orthogonal initialisation for Recurrent Networks
+
+    Parameters
+    ----------
+    shape
+    gain
+    name
+    borrow
+    kwargs
+
+    Returns
+    -------
+
+    References
+    ----------
+
+    .. [1] http://smerity.com/articles/2016/orthogonal_init.html
+    """
     if gain == relu:
         gain = np.sqrt(2)
     flat_shape = (shape[0], np.prod(shape[1:]))
