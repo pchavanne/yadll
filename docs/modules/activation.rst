@@ -1,8 +1,7 @@
 :mod:`yadll.activation`
-=======================
 
 Activation
-----------
+==========
 
 .. automodule:: yadll.activation
 
