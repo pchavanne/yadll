@@ -67,11 +67,46 @@ def uniform(shape, scale=0.5, name=None, borrow=True, **kwargs):
 
 
 def normal(shape, scale=0.5, name=None, borrow=True, **kwargs):
+    """
+    Initialize all the weights from the normal distribution
+
+    Parameters
+    ----------
+    shape
+    scale
+    name
+    borrow
+    kwargs
+
+    Returns
+    -------
+
+    """
     return shared_variable(np_rng.normal(loc=0.0, scale=scale, size=shape),
                            name=name, borrow=borrow, **kwargs)
 
 
 def glorot_uniform(shape, gain=1.0, name=None, fan=None, borrow=True, **kwargs):
+    """
+    Initialize all the weights from the uniform distribution with glorot scaling
+
+    Parameters
+    ----------
+    shape
+    gain
+    name
+    fan
+    borrow
+    kwargs
+
+    Returns
+    -------
+
+    References
+    ----------
+    .. [1] http://jmlr.org/proceedings/papers/v9/glorot10a/glorot10a.pdf
+
+    """
     if fan:
         fan_in, fan_out = fan
     else:
@@ -85,6 +120,26 @@ def glorot_uniform(shape, gain=1.0, name=None, fan=None, borrow=True, **kwargs):
 
 
 def glorot_normal(shape, gain=1, name=None, fan=None, borrow=True, **kwargs):
+    """
+    Initialize all the weights from the normal distribution with glorot scaling
+
+    Parameters
+    ----------
+    shape
+    gain
+    name
+    fan
+    borrow
+    kwargs
+
+    Returns
+    -------
+
+    References
+    ----------
+    .. [1] http://jmlr.org/proceedings/papers/v9/glorot10a/glorot10a.pdf
+
+    """
     if fan:
         fan_in, fan_out = fan
     else:
@@ -109,7 +164,10 @@ def He_normal(shape, name=None, borrow=True, **kwargs):
 
 def orthogonal(shape, gain=1, name=None, borrow=True, **kwargs):
     """
-    Orthogonal initialisation for Recurrent Networks
+    Orthogonal initialization for Recurrent Networks
+
+    Orthogonal initialization solve the vanishing/exploding gradient for
+    recurrent network.
 
     Parameters
     ----------
