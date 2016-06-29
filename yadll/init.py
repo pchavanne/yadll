@@ -67,7 +67,7 @@ def uniform(shape, scale=0.5, name=None, borrow=True, **kwargs):
 
 def normal(shape, scale=0.5, name=None, borrow=True, **kwargs):
     return shared_variable(np_rng.normal(loc=0.0, scale=scale, size=shape),
-                           name=name, borrow=borrow)
+                           name=name, borrow=borrow, **kwargs)
 
 
 def glorot_uniform(shape, gain=1.0, name=None, fan=None, borrow=True):

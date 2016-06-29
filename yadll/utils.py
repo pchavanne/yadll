@@ -16,17 +16,60 @@ EPSILON = 1e-8
 
 
 def to_float_X(arr):
+    """
+    Cast to floatX numpy array
+
+    Parameters
+    ----------
+    arr: list or numpy array
+
+    Returns
+    -------
+        numpy array of flotX
+    """
     return np.asarray(arr, dtype=floatX)
 
 
-def shared_variable(value, dtype=floatX, name=None, borrow=True, broadcastable=None):
+def shared_variable(value, dtype=floatX, name=None, borrow=True, **kwargs):
+    """
+    Create a Theano *shared Variable
+
+    Parameters
+    ----------
+    value:
+        value of the shared variable
+    dtype : default floatX
+        type of the shared variable
+    name : string, optional
+        shared variable name
+    borrow : bool, default is True
+        if True shared variable we construct does not get a [deep] copy of value.
+        So changes we subsequently make to value will also change our shared variable.
+
+    Returns
+    -------
+        Theano Shared Variable
+    """
     if value is None:
         return None
     value = np.asarray(value, dtype=dtype)
-    return theano.shared(value=value, name=name, borrow=borrow, broadcastable=broadcastable)
+    return theano.shared(value=value, name=name, borrow=borrow, **kwargs)
 
 
 def format_sec(sec):
+    """
+    format a time
+
+    Parameters
+    ----------
+    sec : float
+        time in seconds
+
+    Returns
+    -------
+        string :
+            formatted time in days, hours, minutes and seconds
+    """
     m, s = divmod(sec, 60)
     h, m = divmod(m, 60)
     d, h = divmod(h, 24)
@@ -40,6 +83,15 @@ def format_sec(sec):
 
 
 def timer(what_to_show="Function execution"):
+    """
+    decorator that send the execution time of the argument function to the logger
+
+    Parameters
+    ----------
+    what_to_show : `string`, optional
+        message displayed after execution
+
+    """
     def func_wrapper(func):
         @wraps(func)
         def wrapper(*args, **kwargs):

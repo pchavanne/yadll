@@ -1,7 +1,7 @@
 :mod:`yadll.data`
 
 Data
-----
+====
 
 .. automodule:: yadll.data
 

@@ -3,7 +3,7 @@
 .. automodule:: yadll.init
 
 Initializers
-------------
+============
 
 .. autosummary::
 
@@ -15,7 +15,6 @@ Initializers
    he_uniform
    he_normal
    orthogonal
-
 
 Detailed description
 --------------------

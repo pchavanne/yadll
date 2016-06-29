@@ -1,7 +1,7 @@
 :mod:`yadll.layers`
 
 Layers
-------
+======
 
 The Layers classes implement one layer of neural network of different types.
 the ::class:Layer is the mother class of all the layers and has to be inherited
@@ -28,9 +28,7 @@ by any new layer.
    RNN
    LSTM
 
-
 .. inheritance-diagram:: yadll.layers
-
 
 Detailed description
 --------------------

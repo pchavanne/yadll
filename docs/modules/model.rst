@@ -1,7 +1,7 @@
 :mod:`yadll.model`
 
 Model
------
+=====
 
 .. automodule:: yadll.model
 

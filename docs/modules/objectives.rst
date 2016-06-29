@@ -1,7 +1,7 @@
 :mod:`yadll.objectives`
 
 Objectives
-----------
+==========
 
 .. automodule:: yadll.objectives
 
@@ -16,7 +16,6 @@ Initializers
     hinge
     binary_crossentropy
     categorical_crossentropy
-
 
 Detailed description
 --------------------

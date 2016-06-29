@@ -1,8 +1,7 @@
 :mod:`yadll.updates`
 
 Updates
--------
-
+=======
 
 Updating functions that are passed to the network.
 
