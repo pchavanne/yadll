@@ -9,7 +9,7 @@ np_rng = np.random.RandomState(1234)
 # init_obj = glorot_uniform  or init_obj = (glorot_uniform, {'gain':tanh, 'borrow':False})
 
 
-def initializer(init_obj, shape, name, fan=None):
+def initializer(init_obj, shape, name, fan=None, **kwargs):
     """
     Call an Initializer from an init_obj
 
@@ -25,9 +25,10 @@ def initializer(init_obj, shape, name, fan=None):
         Initialized shared variables
     """
     if not isinstance(init_obj, tuple):
-        return init_obj(shape, name=name, fan=fan)
+        return init_obj(shape, name=name, fan=fan, **kwargs)
     else:
-        return init_obj[0](shape, name=name, fan=fan, **init_obj[1])
+        kwargs.update(init_obj[1])
+        return init_obj[0](shape, name=name, fan=fan, **kwargs)
 
 
 def constant(shape, value=0.0, name=None, borrow=True, **kwargs):
@@ -40,7 +41,7 @@ def constant(shape, value=0.0, name=None, borrow=True, **kwargs):
     scale
     """
     return shared_variable(np.ones(shape=shape) * value,
-                           name=name, borrow=borrow)
+                           name=name, borrow=borrow, **kwargs)
 
 
 def uniform(shape, scale=0.5, name=None, borrow=True, **kwargs):
@@ -62,7 +63,7 @@ def uniform(shape, scale=0.5, name=None, borrow=True, **kwargs):
     if not isinstance(scale, tuple):
         scale = (-scale, scale)      # (low, high)
     return shared_variable(np_rng.uniform(low=scale[0], high=scale[1], size=shape),
-                           name=name, borrow=borrow)
+                           name=name, borrow=borrow, **kwargs)
 
 
 def normal(shape, scale=0.5, name=None, borrow=True, **kwargs):
@@ -70,7 +71,7 @@ def normal(shape, scale=0.5, name=None, borrow=True, **kwargs):
                            name=name, borrow=borrow, **kwargs)
 
 
-def glorot_uniform(shape, gain=1.0, name=None, fan=None, borrow=True):
+def glorot_uniform(shape, gain=1.0, name=None, fan=None, borrow=True, **kwargs):
     if fan:
         fan_in, fan_out = fan
     else:
@@ -80,10 +81,10 @@ def glorot_uniform(shape, gain=1.0, name=None, fan=None, borrow=True):
     if gain == sigmoid:
         gain = 4.
     scale = gain * np.sqrt(6. / (fan_in + fan_out))
-    return uniform(shape, scale, name, borrow)
+    return uniform(shape, scale, name, borrow, **kwargs)
 
 
-def glorot_normal(shape, gain=1, name=None, fan=None, borrow=True):
+def glorot_normal(shape, gain=1, name=None, fan=None, borrow=True, **kwargs):
     if fan:
         fan_in, fan_out = fan
     else:
@@ -93,20 +94,20 @@ def glorot_normal(shape, gain=1, name=None, fan=None, borrow=True):
     if gain == sigmoid:
         gain = 4.
     scale = gain * np.sqrt(2. / (fan_in + fan_out))
-    return normal(shape, scale, name, borrow)
+    return normal(shape, scale, name, borrow, **kwargs)
 
 
-def He_uniform(shape, name=None, fan=None, borrow=True):
+def He_uniform(shape, name=None, borrow=True, **kwargs):
     scale = np.sqrt(6. / shape[0])
-    return uniform(shape, scale, name, borrow)
+    return uniform(shape, scale, name, borrow, **kwargs)
 
 
-def He_normal(shape, name=None, fan=None, borrow=True):
+def He_normal(shape, name=None, borrow=True, **kwargs):
     scale = np.sqrt(2. / shape[0])
-    return normal(shape, scale, name, borrow)
+    return normal(shape, scale, name, borrow, **kwargs)
 
 
-def orthogonal(shape, gain=1, name=None, fan=None, borrow=True):
+def orthogonal(shape, gain=1, name=None, borrow=True, **kwargs):
     if gain == relu:
         gain = np.sqrt(2)
     flat_shape = (shape[0], np.prod(shape[1:]))
@@ -114,4 +115,4 @@ def orthogonal(shape, gain=1, name=None, fan=None, borrow=True):
     u, _, v = np.linalg.svd(a, full_matrices=False)
     q = u if u.shape == flat_shape else v
     q = q.reshape(shape)
-    return shared_variable(gain * q, name=name, borrow=borrow)
+    return shared_variable(gain * q, name=name, borrow=borrow, **kwargs)
