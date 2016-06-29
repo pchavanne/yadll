@@ -9,9 +9,9 @@ logger = logging.getLogger(__name__)
 
 class Model(object):
     """
-    The :class: `Model` containes the data, the network, the hyperparameters,
+    The :class:`Model` contains the data, the network, the hyperparameters,
     and the report.
-    It pretrains unsupervised layers, trains the network and save to file.
+    It pre-trains unsupervised layers, trains the network and save it to file.
 
     Parameters
     ----------
