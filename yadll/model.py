@@ -9,6 +9,21 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def save_model(model, file=None):
+    if file is None:
+        d_file = model.file
+    else:
+        d_file = file
+    with open(d_file, 'wb') as f:
+        cPickle.dump(model, f, cPickle.HIGHEST_PROTOCOL)
+
+
+def load_model(file):
+    with open(file, 'rb') as f:
+        model = cPickle.load(f)
+    return model
+
+
 class Model(object):
     """
     The :class:`Model` contains the data, the network, the hyperparameters,
@@ -182,8 +197,7 @@ class Model(object):
 
                         # save and overwrite each best model
                         if self.save_mode == 'each':
-                            with open(self.file, 'wb') as f:
-                                cPickle.dump((self.network, self.name, self.hp, self.updates), f, cPickle.HIGHEST_PROTOCOL)
+                            save_model(self)
                             logger.info(' Best model saved')
 
                 if patience <= iter:
@@ -192,8 +206,7 @@ class Model(object):
 
         # save the final model
         if self.save_mode == 'end':
-            with open(self.file, 'wb') as f:
-                cPickle.dump((self.network, self.name, self.hp, self.updates), f, cPickle.HIGHEST_PROTOCOL)
+            save_model(self)
             logger.info(' Final model saved as : ' + self.file)
 
         logger.info('\n Optimization completed. ' + ('Early stopped at epoch: %i' % epoch)
@@ -212,12 +225,8 @@ class Model(object):
 
         return self.report
 
-    def load(self, file):
-        with open(file, 'rb') as f:
-            self.network, self.name, self.hp, self.updates = cPickle.load(f)
-
     def predict(self, X):
         prediction = T.argmax(self.network.get_output(stochastic=False), axis=1)
-        prediction_model = theano.function(inputs=[self.x], outputs=prediction, name='prediction')
-        return prediction_model(X)
+        predict = theano.function(inputs=[self.x], outputs=prediction, name='predict')
+        return predict(X)
 

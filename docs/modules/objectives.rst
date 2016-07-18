@@ -5,9 +5,6 @@ Objectives
 
 .. automodule:: yadll.objectives
 
-Initializers
-------------
-
 .. autosummary::
 
     mean_squared_error
