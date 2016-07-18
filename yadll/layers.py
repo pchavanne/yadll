@@ -49,10 +49,10 @@ class Layer(object):
         self.params = []
         self.reguls = 0
 
+
     def get_params(self):
         """
-        Return a list of Theano shared variables representing the parameters of
-        this layer.
+        Theano shared variables representing the parameters of this layer.
 
         Returns
         -------
@@ -62,7 +62,7 @@ class Layer(object):
 
     def get_reguls(self):
         """
-        Return Theano expression representing the sum of the regulators of
+        Theano expression representing the sum of the regulators of
         this layer.
 
         Returns
@@ -182,6 +182,14 @@ class DenseLayer(Layer):
         if l2:
             self.reguls += l2 * T.mean(T.sqr(self.W))
 
+    def __getstate__(self):
+        return self.W.get_value(), self.b.get_value()
+
+    def __setstate__(self, state):
+        W, b = state
+        self.W.set_value(W)
+        self.b.set_value(b)
+
     @property
     def output_shape(self):
         return self.input_shape[0], self.shape[1]
@@ -240,6 +248,12 @@ class LogisticRegression(DenseLayer):
     def __init__(self, incoming, nb_class, W=constant, activation=softmax, **kwargs):
         super(LogisticRegression, self).__init__(incoming, nb_class, W=W,
                                                  activation=activation, **kwargs)
+
+    def __getstate__(self):
+        return super(LogisticRegression, self).__getstate__()
+
+    def __setstate__(self, state):
+        super(LogisticRegression, self).__setstate__(state)
 
 
 class Dropout(Layer):

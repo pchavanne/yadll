@@ -1,4 +1,6 @@
 # -*- coding: UTF-8 -*-
+import cPickle
+
 from .layers import *
 from .exceptions import *
 
@@ -27,7 +29,7 @@ class Model(object):
         name of the file to save the model
 
     """
-    def __init__(self, network=None, data=None, hyperparameters=None, name=None,
+    def __init__(self, network=None, data=None, hyperparameters=None, name='model',
                  updates=sgd, file=None):
         self.network = network
         self.data = data             # data [(train_set_x, train_set_y), (valid_set_x, valid_set_y), (test_set_x, test_set_y)]
@@ -35,6 +37,7 @@ class Model(object):
         self.hp = hyperparameters
         self.updates = updates
         self.file = file
+        self.save_mode = None        # None, 'end' or 'each'
         self.index = T.iscalar()     # index to a [mini]batch
         self.x = T.matrix('x')       # the input data is presented as a matrix
         if data.train_set_y.ndim == 1:
@@ -52,9 +55,37 @@ class Model(object):
                 layer.unsupervised_training(self.x, self.data.train_set_x)
 
     @timer(' Training')
-    def train(self, unsupervised_training=True, save_model=False):
+    def train(self, unsupervised_training=True, save_mode=None):
+        """
+        Training the network
+
+        Parameters
+        ----------
+        unsupervised_training: `bool`, (default is True)
+            pretraining of the unsupervised layers if any
+        save_mode : {None, 'end', 'each'}
+            None (default), model will not be saved
+            'end', model will only be savec at the end of the training
+            'each', model will be saved each time the model is improved
+
+        Returns
+        -------
+            report
+        """
         if self.data is None:
             raise NoDataFoundException
+
+        if save_mode is not None:
+            if save_mode not in ['end', 'each']:
+                self.save_mode = 'end'
+            else:
+                self.save_mode = save_mode
+            if self.file is None:
+                import datetime
+                self.file = self.name + '_' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.yaddl'
+
+        if self.file is not None and save_mode is None:
+            self.save_mode = 'end'
 
         self.report['test_values'] = []
         self.report['validation_values'] = []
@@ -93,12 +124,12 @@ class Model(object):
         error = T.neq(prediction, self.y)
 
         validate_model = theano.function(inputs=[self.index], outputs=error, name='validate',
-                                         givens={self.x: self.data.valid_set_x[self.index * self.hp.batch_size:(self.index + 1) * self.hp.batch_size],
-                                                 self.y: self.data.valid_set_y[self.index * self.hp.batch_size:(self.index + 1) * self.hp.batch_size]})
+                                         givens={self.x: self.data.valid_set_x[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size],
+                                                 self.y: self.data.valid_set_y[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size]})
 
         test_model = theano.function(inputs=[self.index], outputs=error, name='test',
-                                     givens={self.x: self.data.test_set_x[self.index * self.hp.batch_size:(self.index + 1) * self.hp.batch_size],
-                                             self.y: self.data.test_set_y[self.index * self.hp.batch_size:(self.index + 1) * self.hp.batch_size]})
+                                     givens={self.x: self.data.test_set_x[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size],
+                                             self.y: self.data.test_set_y[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size]})
 
         logger.info('... Training the model')
 
@@ -149,15 +180,21 @@ class Model(object):
                                     (epoch, minibatch_index + 1, n_train_batches, test_score * 100.))
                         self.report['test_values'].append((epoch, test_score * 100))
 
-                        # # save the best model
-                        # if save_model:
-                        #
-                        #     with open(self.file, 'wb') as f:
-                        #         cPickle.dump(self.network, f)
+                        # save and overwrite each best model
+                        if self.save_mode == 'each':
+                            with open(self.file, 'wb') as f:
+                                cPickle.dump((self.network, self.name, self.hp, self.updates), f, cPickle.HIGHEST_PROTOCOL)
+                            logger.info(' Best model saved')
 
                 if patience <= iter:
                     done_looping = True
                     break
+
+        # save the final model
+        if self.save_mode == 'end':
+            with open(self.file, 'wb') as f:
+                cPickle.dump((self.network, self.name, self.hp, self.updates), f, cPickle.HIGHEST_PROTOCOL)
+            logger.info(' Final model saved as : ' + self.file)
 
         logger.info('\n Optimization completed. ' + ('Early stopped at epoch: %i' % epoch)
                     if done_looping else 'Optimization completed. ' + ('Trained on all %i epochs' % epoch))
@@ -174,3 +211,13 @@ class Model(object):
         self.report['test_score'] = test_score * 100.
 
         return self.report
+
+    def load(self, file):
+        with open(file, 'rb') as f:
+            self.network, self.name, self.hp, self.updates = cPickle.load(f)
+
+    def predict(self, X):
+        prediction = T.argmax(self.network.get_output(stochastic=False), axis=1)
+        prediction_model = theano.function(inputs=[self.x], outputs=prediction, name='prediction')
+        return prediction_model(X)
+
