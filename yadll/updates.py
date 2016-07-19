@@ -1,4 +1,16 @@
 # -*- coding: UTF-8 -*-
+"""
+Updates functions
+
+Arguments
+---------
+cost : cost function
+    The cost function that will be minimised during training
+params : list of parameters
+    The list of all the weights of the network that will be modified
+
+"""
+
 from collections import OrderedDict
 
 import theano.tensor as T
