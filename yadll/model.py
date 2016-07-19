@@ -10,6 +10,17 @@ logger = logging.getLogger(__name__)
 
 
 def save_model(model, file=None):
+    """
+    Save the model to file with cPickle
+    This function is used by the training function to save the model.
+    Parameters
+    ----------
+    model : :class:`yadll.model.Model`
+        model to be saved in file
+    file : `string`
+        file name
+
+    """
     if file is None:
         d_file = model.file
     else:
@@ -19,6 +30,24 @@ def save_model(model, file=None):
 
 
 def load_model(file):
+    """
+    load (unpickle) a saved model
+
+    Parameters
+    ----------
+    file : `string'
+        file name
+
+    Returns
+    -------
+        a :class:`yadll.model.Model`
+
+    Examples
+    --------
+
+    >>> my_model = load_model('my_best_model.yadll')
+
+    """
     with open(file, 'rb') as f:
         model = cPickle.load(f)
     return model
@@ -26,22 +55,23 @@ def load_model(file):
 
 class Model(object):
     """
-    The :class:`Model` contains the data, the network, the hyperparameters,
+    The :class:`yadll.model.Model` contains the data, the network, the hyperparameters,
     and the report.
     It pre-trains unsupervised layers, trains the network and save it to file.
 
     Parameters
     ----------
-    network : :class:`yadll.network`
+    network : :class:`yadll.network.Network`
         the network to be trained
-    data : :class:`yadll.data`
+    data : :class:`yadll.data.Data`
         the training, validating and testing set
     name : `string`
         the name of the model
     updates : :func:`yadll.updates`
         an update function
     file : `string`
-        name of the file to save the model
+        name of the file to save the model. If omitted a name is generated with
+        the model name + date + time of training
 
     """
     def __init__(self, network=None, data=None, hyperparameters=None, name='model',
@@ -63,6 +93,13 @@ class Model(object):
 
     @timer(' Unsupervised Pre-Training')
     def pretrain(self):
+        """
+        Pre-training of the unsupervised layers sequentially
+
+        Returns
+        -------
+            update unsupervised layers weights
+        """
         if self.data is None:
             raise NoDataFoundException
         for layer in self.network.layers:
@@ -77,10 +114,11 @@ class Model(object):
         Parameters
         ----------
         unsupervised_training: `bool`, (default is True)
-            pretraining of the unsupervised layers if any
+            pre-training of the unsupervised layers if any
         save_mode : {None, 'end', 'each'}
-            None (default), model will not be saved
-            'end', model will only be savec at the end of the training
+            None (default), model will not be saved unless name specified in the
+            model definition.
+            'end', model will only be saved at the end of the training
             'each', model will be saved each time the model is improved
 
         Returns

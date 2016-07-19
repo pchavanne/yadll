@@ -43,7 +43,7 @@ def train(network_name, data):
 
     ################################################
     # construct the model
-    model = yadll.model.Model(name=network_name, data=data, file='best_model.yadll')
+    model = yadll.model.Model(name=network_name, data=data)
     # construct the network
     network, hp = build_network(network_name, input_var=model.x)
     # add the network to the model
@@ -59,26 +59,6 @@ def train(network_name, data):
     test_set_x = data.test_set_x.get_value()
     test_set_y = data.test_set_y.eval()
 
-    predicted_values = model.predict(test_set_x[:30])
-    print ("Predicted values for the first 30 examples in test set:")
-    print predicted_values
-    print test_set_y[:30]
-
-
-# def load_model_from_file(network_name, data):
-
-    print ("Loading model from file")
-    # construct the model
-    model2 = yadll.model.Model(name=network_name, data=data)
-    # load the saved model
-    model2.load('best_model.yadll')
-    print model2.name
-    print model2.network.layers
-    assert model2 == model
-    # We can test it on some examples from test
-    test_set_x = data.test_set_x.get_value()
-    test_set_y = data.test_set_y.eval()
-    #model2.train(unsupervised_training=True)
     predicted_values = model.predict(test_set_x[:30])
     print ("Predicted values for the first 30 examples in test set:")
     print predicted_values
@@ -112,4 +92,3 @@ if __name__ == '__main__':
 
         train(network_name, data=data)
 
-        # load_model_from_file(network_name, data=data)
