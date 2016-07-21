@@ -151,9 +151,11 @@ class Model(object):
         n_test_batches = self.data.test_set_x.get_value(borrow=True).shape[0] / self.hp.batch_size
 
         cost = -T.mean(T.log(self.network.get_output(stochastic=True))[T.arange(self.y.shape[0]), self.y])
-        # add regularistion
+        # add regularisation
         cost += self.network.reguls
 
+        ################################################
+        # Updates
         # updates of the model as a list of (variable, update expression) pairs
         update_param = {}
         if hasattr(self.hp, 'learning_rate'):
@@ -166,15 +168,17 @@ class Model(object):
             update_param['rho'] = self.hp.rho
         updates = self.updates(cost, self.network.params, **update_param)
 
-        # compiling Theano functions for training, validating and testing the model
-        train_model = theano.function(inputs=[self.index], outputs=cost, updates=updates, name='train',
-                                      givens={self.x: self.data.train_set_x[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size],
-                                              self.y: self.data.train_set_y[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size]})
-
         ################################################
         # Validation & Test functions
         prediction = T.argmax(self.network.get_output(stochastic=False), axis=1)
         error = T.neq(prediction, self.y)
+
+        ################################################
+        # Compiling functions for training, validating and testing the model
+        logger.info('... Compiling the model')
+        train_model = theano.function(inputs=[self.index], outputs=cost, updates=updates, name='train',
+                                      givens={self.x: self.data.train_set_x[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size],
+                                              self.y: self.data.train_set_y[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size]})
 
         validate_model = theano.function(inputs=[self.index], outputs=error, name='validate',
                                          givens={self.x: self.data.valid_set_x[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size],
@@ -184,6 +188,8 @@ class Model(object):
                                      givens={self.x: self.data.test_set_x[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size],
                                              self.y: self.data.test_set_y[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size]})
 
+        ################################################
+        # Training
         logger.info('... Training the model')
 
         # early-stopping parameters

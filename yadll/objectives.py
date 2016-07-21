@@ -124,7 +124,7 @@ def categorical_crossentropy(prediction, target):
 
     Returns
     -------
-        Binary crossentropy
+        Categorical crossentropy
     """
     prediction /= prediction.sum(axis=-1, keepdims=True)
     prediction = T.clip(prediction, EPSILON, 1 - EPSILON)
