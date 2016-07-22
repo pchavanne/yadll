@@ -12,7 +12,7 @@ to run this example, just do:
 
 .. code-block:: bash
 
-    cd /yadll.examples
+    cd /yadll/examples
     python model_template.py
 
 We will first import yadll and configure a basic logger.
@@ -150,6 +150,14 @@ Once the model is trained let's use it to make prediction:
     print ("Predicted values for the first 30 examples in test set:")
     print predicted_values
     print test_set_y[:30]
+
+This should give you
+
+.. code-block:: text
+
+    Predicted values for the first 30 examples in test set:
+    [7 2 1 0 4 1 4 9 6 9 0 6 9 0 1 5 9 7 3 4 9 6 6 5 4 0 7 4 0 1]
+    [7 2 1 0 4 1 4 9 5 9 0 6 9 0 1 5 9 7 3 4 9 6 6 5 4 0 7 4 0 1]
 
 
 Saving/loading models
