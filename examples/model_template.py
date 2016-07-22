@@ -68,8 +68,8 @@ model.updates = yadll.updates.nesterov_momentum
 # train the model and save it to file at each best
 model.train()
 
-# model report
-print model.report
+# saving network paramters
+net.save_params('net_params.yp')
 
 # make prediction
 # We can test it on some examples from test
@@ -87,14 +87,10 @@ print ("Loading model from file")
 # load the saved model
 model2 = yadll.model.load_model('best_model.ym')
 
-
 predicted_values2 = model2.predict(test_set_x[:30])
 print ("Model 2, predicted values for the first 30 examples in test set:")
 print predicted_values2
 print test_set_y[:30]
-
-# saving network paramters
-net.save_params('net_params.yp')
 
 # load network parameters
 # first we recreate the network
@@ -132,19 +128,19 @@ l_out = yadll.layers.LogisticRegression(incoming=l_hid2, nb_class=10, l1=hp.l1_r
                                         l2=hp.l2_reg, name='Logistic regression')
 
 # Create network and add layers
-net2 = yadll.network.Network('2 layers mlp with dropout')
-net2.add(l_in)
-net2.add(l_dro1)
-net2.add(l_hid1)
-net2.add(l_dro2)
-net2.add(l_hid2)
-net2.add(l_out)
+net3 = yadll.network.Network('2 layers mlp with dropout')
+net3.add(l_in)
+net3.add(l_dro1)
+net3.add(l_hid1)
+net3.add(l_dro2)
+net3.add(l_hid2)
+net3.add(l_out)
 
 # load params
-net2.load_params('net_params.yp')
+net3.load_params('net_params.yp')
 
 # add the network to the model
-model3.network = net2
+model3.network = net3
 
 predicted_values3 = model3.predict(test_set_x[:30])
 print ("Model 3, predicted values for the first 30 examples in test set:")

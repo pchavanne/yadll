@@ -283,6 +283,8 @@ class Model(object):
         return self.report
 
     def predict(self, X):
+        if self.network.layers[0].input is None:
+            self.network.layers[0].input = self.x
         prediction = T.argmax(self.network.get_output(stochastic=False), axis=1)
         predict = theano.function(inputs=[self.x], outputs=prediction, name='predict')
         return predict(X)
