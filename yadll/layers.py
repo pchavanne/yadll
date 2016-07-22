@@ -114,7 +114,7 @@ class InputLayer(Layer):
         shape : `tuple` of `int`
             The shape of the input layer
         input_var : `Theano shared Variables`, optional
-            The input data of the network
+            The input data of the network, used to train the model
         """
         super(InputLayer, self).__init__(shape, **kwargs)
         self.input = input_var

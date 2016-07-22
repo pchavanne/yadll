@@ -40,7 +40,7 @@ def grid_search():
         model.hp = hp
         # Create connected layers
         # Input layer
-        l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=model.x, name='Input')
+        l_in = InputLayer(shape=(hp.batch_size, 28 * 28), name='Input')
         # Dense Layer 1
         l_hid1 = DenseLayer(incoming=l_in, nb_units=500, W=glorot_uniform, l1=hp.l1_reg,
                             l2=hp.l2_reg, activation=hp.activation, name='Hidden layer 1')

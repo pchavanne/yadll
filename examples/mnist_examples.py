@@ -5,10 +5,10 @@ Example of dl usage on the mnist dataset
 use -n or --network_list to see all available networks
 
 Usage:
-    mnist_dl.py [<network>] [default:'logistic_regression']
-    mnist_dl.py (-n | --network_list)
-    mnist_dl.py (-h | --help)
-    mnist_dl.py --version
+    mnist_examples.py [<network>] [default:'logistic_regression']
+    mnist_examples.py (-n | --network_list)
+    mnist_examples.py (-h | --help)
+    mnist_examples.py --version
 
 Options:
     -n --network_list   Show available networks
@@ -45,7 +45,7 @@ def train(network_name, data):
     # construct the model
     model = yadll.model.Model(name=network_name, data=data)
     # construct the network
-    network, hp = build_network(network_name, input_var=model.x)
+    network, hp = build_network(network_name)
     # add the network to the model
     model.network = network
     # add the hyperparameters to the model

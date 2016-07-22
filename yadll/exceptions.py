@@ -4,3 +4,6 @@ class DlException(Exception):
 
 class NoDataFoundException(DlException):
     pass
+
+class NoNetworkFoundException(DlException):
+    pass

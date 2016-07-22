@@ -45,7 +45,7 @@ def load_model(file):
     Examples
     --------
 
-    >>> my_model = load_model('my_best_model.yadll')
+    >>> my_model = load_model('my_best_model.ym')
 
     """
     with open(file, 'rb') as f:
@@ -102,6 +102,13 @@ class Model(object):
         """
         if self.data is None:
             raise NoDataFoundException
+
+        if self.network is None:
+            raise NoNetworkFoundException
+        else:
+            if self.network.layers[0].input is None:
+                self.network.layers[0].input = self.x
+
         for layer in self.network.layers:
             if isinstance(layer, UnsupervisedLayer):
                 layer.unsupervised_training(self.x, self.data.train_set_x)
@@ -128,6 +135,12 @@ class Model(object):
         if self.data is None:
             raise NoDataFoundException
 
+        if self.network is None:
+            raise NoNetworkFoundException
+        else:
+            if self.network.layers[0].input is None:
+                self.network.layers[0].input = self.x
+
         if save_mode is not None:
             if save_mode not in ['end', 'each']:
                 self.save_mode = 'end'
@@ -135,7 +148,7 @@ class Model(object):
                 self.save_mode = save_mode
             if self.file is None:
                 import datetime
-                self.file = self.name + '_' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.yaddl'
+                self.file = self.name + '_' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.ym'
 
         if self.file is not None and save_mode is None:
             self.save_mode = 'end'

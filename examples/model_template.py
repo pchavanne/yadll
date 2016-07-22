@@ -5,6 +5,7 @@ import os
 import yadll
 
 import logging
+
 logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
 # load the data
@@ -17,7 +18,7 @@ if not os.path.isfile(datafile):
 data = yadll.data.Data(datafile)
 
 # create the model
-model = yadll.model.Model(name='mlp dropout', data=data, file='best_model.yadll')
+model = yadll.model.Model(name='mlp with dropout', data=data, file='best_model.ym')
 
 # Hyperparameters
 hp = yadll.hyperparameters.Hyperparameters()
@@ -33,7 +34,7 @@ model.hp = hp
 
 # Create connected layers
 # Input layer
-l_in = yadll.layers.InputLayer(shape=(hp.batch_size, 28 * 28), input_var=model.x, name='Input')
+l_in = yadll.layers.InputLayer(shape=(hp.batch_size, 28 * 28), name='Input')
 # Dropout Layer 1
 l_dro1 = yadll.layers.Dropout(incoming=l_in, corruption_level=0.4, name='Dropout 1')
 # Dense Layer 1
@@ -49,7 +50,7 @@ l_out = yadll.layers.LogisticRegression(incoming=l_hid2, nb_class=10, l1=hp.l1_r
                                         l2=hp.l2_reg, name='Logistic regression')
 
 # Create network and add layers
-net = yadll.network.Network('mlp')
+net = yadll.network.Network('2 layers mlp with dropout')
 net.add(l_in)
 net.add(l_dro1)
 net.add(l_hid1)
@@ -92,3 +93,6 @@ predicted_values2 = model2.predict(test_set_x[:30])
 print ("Predicted values for the first 30 examples in test set:")
 print predicted_values2
 print test_set_y[:30]
+
+# saving network paramters
+net.save_params('net_params.yp')

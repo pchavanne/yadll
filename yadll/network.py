@@ -1,5 +1,11 @@
 # -*- coding: UTF-8 -*-
+import cPickle
+
 from .layers import *
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Network(object):
@@ -85,3 +91,60 @@ class Network(object):
 
         """
         return self.layers[-1].get_output(**kwargs)
+
+    def save_params(self, file):
+        """
+        Save the parameters of the network to file with cPickle
+
+        Parameters
+        ----------
+        network : :class:`yadll.network.Network`
+            model to be saved in file
+        file : `string`
+            file name
+
+        Examples
+        --------
+
+        >>> my_network.save_params('my_network_params.yp')
+
+        """
+        if self.name is None:
+            logger.error(
+                'Your network has no name. Please set one and try again.')
+            return
+
+        with open(file, 'wb') as f:
+            cPickle.dump(self.name, f, cPickle.HIGHEST_PROTOCOL)
+            for param in self.params:
+                cPickle.dump(param.get_value(borrow=True), f,
+                             cPickle.HIGHEST_PROTOCOL)
+
+    def load_params(self, file):
+        """
+        load (unpickle) saved parameters of a network.
+
+        Parameters
+        ----------
+        network : :class:`yadll.network.Network`
+            the network that we want the paramaters to be loaded from file
+        file : `string'
+            name of the file containing the saved parameters
+
+
+        Examples
+        --------
+
+        >>> my_network.load_params('my_network_params.yp')
+
+        """
+
+        with open(file, 'rb') as f:
+            pickled_name = cPickle.load(f)
+            if pickled_name != self.name:
+                logger.error(
+                    'Network names are different. Saved network name is: %s' % pickled_name)
+                return
+
+            for param in self.params:
+                param.set_value(cPickle.load(f), borrow=True)

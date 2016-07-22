@@ -12,7 +12,7 @@ def mean_squared_error(prediction, target):
     """
     Mean Squared Error
 
-    .. math:: MSE_i = \\frac{1}{n} \\sum_{j}{(target_{i,j} - predicition_{i,j})^2}
+    .. math:: MSE_i = \\frac{1}{n} \\sum_{j}{(target_{i,j} - prediction_{i,j})^2}
 
     Parameters
     ----------
@@ -32,7 +32,7 @@ def root_mean_squared_error(prediction, target):
     """
     Root Mean Squared Error
 
-    .. math:: RMSE_i = \\sqrt{\\frac{1}{n} \\sum_{j}{(target_{i,j} - predicition_{i,j})^2}}
+    .. math:: RMSE_i = \\sqrt{\\frac{1}{n} \\sum_{j}{(target_{i,j} - prediction_{i,j})^2}}
 
     Parameters
     ----------
@@ -52,7 +52,7 @@ def mean_absolute_error(prediction, target):
     """
     Mean Absolute Error
 
-    .. math:: MAE_i = \\frac{1}{n} \\sum_{j}{|target_{i,j} - predicition_{i,j}|}
+    .. math:: MAE_i = \\frac{1}{n} \\sum_{j}{|target_{i,j} - prediction_{i,j}|}
 
     Parameters
     ----------
@@ -72,7 +72,7 @@ def hinge(prediction, target):
     """
     Hinge Error
 
-    .. math:: MAE_i = \\frac{1}{n} \\sum_{j}{\\max(1. - target_{i,j} * predicition_{i,j}, 0.)}
+    .. math:: MAE_i = \\frac{1}{n} \\sum_{j}{\\max(1. - target_{i,j} * prediction_{i,j}, 0.)}
 
     Parameters
     ----------
@@ -92,7 +92,7 @@ def binary_crossentropy(prediction, target):
     """
     Binary Crossentropy Error
 
-    .. math:: MAE_i = \\frac{1}{n} \\sum_{j}{\abs{target_{i,j} - predicition_{i,j}}}
+    .. math:: MAE_i = \\frac{1}{n} \\sum_{j}{\abs{target_{i,j} - prediction_{i,j}}}
 
     Parameters
     ----------
@@ -113,7 +113,7 @@ def categorical_crossentropy(prediction, target):
     """
     Categorical Crossentropy Error
 
-    .. math:: MAE_i = \\frac{1}{n} \\sum_{j}{\abs{target_{i,j} - predicition_{i,j}}}
+    .. math:: MAE_i = \\frac{1}{n} \\sum_{j}{\abs{target_{i,j} - prediction_{i,j}}}
 
     Parameters
     ----------
