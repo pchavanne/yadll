@@ -153,6 +153,7 @@ Once the model is trained let's use it to make prediction:
 
 Saving/loading models
 ---------------------
+
 Yadll provides two ways to save and load models.
 The first will pickle the whole model. It is not recommended for long term
 storage but is very convenient to handle models.
