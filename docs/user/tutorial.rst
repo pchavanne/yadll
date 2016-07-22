@@ -63,6 +63,7 @@ We define the hyperparameters of the model and add it to our model object.
     hp('l1_reg', 0.00)
     hp('l2_reg', 0.0000)
     hp('patience', 10000)
+
     # add the hyperparameters to the model
     model.hp = hp
 
@@ -155,11 +156,94 @@ Saving/loading models
 ---------------------
 
 Yadll provides two ways to save and load models.
-The first will pickle the whole model. It is not recommended for long term
-storage but is very convenient to handle models.
-The second is more robust. It saves the parameters of the network but ask you to
+
+**Save the model**
+
+This first method for saving your model is to pickle the whole model. It is not recommended for long term
+storage but is very convenient to handle models. All you have to do is provide you model constructor with
+a file name. The model will be saved after training.
+
+.. code-block:: python
+
+    model = yadll.model.Model(name='mlp with dropout', data=data, file='best_model.ym')
+
+You can save your model after each best model. If your system crash you will be able to
+restart the training from the last best model. To do so just do
+
+.. code-block:: python
+
+    model.train(save_mode='each')
+
+**Save the network parameters**
+
+This second method is more robust and can be used for long term storage.
+It consists in saving the parameters (pickling)of the network. but ask you to
 recreate the network and model.
 
+Once the model has been trained you can save the parameters:
+.. code-block:: python
+
+    # saving network paramters
+    net.save_params('net_params.yp')
+
+Now you can retrieve the model with those parameters, but you have to recreate the model and load the parameters.
+When loading the parameters, the network name must match the saved parameters network name.
+
+.. code-block:: python
+
+    # load network parameters
+    # first we recreate the network
+    # create the model
+    model3 = yadll.model.Model(name='mlp with dropout', data=data,)
+
+    # Hyperparameters
+    hp = yadll.hyperparameters.Hyperparameters()
+    hp('batch_size', 500)
+    hp('n_epochs', 1000)
+    hp('learning_rate', 0.1)
+    hp('momentum', 0.5)
+    hp('l1_reg', 0.00)
+    hp('l2_reg', 0.0000)
+    hp('patience', 10000)
+
+    # add the hyperparameters to the model
+    model3.hp = hp
+
+    # Create connected layers
+    # Input layer
+    l_in = yadll.layers.InputLayer(shape=(hp.batch_size, 28 * 28), name='Input')
+    # Dropout Layer 1
+    l_dro1 = yadll.layers.Dropout(incoming=l_in, corruption_level=0.4, name='Dropout 1')
+    # Dense Layer 1
+    l_hid1 = yadll.layers.DenseLayer(incoming=l_dro1, nb_units=500, W=yadll.init.glorot_uniform, l1=hp.l1_reg,
+                                     l2=hp.l2_reg, activation=yadll.activation.relu, name='Hidden layer 1')
+    # Dropout Layer 2
+    l_dro2 = yadll.layers.Dropout(incoming=l_hid1, corruption_level=0.2, name='Dropout 2')
+    # Dense Layer 2
+    l_hid2 = yadll.layers.DenseLayer(incoming=l_dro2, nb_units=500, W=yadll.init.glorot_uniform, l1=hp.l1_reg,
+                                     l2=hp.l2_reg, activation=yadll.activation.relu, name='Hidden layer 2')
+    # Logistic regression Layer
+    l_out = yadll.layers.LogisticRegression(incoming=l_hid2, nb_class=10, l1=hp.l1_reg,
+                                            l2=hp.l2_reg, name='Logistic regression')
+
+    # Create network and add layers
+    net2 = yadll.network.Network('2 layers mlp with dropout')
+    net2.add(l_in)
+    net2.add(l_dro1)
+    net2.add(l_hid1)
+    net2.add(l_dro2)
+    net2.add(l_hid2)
+    net2.add(l_out)
+
+    # load params
+    net2.load_params('net_params.yp')   # Here we don't train the model but reload saved parameters
+
+    # add the network to the model
+    model3.network = net2
+
+.. note::
+    By convention we use the .ym extension for Yadll Model file and
+    .yp for Yadll Parameters file, but it is not mandatory.
 
 Run the mnist examples
 ----------------------
@@ -190,7 +274,7 @@ You can get the list of all available networks:
   python mnist_examples.py --network_list
 
 
-Trainning a model for example lenet5:
+Training a model for example lenet5:
 
 .. code-block:: bash
 
@@ -205,3 +289,4 @@ grid search on the hyperparameters:
 .. code-block:: bash
 
   python hp_grid_search.py
+

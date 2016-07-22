@@ -98,8 +98,6 @@ class Network(object):
 
         Parameters
         ----------
-        network : :class:`yadll.network.Network`
-            model to be saved in file
         file : `string`
             file name
 
@@ -126,8 +124,6 @@ class Network(object):
 
         Parameters
         ----------
-        network : :class:`yadll.network.Network`
-            the network that we want the paramaters to be loaded from file
         file : `string'
             name of the file containing the saved parameters
 
