@@ -123,12 +123,14 @@ Here is the output when trained on NVIDIA Geforce Titan X card:
 
 .. code-block:: text
 
-    epoch 998, minibatch 100/100, validation error 1.420 %
-    epoch 999, minibatch 100/100, validation error 1.370 %
-    epoch 1000, minibatch 100/100, validation error 1.350 %
-    Optimization completed. Trained on all 1000 epochs
-     Validation score of 1.290 % obtained at iteration 68700, with test performance 1.290 %
-     Training MLP 2 layers with dropout took 03 m 12 s
+    epoch 463, minibatch 100/100, validation error 1.360 %
+    epoch 464, minibatch 100/100, validation error 1.410 %
+    epoch 465, minibatch 100/100, validation error 1.400 %
+
+     Optimization completed. Early stopped at epoch: 466
+     Validation score of 1.260 % obtained at iteration 23300, with test performance 1.320 %
+     Training mlp with dropout took 02 m 29 s
+
 
 Making Prediction
 _________________
