@@ -167,12 +167,29 @@ a file name. The model will be saved after training.
 
     model = yadll.model.Model(name='mlp with dropout', data=data, file='best_model.ym')
 
-You can save your model after each best model. If your system crash you will be able to
-restart the training from the last best model. To do so just do
+You can also save your model by setting the `save_mode` argument of the train function.
+If you didn't give a file name it will create one: model.name + '_' + ('%Y%m%d%H%M%S') + '.ym'.
+You can set it to 'end' (save at the end of the training) or 'each' (save after each best model).
 
 .. code-block:: python
 
     model.train(save_mode='each')
+
+If you used 'each' and if your system crash you will be able to
+restart the training from the last best model. To do so just do
+
+To load the model just do
+
+.. code-block:: python
+
+    # load the saved model
+    model2 = yadll.model.load_model('best_model.ym')
+
+.. warning::
+
+    * Do not use this method for long term storage or production environment.
+    * Model trained on GPU will not be usable on CPU and vice versa.
+
 
 **Save the network parameters**
 
@@ -180,7 +197,8 @@ This second method is more robust and can be used for long term storage.
 It consists in saving the parameters (pickling)of the network. but ask you to
 recreate the network and model.
 
-Once the model has been trained you can save the parameters:
+Once the model has been trained you can save the parameters
+
 .. code-block:: python
 
     # saving network paramters
