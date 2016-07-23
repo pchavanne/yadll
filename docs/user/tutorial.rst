@@ -43,14 +43,14 @@ Then we load the MNIST dataset (or download it) and create a
 
 We now create a :class:`yadll.model.Model`, that is the class that contain
 the data, the network, the hyperparameters and the updates function. As a file
-name is provided, the model will be saved (see Saving/loading models).
+name is provided, the model will be saved (see `Saving/loading models`_).
 
 .. code-block:: python
 
     # create the model
     model = yadll.model.Model(name='mlp with dropout', data=data, file='best_model.ym')
 
-We define the hyperparameters of the model and add it to our model object.
+We define the hyperparameters(see `Hyperparameters and Grid search`_) of the model and add it to our model object.
 
 .. code-block:: python
 
@@ -108,6 +108,7 @@ Order matters!!!
     net.add(l_out)
 
 We add the network and the updates function to the model and train the model.
+Here we update with the stochastic gradient descent with Nesterov momentum.
 
 .. code-block:: python
 
@@ -307,8 +308,8 @@ Training a model for example lenet5:
   python mnist_examples.py lenet5
 
 
-Grid search of the Hyperparameters
-----------------------------------
+Hyperparameters and Grid search
+-------------------------------
 
 grid search on the hyperparameters:
 
