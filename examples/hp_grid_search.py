@@ -70,20 +70,18 @@ def grid_search():
         model.updates = yadll.updates.sgd
         reports.append((hp, model.train()))
 
-        report_file = open('reports.pkl', 'wb')
-        cPickle.dump(reports, report_file)
-        report_file.close()
+        with open('reports.pkl', 'wb') as report_file:
+            cPickle.dump(reports, report_file)
 
 
 # Grid search
 grid_search()
 
-
 # Report Analysis
-report_file = open('reports.pkl', 'rb')
-reports = cPickle.load(report_file)
+with open('reports.pkl', 'rb') as report_file:
+    reports = cPickle.load(report_file)
 reports = pd.DataFrame(reports)
-param_reports = pd.DataFrame.from_records(reports['parameters'])
+param_reports = pd.DataFrame.from_records(reports[0])
 pd_report = pd.DataFrame(reports,
                          columns=['iteration', 'test', 'validation', 'training time'])
 reports = pd.concat([param_reports, pd_report], axis=1)

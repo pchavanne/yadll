@@ -168,6 +168,7 @@ Saving/loading models
 Yadll provides two ways to save and load models.
 
 **Save the model**
+^^^^^^^^^^^^^^^^^^
 
 This first method for saving your model is to pickle the whole model. It is not recommended for long term
 storage but is very convenient to handle models. All you have to do is provide you model constructor with
@@ -201,7 +202,8 @@ To load the model just do
     * Model trained on GPU will not be usable on CPU.
 
 
-**Save the network parameters**
+Save the network parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This second method is more robust and can be used for long term storage.
 It consists in saving the parameters (pickling) of the network.
