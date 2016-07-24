@@ -28,7 +28,7 @@ def logistic_regression(input_var=None):
     hp = Hyperparameters()
     hp('batch_size', 600)
     hp('n_epochs', 1000)
-    hp('learning_rate', 0.13)
+    hp('learning_rate', 0.1)
     hp('patience', 5000)
 
     # Create connected layers
