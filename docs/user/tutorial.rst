@@ -197,14 +197,13 @@ To load the model just do
 .. warning::
 
     * Do not use this method for long term storage or production environment.
-    * Model trained on GPU will not be usable on CPU and vice versa.
+    * Model trained on GPU will not be usable on CPU.
 
 
 **Save the network parameters**
 
 This second method is more robust and can be used for long term storage.
-It consists in saving the parameters (pickling)of the network. but ask you to
-recreate the network and model.
+It consists in saving the parameters (pickling) of the network.
 
 Once the model has been trained you can save the parameters
 
@@ -213,7 +212,7 @@ Once the model has been trained you can save the parameters
     # saving network paramters
     net.save_params('net_params.yp')
 
-Now you can retrieve the model with those parameters, but you have to recreate the model and load the parameters.
+Now you can retrieve the model with those parameters, but first you have to recreate the model.
 When loading the parameters, the network name must match the saved parameters network name.
 
 .. code-block:: python
