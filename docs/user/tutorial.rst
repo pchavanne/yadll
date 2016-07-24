@@ -43,14 +43,14 @@ Then we load the MNIST dataset (or download it) and create a
 
 We now create a :class:`yadll.model.Model`, that is the class that contain
 the data, the network, the hyperparameters and the updates function. As a file
-name is provided, the model will be saved (see Saving/loading models).
+name is provided, the model will be saved (see `Saving/loading models`_).
 
 .. code-block:: python
 
     # create the model
     model = yadll.model.Model(name='mlp with dropout', data=data, file='best_model.ym')
 
-We define the hyperparameters of the model and add it to our model object.
+We define the hyperparameters(see `Hyperparameters and Grid search`_) of the model and add it to our model object.
 
 .. code-block:: python
 
@@ -68,7 +68,7 @@ We define the hyperparameters of the model and add it to our model object.
     model.hp = hp
 
 We now create each layers of the network by implementing :class:`yadll.layers` classes.
-We always start with a :class:`yadll.layers.Input` that give the shape of the input data.
+The first layers must be a :class:`yadll.layers.Input` that give the shape of the input data.
 This network will be a mlp with two dense layer with rectified linear unit activation and dropout.
 Each layer receive as `incoming` the previous layer.
 The last layer is a :class:`yadll.layers.LogisticRegression` which is a dense layer with softmax activation.
@@ -108,6 +108,7 @@ Order matters!!!
     net.add(l_out)
 
 We add the network and the updates function to the model and train the model.
+Here we update with the stochastic gradient descent with Nesterov momentum.
 
 .. code-block:: python
 
@@ -120,7 +121,7 @@ We add the network and the updates function to the model and train the model.
     # train the model and save it to file at each best
     model.train(save_mode='each')
 
-Here is the output when trained on NVIDIA Geforce Titan X card:
+Here is the output when trained on a NVIDIA Geforce Titan X card:
 
 .. code-block:: text
 
@@ -156,7 +157,7 @@ This should give you
 .. code-block:: text
 
     Predicted values for the first 30 examples in test set:
-    [7 2 1 0 4 1 4 9 6 9 0 6 9 0 1 5 9 7 3 4 9 6 6 5 4 0 7 4 0 1]
+    [7 2 1 0 4 1 4 9 5 9 0 6 9 0 1 5 9 7 3 4 9 6 6 5 4 0 7 4 0 1]
     [7 2 1 0 4 1 4 9 5 9 0 6 9 0 1 5 9 7 3 4 9 6 6 5 4 0 7 4 0 1]
 
 
@@ -176,7 +177,7 @@ a file name. The model will be saved after training.
     model = yadll.model.Model(name='mlp with dropout', data=data, file='best_model.ym')
 
 You can also save your model by setting the `save_mode` argument of the train function.
-If you didn't give a file name it will create one: model.name + '_' + ('%Y%m%d%H%M%S') + '.ym'.
+If you didn't give a file name to the constructor it will create one (model.name + '_YmdHMS.ym').
 You can set it to 'end' (save at the end of the training) or 'each' (save after each best model).
 
 .. code-block:: python
@@ -184,7 +185,7 @@ You can set it to 'end' (save at the end of the training) or 'each' (save after 
     model.train(save_mode='each')
 
 If you used 'each' and if your system crash you will be able to
-restart the training from the last best model. To do so just do
+restart the training from the last best model.
 
 To load the model just do
 
@@ -307,8 +308,8 @@ Training a model for example lenet5:
   python mnist_examples.py lenet5
 
 
-Grid search of the Hyperparameters
-----------------------------------
+Hyperparameters and Grid search
+-------------------------------
 
 grid search on the hyperparameters:
 
