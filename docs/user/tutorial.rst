@@ -5,7 +5,7 @@ Tutorial
 ========
 
 Building and training your first network
-----------------------------------------
+========================================
 
 Let's build our first MLP with dropout on the MNIST example.
 to run this example, just do:
@@ -82,13 +82,15 @@ Layers names are optional.
     # Dropout Layer 1
     l_dro1 = yadll.layers.Dropout(incoming=l_in, corruption_level=0.4, name='Dropout 1')
     # Dense Layer 1
-    l_hid1 = yadll.layers.DenseLayer(incoming=l_dro1, nb_units=500, W=yadll.init.glorot_uniform, l1=hp.l1_reg,
-                                     l2=hp.l2_reg, activation=yadll.activation.relu, name='Hidden layer 1')
+    l_hid1 = yadll.layers.DenseLayer(incoming=l_dro1, nb_units=500, W=yadll.init.glorot_uniform,
+                                     l1=hp.l1_reg, l2=hp.l2_reg, activation=yadll.activation.relu,
+                                     name='Hidden layer 1')
     # Dropout Layer 2
     l_dro2 = yadll.layers.Dropout(incoming=l_hid1, corruption_level=0.2, name='Dropout 2')
     # Dense Layer 2
-    l_hid2 = yadll.layers.DenseLayer(incoming=l_dro2, nb_units=500, W=yadll.init.glorot_uniform, l1=hp.l1_reg,
-                                     l2=hp.l2_reg, activation=yadll.activation.relu, name='Hidden layer 2')
+    l_hid2 = yadll.layers.DenseLayer(incoming=l_dro2, nb_units=500, W=yadll.init.glorot_uniform,
+                                     l1=hp.l1_reg, l2=hp.l2_reg, activation=yadll.activation.relu,
+                                     name='Hidden layer 2')
     # Logistic regression Layer
     l_out = yadll.layers.LogisticRegression(incoming=l_hid2, nb_class=10, l1=hp.l1_reg,
                                             l2=hp.l2_reg, name='Logistic regression')
@@ -135,8 +137,7 @@ Here is the output when trained on a NVIDIA Geforce Titan X card:
 
 
 Making Prediction
-_________________
-
+=================
 Once the model is trained let's use it to make prediction:
 
 .. code-block:: python
@@ -162,7 +163,7 @@ This should give you
 
 
 Saving/loading models
----------------------
+=====================
 
 Yadll provides two ways to save and load models.
 
@@ -241,13 +242,15 @@ When loading the parameters, the network name must match the saved parameters ne
     # Dropout Layer 1
     l_dro1 = yadll.layers.Dropout(incoming=l_in, corruption_level=0.4, name='Dropout 1')
     # Dense Layer 1
-    l_hid1 = yadll.layers.DenseLayer(incoming=l_dro1, nb_units=500, W=yadll.init.glorot_uniform, l1=hp.l1_reg,
-                                     l2=hp.l2_reg, activation=yadll.activation.relu, name='Hidden layer 1')
+    l_hid1 = yadll.layers.DenseLayer(incoming=l_dro1, nb_units=500, W=yadll.init.glorot_uniform,
+                                     l1=hp.l1_reg, l2=hp.l2_reg, activation=yadll.activation.relu,
+                                     name='Hidden layer 1')
     # Dropout Layer 2
     l_dro2 = yadll.layers.Dropout(incoming=l_hid1, corruption_level=0.2, name='Dropout 2')
     # Dense Layer 2
-    l_hid2 = yadll.layers.DenseLayer(incoming=l_dro2, nb_units=500, W=yadll.init.glorot_uniform, l1=hp.l1_reg,
-                                     l2=hp.l2_reg, activation=yadll.activation.relu, name='Hidden layer 2')
+    l_hid2 = yadll.layers.DenseLayer(incoming=l_dro2, nb_units=500, W=yadll.init.glorot_uniform,
+                                     l1=hp.l1_reg, l2=hp.l2_reg, activation=yadll.activation.relu,
+                                     name='Hidden layer 2')
     # Logistic regression Layer
     l_out = yadll.layers.LogisticRegression(incoming=l_hid2, nb_class=10, l1=hp.l1_reg,
                                             l2=hp.l2_reg, name='Logistic regression')
@@ -271,10 +274,16 @@ When loading the parameters, the network name must match the saved parameters ne
     By convention we use the .ym extension for Yadll Model file and
     .yp for Yadll Parameters file, but it is not mandatory.
 
-Run the mnist examples
-----------------------
+Run the examples
+================
 
-Different networks are tested on MNIST dataset in the ``examples/mnist_examples.py``
+Yadll provide a rather exhaustive list of conventional network implementation.
+You will find them in the `/yadll/examples/networks.py` file.
+
+MNIST
+-----
+
+Let's try those network on the MNIST dataset. in the ``/yadll/examples/mnist_examples.py``
 file.
 
 * Logisitic Regression
@@ -308,11 +317,73 @@ Training a model for example lenet5:
 
 
 Hyperparameters and Grid search
--------------------------------
+===============================
 
-grid search on the hyperparameters:
+Yadll provide the :class:`yadll.hyperparameters.Hyperparameters` to hold the
+hyperparameters of the model. It also allows to perform a grid search optimisation
+as the class is iterable over all hyperparameters combinations.
+
+Let's first define our hyperparameters and their search space
+
+.. code-block:: python
+
+    # Hyperparameters
+    hps = Hyperparameters()
+    hps('batch_size', 500, [50, 100, 500, 1000])
+    hps('n_epochs', 1000)
+    hps('learning_rate', 0.1, [0.001, 0.01, 0.1, 1])
+    hps('l1_reg', 0.00, [0, 0.0001, 0.001, 0.01])
+    hps('l2_reg', 0.0001, [0, 0.0001, 0.001, 0.01])
+    hps('activation', tanh, [tanh, sigmoid, relu])
+    hps('initialisation', glorot_uniform, [glorot_uniform, glorot_normal])
+    hps('patience', 10000)
+
+Now we will loop over each possible combination
+
+.. code-block:: python
+
+    reports = []
+    for hp in hps:
+        # create the model
+        model = Model(name='mlp grid search', data=data)
+        # add the hyperparameters to the model
+        model.hp = hp
+        # Create connected layers
+        # Input layer
+        l_in = InputLayer(shape=(None, 28 * 28), name='Input')
+        # Dense Layer 1
+        l_hid1 = DenseLayer(incoming=l_in, nb_units=5, W=hp.initialisation, l1=hp.l1_reg,
+                            l2=hp.l2_reg, activation=hp.activation, name='Hidden layer 1')
+        # Dense Layer 2
+        l_hid2 = DenseLayer(incoming=l_hid1, nb_units=5, W=hp.initialisation, l1=hp.l1_reg,
+                            l2=hp.l2_reg, activation=hp.activation, name='Hidden layer 2')
+        # Logistic regression Layer
+        l_out = LogisticRegression(incoming=l_hid2, nb_class=10, l1=hp.l1_reg,
+                                   l2=hp.l2_reg, name='Logistic regression')
+
+        # Create network and add layers
+        net = Network('mlp')
+        net.add(l_in)
+        net.add(l_hid1)
+        net.add(l_hid2)
+        net.add(l_out)
+        # add the network to the model
+        model.network = net
+
+        # updates method
+        model.updates = yadll.updates.sgd
+        reports.append((hp, model.train()))
+
+.. warning::
+    This hyperparameters would generate 4*4*4*4*3*2=1536 different combinations.
+    Each of these combinations will have a training time different but
+    if it takes 10 minutes on average, the whole optimisation while last more the 10 days!!!
+
+
+to run this example, just do:
 
 .. code-block:: bash
 
-  python hp_grid_search.py
+    python hp_grid_search.py
+
 

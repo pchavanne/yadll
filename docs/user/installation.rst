@@ -25,7 +25,7 @@ We assume you have `Installed Theano`_.
 
 
 Installation
-------------
+============
 The easiest way to install yadll is
 with the Python package manager ``pip``:
 
