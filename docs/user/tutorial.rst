@@ -278,7 +278,7 @@ Run the examples
 ================
 
 Yadll provide a rather exhaustive list of conventional network implementation.
-You will find them in the `/yadll/examples/networks.py` file.
+You will find them in the ``/yadll/examples/networks.py`` file.
 
 MNIST
 -----
@@ -375,9 +375,9 @@ Now we will loop over each possible combination
         reports.append((hp, model.train()))
 
 .. warning::
-    This hyperparameters would generate 4*4*4*4*3*2=1536 different combinations.
-    Each of these combinations will have a training time different but
-    if it takes 10 minutes on average, the whole optimisation while last more the 10 days!!!
+    These hyperparameters would generate 4*4*4*4*3*2=1536 different combinations.
+    Each of these combinations would have a different training time but
+    if it takes 10 minutes on average, the whole optimisation would last more the 10 days!!!
 
 
 to run this example, just do:
