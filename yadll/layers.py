@@ -103,7 +103,8 @@ class Layer(object):
 class InputLayer(Layer):
     """
     Input layer of the data, it has no parameters, it just shapes the data as
-     the input for any network. An ::class:`InputLayer` is always the first layer of any network.
+     the input for any network.
+     A ::class:`InputLayer` is always the first layer of any network.
     """
     def __init__(self, shape, input_var=None, **kwargs):
         """
@@ -112,7 +113,8 @@ class InputLayer(Layer):
         Parameters
         ----------
         shape : `tuple` of `int`
-            The shape of the input layer
+            The shape of the input layer the first element is the batch size
+            and can be set to None.
         input_var : `Theano shared Variables`, optional
             The input data of the network, used to train the model
         """
@@ -126,7 +128,6 @@ class InputLayer(Layer):
 class ReshapeLayer(Layer):
     """
     Reshape the incoming layer to the output_shape.
-    No parameters on this layer.
     """
     def __init__(self, incoming, output_shape=None, **kwargs):
         super(ReshapeLayer, self).__init__(incoming, **kwargs)
@@ -138,6 +139,10 @@ class ReshapeLayer(Layer):
 
     def get_output(self, **kwargs):
         X = self.input_layer.get_output(**kwargs)
+        if self.reshape_shape[0] is None:
+            lst = list(self.reshape_shape)
+            lst[0] = T.shape(X)[0]
+            self.reshape_shape = tuple(lst)
         return X.reshape(self.reshape_shape)
 
 

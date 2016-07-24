@@ -33,7 +33,7 @@ def logistic_regression(input_var=None):
 
     # Create connected layers
     # Input layer
-    l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=input_var, name='Input')
+    l_in = InputLayer(shape=(None, 28 * 28), input_var=input_var, name='Input')
     # Logistic regression Layer
     l_out = LogisticRegression(incoming=l_in, nb_class=10, name='Logistic regression')
 
@@ -59,7 +59,7 @@ def mlp(input_var=None):
 
     # Create connected layers
     # Input layer
-    l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=input_var, name='Input')
+    l_in = InputLayer(shape=(None, 28 * 28), input_var=input_var, name='Input')
     # Dense Layer
     l_hid1 = DenseLayer(incoming=l_in, nb_units=500, W=glorot_uniform, l1=hp.l1_reg,
                         l2=hp.l2_reg, activation=tanh, name='Hidden layer 1')
@@ -92,7 +92,7 @@ def dropout(input_var=None):
 
     # Create connected layers
     # Input layer
-    l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=input_var, name='Input')
+    l_in = InputLayer(shape=(None, 28 * 28), input_var=input_var, name='Input')
     # Dropout Layer
     l_dro1 = Dropout(incoming=l_in, corruption_level=0.4, name='Dropout 1')
     # Dense Layer
@@ -130,7 +130,7 @@ def dropconnect(input_var=None):
 
     # Create connected layers
     # Input layer
-    l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=input_var, name='Input')
+    l_in = InputLayer(shape=(None, 28 * 28), input_var=input_var, name='Input')
     # DropConnect Layer
     l_dc1 = Dropconnect(incoming=l_in, nb_units=500, corruption_level=0.4,
                         W=glorot_uniform, activation=relu, name='Dropconnect layer 1')
@@ -161,11 +161,11 @@ def convpool(input_var=None):
     hp('patience', 10000)
 
     # Create connected layers
-    image_shape = (hp.batch_size, 1, 28, 28)    # (batch size, nb input feature maps, image height, image width)
-    filter_shape = (20, 1, 5, 5)                # (number of filters, nb input feature maps, filter height, filter width)
-    poolsize = (2, 2)                           # downsampling factor per (row, col)
+    image_shape = (None, 1, 28, 28)    # (batch size, nb input feature maps, image height, image width)
+    filter_shape = (20, 1, 5, 5)       # (number of filters, nb input feature maps, filter height, filter width)
+    poolsize = (2, 2)                  # downsampling factor per (row, col)
     # Input layer
-    l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=input_var, name='Input')
+    l_in = InputLayer(shape=(None, 28 * 28), input_var=input_var, name='Input')
     # ConvLayer needs 4D Tensor
     l_rs = ReshapeLayer(incoming=l_in, output_shape=image_shape)
     # ConvPool Layer
@@ -198,9 +198,9 @@ def lenet5(input_var=None):
 
     # Create connected layers
     # Input layer
-    l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=input_var, name='Input')
+    l_in = InputLayer(shape=(None, 28 * 28), input_var=input_var, name='Input')
     # ConvLayer needs 4D Tensor
-    image_shape = (hp.batch_size, 1, 28, 28)
+    image_shape = (None, 1, 28, 28)
     l_rs = ReshapeLayer(incoming=l_in, output_shape=image_shape)
     # first convpool
     filter_shape = (20, 1, 5, 5)
@@ -208,7 +208,7 @@ def lenet5(input_var=None):
     l_cp1 = ConvPoolLayer(incoming=l_rs, poolsize=poolsize, image_shape=image_shape,
                           filter_shape=filter_shape, name='ConvPool layer 1')
     # second convpool
-    image_shape = (hp.batch_size, 20, 12, 12)   # (batch size, nb filters, (28-5)/2, (28-5)/2)
+    image_shape = (None, 20, 12, 12)   # (batch size, nb filters, (28-5)/2, (28-5)/2)
     filter_shape = (50, 20, 5, 5)
     poolsize = (2, 2)
     l_cp2 = ConvPoolLayer(incoming=l_cp1, poolsize=poolsize, image_shape=image_shape,
@@ -251,9 +251,9 @@ def autoencoder(input_var=None):
 
     # Create connected layers
     # Input layer
-    l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=input_var, name='Input')
+    l_in = InputLayer(shape=(None, 28 * 28), input_var=input_var, name='Input')
     # Auto Encoder Layer
-    l_ae1 = AutoEncoder(incoming=l_in, nb_units=100, hyperparameters=hp_ae,
+    l_ae1 = AutoEncoder(incoming=l_in, nb_units=500, hyperparameters=hp_ae,
                         corruption_level=0.0, name='AutoEncoder')
     # Logistic regression Layer
     l_out = LogisticRegression(incoming=l_ae1, nb_class=10, name='Logistic regression')
@@ -285,7 +285,7 @@ def denoising_autoencoder(input_var=None):
 
     # Create connected layers
     # Input layer
-    l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=input_var, name='Input')
+    l_in = InputLayer(shape=(None, 28 * 28), input_var=input_var, name='Input')
     # Auto Encoder Layer
     l_ae1 = AutoEncoder(incoming=l_in, nb_units=500, hyperparameters=hp_ae,
                         corruption_level=0.3, activation=relu, name='Denoising AutoEncoder')
@@ -319,7 +319,7 @@ def gaussian_denoising_autoencoder(input_var=None):
 
     # Create connected layers
     # Input layer
-    l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=input_var, name='Input')
+    l_in = InputLayer(shape=(None, 28 * 28), input_var=input_var, name='Input')
     # Auto Encoder Layer
     l_ae1 = AutoEncoder(incoming=l_in, nb_units=500, hyperparameters=hp_ae, sigma=0.3,
                         activation=relu, name='Gaussian Denoising AutoEncoder')
@@ -353,7 +353,7 @@ def contractive_denoising_autoencoder(input_var=None):
 
     # Create connected layers
     # Input layer
-    l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=input_var, name='Input')
+    l_in = InputLayer(shape=(None, 28 * 28), input_var=input_var, name='Input')
     # Auto Encoder Layer
     l_ae1 = AutoEncoder(incoming=l_in, nb_units=500, hyperparameters=hp_ae, contraction_level=0.3,
                         activation=relu, name='Contractive Denoising AutoEncoder')
@@ -387,7 +387,7 @@ def stacked_denoising_autoencoder(input_var=None):
 
     # Create connected layers
     # Input layer
-    l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=input_var, name='Input')
+    l_in = InputLayer(shape=(None, 28 * 28), input_var=input_var, name='Input')
     # Auto Encoder Layer
     l_ae1 = AutoEncoder(incoming=l_in, nb_units=500, hyperparameters=hp_ae,
                         corruption_level=0.2, name='Denoising AutoEncoder 1')
@@ -425,7 +425,7 @@ def rbm(input_var=None):
 
     # Create connected layers
     # Input layer
-    l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=input_var, name='Input')
+    l_in = InputLayer(shape=(None, 28 * 28), input_var=input_var, name='Input')
     # Restricted Boltzmann Machine Layer
     l_rbm1 = RBM(incoming=l_in, nb_units=500, hyperparameters=hp_ae,
                  name='Restricted Boltzmann Machine')
@@ -458,7 +458,7 @@ def dbn(input_var=None):
     hp_ae('learning_rate', 0.01)
 
     # Create connected layers
-    l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=input_var, name='Input')
+    l_in = InputLayer(shape=(None, 28 * 28), input_var=input_var, name='Input')
     l_rbm1 = RBM(incoming=l_in, nb_units=500, hyperparameters=hp_ae,
                  name='Restricted Boltzmann Machine 1')
     l_rbm2 = RBM(incoming=l_rbm1, nb_units=500, hyperparameters=hp_ae,
@@ -486,7 +486,7 @@ def rnn(input_var=None):
     hp('patience', 500)
 
     # Create connected layers
-    l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=input_var, name='Input')
+    l_in = InputLayer(shape=(None, 28 * 28), input_var=input_var, name='Input')
     l_rnn = RNN(incoming=l_in, n_hidden=100, n_out=28 * 28, name='Recurrent Neural Network')
     l_out = LogisticRegression(incoming=l_rnn, nb_class=10, name='Logistic regression')
 
@@ -510,7 +510,7 @@ def lstm(input_var=None):
     hp('patience', 500)
 
     # Create connected layers
-    l_in = InputLayer(shape=(hp.batch_size, 28 * 28), input_var=input_var, name='Input')
+    l_in = InputLayer(shape=(None, 28 * 28), input_var=input_var, name='Input')
     l_lstm = LSTM(incoming=l_in, n_hidden=100, n_out=28 * 28, name='Long Short Term Memory')
     l_out = LogisticRegression(incoming=l_lstm, nb_class=10, name='Logistic regression')
 
