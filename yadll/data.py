@@ -9,15 +9,16 @@ from .utils import *
 
 def one_hot_encoding(arr, N=None):
     """
-    one hot encoding of a vector of integer data in a range [0..N]
-    you can provide N or max will be used
+    One hot encoding of a vector of integer categorical variables in a range [0..N].
+
+    You can provide the higher category N or max(arr) will be used.
 
     Parameters
     ----------
     arr : numpy array
         array of integer in a range [0, N]
     N : `int`, optional
-        Higher class
+        Higher category
 
     Returns
     -------
