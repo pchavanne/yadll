@@ -167,8 +167,8 @@ Saving/loading models
 
 Yadll provides two ways to save and load models.
 
-**Save the model**
-^^^^^^^^^^^^^^^^^^
+Save the model
+^^^^^^^^^^^^^^
 
 This first method for saving your model is to pickle the whole model. It is not recommended for long term
 storage but is very convenient to handle models. All you have to do is provide you model constructor with
