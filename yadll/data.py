@@ -11,15 +11,18 @@ def one_hot_encoding(arr, N=None):
     """
     one hot encoding of a vector of integer data in a range [0..N]
     you can provide N or max will be used
+
     Parameters
     ----------
     arr : numpy array
         array of integer in a range [0, N]
     N : `int`, optional
         Higher class
+
     Returns
     -------
         one hot encoding [0, 1, 0, 0]
+
     Examples
     --------
     >>> a = np.asarray([1, 0, 3])
@@ -43,13 +46,16 @@ def one_hot_encoding(arr, N=None):
 def one_hot_decoding(mat):
     """
     decoding of a one hot matrix
+
     Parameters
     ----------
     mat : numpy matrix
         one hot matrix
+
     Returns
     -------
         vector of decoded value
+
     Examples
     --------
     >>> a = np.asarray([[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 1]])
