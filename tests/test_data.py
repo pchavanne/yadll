@@ -5,6 +5,26 @@ import pytest
 import numpy as np
 
 
+def test_one_hot_encoding():
+    from yadll.data import one_hot_encoding
+    np.testing.assert_array_equal(one_hot_encoding(np.asarray([1, 0, 3])),
+                                  np.asarray([[0, 1, 0, 0],
+                                              [1, 0, 0, 0],
+                                              [0, 0, 0, 1]]))
+    np.testing.assert_array_equal(one_hot_encoding(np.asarray([1, 0, 3]), 5),
+                                  np.asarray([[0, 1, 0, 0, 0, 0],
+                                              [1, 0, 0, 0, 0, 0],
+                                              [0, 0, 0, 1, 0, 0]]))
+
+
+def test_one_hot_decoding():
+    from yadll.data import one_hot_decoding
+    np.testing.assert_array_equal(one_hot_decoding(np.asarray([[0, 1, 0, 0],
+                                                               [1, 0, 0, 0],
+                                                               [0, 0, 0, 1]])),
+                                  np.asarray([1, 0, 3]))
+
+
 class Testdata:
     @pytest.fixture
     def train_valid_test_data(self):
