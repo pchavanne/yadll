@@ -136,8 +136,7 @@ class Model(object):
             raise NoDataFoundException
         else:
             if self.data.train_set_y.ndim == 1:
-                self.y = T.ivector(
-                    'y')  # the output labels are presented as 1D vector of[int] labels
+                self.y = T.ivector('y')  # the output labels are presented as 1D vector of[int] labels
             else:
                 self.y = T.matrix('y')
 

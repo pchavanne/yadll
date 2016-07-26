@@ -38,9 +38,9 @@ class TestModel:
         return Model(name='test_model', hyperparameters=hp)
 
     @pytest.fixture(scope='module')
-    def input(self, model, hp):
+    def input(self):
         from yadll.layers import InputLayer
-        return InputLayer(shape=(hp.batch_size, 25), input_var=model.x)
+        return InputLayer(shape=(None, 25))
 
     @pytest.fixture(scope='module')
     def layer(self, input):

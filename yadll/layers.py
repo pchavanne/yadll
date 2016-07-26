@@ -403,9 +403,9 @@ class AutoEncoder(UnsupervisedLayer):
         X = self.input_layer.get_output(stochastic=False, **kwargs)
         if self.p > 0:
             if self.sigma:
-                X = X + T_rng.normal(self.input_shape, avg=0.0, std=self.sigma, dtype=floatX)
+                X = X + T_rng.normal((self.hp.batch_size, self.input_shape[1]), avg=0.0, std=self.sigma, dtype=floatX)
             else:
-                X = X * T_rng.binomial(self.input_shape, n=1, p=self.p, dtype=floatX)
+                X = X * T_rng.binomial((self.hp.batch_size, self.input_shape[1]), n=1, p=self.p, dtype=floatX)
         Y = sigmoid(T.dot(X, self.W) + self.b)
         Z = sigmoid(T.dot(Y, self.W_prime) + self.b_prime)
         return Y, Z
