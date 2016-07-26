@@ -63,6 +63,14 @@ class TestModel:
         from yadll.network import Network
         return Network(name='test_network', layers=[input, layer, unsupervised_layer, logistic_regression])
 
+
+    def test_save_model(self, model, network):
+        model.network = network
+        from yadll.model import save_model, load_model
+        save_model(model, 'test_model.ym')
+        test_model = load_model('test_model.ym')
+
+
     def test_model(self, model, network):
         model.network = network
         assert model.name == 'test_model'
