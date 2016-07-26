@@ -49,7 +49,6 @@ class Layer(object):
         self.params = []
         self.reguls = 0
 
-
     def get_params(self):
         """
         Theano shared variables representing the parameters of this layer.

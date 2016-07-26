@@ -28,6 +28,10 @@ class TestLayer:
     def test_named_layer(self, named_layer):
         assert named_layer.name == 'layer_name'
 
+    def test_get_output(self, layer):
+        with pytest.raises(NotImplementedError):
+            layer.get_output()
+
     @pytest.fixture
     def layer_from_shape(self):
         from yadll.layers import Layer
@@ -198,8 +202,65 @@ class TestLogisticRegression:
         from yadll.layers import LogisticRegression
         return LogisticRegression
 
+
 class TestDropout:
     @pytest.fixture
     def dropout(self):
         from yadll.layers import Dropout
         return Dropout
+
+
+class TestDropConnect:
+    @pytest.fixture
+    def dropout(self):
+        from yadll.layers import Dropconnect
+        return Dropconnect
+
+
+class TestDropPoolLayer:
+    @pytest.fixture
+    def dropout(self):
+        from yadll.layers import PoolLayer
+        return PoolLayer
+
+
+class TestConvLayer:
+    @pytest.fixture
+    def dropout(self):
+        from yadll.layers import ConvLayer
+        return ConvLayer
+
+
+class TestConvPoolLayer:
+    @pytest.fixture
+    def dropout(self):
+        from yadll.layers import ConvPoolLayer
+        return ConvPoolLayer
+
+
+class TestAutoEncoder:
+    @pytest.fixture
+    def dropout(self):
+        from yadll.layers import AutoEncoder
+        return AutoEncoder
+
+
+class TestRBM:
+    @pytest.fixture
+    def dropout(self):
+        from yadll.layers import RBM
+        return RBM
+
+
+class TestRNN:
+    @pytest.fixture
+    def dropout(self):
+        from yadll.layers import RNN
+        return RNN
+
+
+class TestLSTM:
+    @pytest.fixture
+    def dropout(self):
+        from yadll.layers import LSTM
+        return LSTM
