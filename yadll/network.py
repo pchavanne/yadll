@@ -56,30 +56,6 @@ class Network(object):
         if isinstance(layer, UnsupervisedLayer):
             self.has_unsupervised_layer = True
 
-    def params(self):
-        """
-        Returns the list of parameters of the network
-
-        Returns
-        -------
-        params :
-            list of parameters of the network
-
-        """
-        return self.params
-
-    def reguls(self):
-        """
-        Returns the regularization cost for the network
-
-        Returns
-        -------
-        reguls : symbolic expresssion
-            regularization cost for the network
-
-        """
-        return self.reguls
-
     def get_output(self, **kwargs):
         """
         Returns the output of the network
