@@ -3,6 +3,7 @@ from mock import MagicMock as mock
 import theano.tensor as T
 import numpy as np
 import pytest
+import logging
 
 
 class TestNetwork:
@@ -36,7 +37,7 @@ class TestNetwork:
         from yadll.layers import AutoEncoder
         return AutoEncoder(incoming=layer, nb_units=25, hyperparameters=mock())
 
-    def test_network(self, network, x, input, layer, layer2, unsupervised_layer):
+    def test_network(self, network, x, input, layer, layer2, unsupervised_layer, caplog):
         net = network(name='test_network', layers=[input, layer, unsupervised_layer])
         assert net.params == [layer.W, layer.b, unsupervised_layer.W, unsupervised_layer.b]
         net = network(name='test_network')
@@ -51,6 +52,7 @@ class TestNetwork:
         from yadll.utils import to_float_X
         x_val = to_float_X(np.random.random((50, 25)))
         assert (net.get_output().eval({x: x_val}) == unsupervised_layer.get_output().eval({x: x_val})).all()
+        # Save and load Params
         net.save_params('test.yp')
         net2 = network(name='test_network', layers=[input, layer2, unsupervised_layer])
 
@@ -63,3 +65,12 @@ class TestNetwork:
                                  net.params, net2.params)
         net2.load_params('test.yp')
         params_equal(net.params, net2.params)
+
+        caplog.setLevel(logging.ERROR)
+        net3 = network(name=None)
+        net3.add(input)
+        net3.add(layer)
+        net3.save_params('test.yp')
+        assert 'Your network has no name. Please set one and try again.'in caplog.text()
+        net3.load_params('test.yp')
+        assert 'Network names are different. Saved network name is: test_network' in caplog.text()
