@@ -22,7 +22,11 @@ def save_model(model, file=None):
 
     """
     if file is None:
-        d_file = model.file
+        if model.file is None:
+            logger.error('No file name. Model not saved.')
+            return
+        else:
+            d_file = model.file
     else:
         d_file = file
     with open(d_file, 'wb') as f:
@@ -85,10 +89,6 @@ class Model(object):
         self.save_mode = None        # None, 'end' or 'each'
         self.index = T.iscalar()     # index to a [mini]batch
         self.x = T.matrix('x')       # the input data is presented as a matrix
-        if data.train_set_y.ndim == 1:
-            self.y = T.ivector('y')      # the output labels are presented as 1D vector of[int] labels
-        else:
-            self.y = T.matrix('y')
         self.report = dict()
 
     @timer(' Unsupervised Pre-Training')
@@ -134,6 +134,12 @@ class Model(object):
         """
         if self.data is None:
             raise NoDataFoundException
+        else:
+            if self.data.train_set_y.ndim == 1:
+                self.y = T.ivector(
+                    'y')  # the output labels are presented as 1D vector of[int] labels
+            else:
+                self.y = T.matrix('y')
 
         if self.network is None:
             raise NoNetworkFoundException

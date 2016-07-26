@@ -33,6 +33,11 @@ class TestModel:
         return Model(name='test_model', data=data, hyperparameters=hp)
 
     @pytest.fixture(scope='module')
+    def model_no_data(self, hp):
+        from yadll.model import Model
+        return Model(name='test_model', hyperparameters=hp)
+
+    @pytest.fixture(scope='module')
     def input(self, model, hp):
         from yadll.layers import InputLayer
         return InputLayer(shape=(hp.batch_size, 25), input_var=model.x)
@@ -63,13 +68,24 @@ class TestModel:
         from yadll.network import Network
         return Network(name='test_network', layers=[input, layer, unsupervised_layer, logistic_regression])
 
+    def test_no_data_found(self, model_no_data, network):
+        model_no_data.network = network
+        from yadll.exceptions import NoDataFoundException
+        with pytest.raises(NoDataFoundException):
+            model_no_data.pretrain()
+            model_no_data.train()
+
+    def test_no_network(self, model):
+        from yadll.exceptions import NoNetworkFoundException
+        with pytest.raises(NoNetworkFoundException):
+            model.pretrain()
+            model.train()
 
     def test_save_model(self, model, network):
         model.network = network
         from yadll.model import save_model, load_model
         save_model(model, 'test_model.ym')
         test_model = load_model('test_model.ym')
-
 
     def test_model(self, model, network):
         model.network = network
