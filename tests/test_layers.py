@@ -289,11 +289,26 @@ class TestDropConnect:
         assert np.all(layer_c1.get_output().eval() == 0)
 
 
-class TestDropPoolLayer:
+class TestPoolLayer:
     @pytest.fixture
     def pool_layer(self):
         from yadll.layers import PoolLayer
         return PoolLayer
+
+    @pytest.fixture
+    def input_data(self):
+        from yadll.utils import shared_variable
+        return shared_variable(np.random.random((10, 20)))
+
+    @pytest.fixture
+    def input_layer(self, input_data):
+        from yadll.layers import InputLayer
+        shape = (10, 20)
+        return InputLayer(shape, input_var=input_data)
+
+    @pytest.fixture
+    def layer(self, pool_layer, input_layer):
+        return pool_layer(input_layer, poolsize=(2, 2))
 
 
 class TestConvLayer:
