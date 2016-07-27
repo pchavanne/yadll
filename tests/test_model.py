@@ -64,9 +64,14 @@ class TestModel:
         return LogisticRegression(incoming=unsupervised_layer, nb_class=10)
 
     @pytest.fixture(scope='module')
-    def network(self, input, layer, unsupervised_layer, logistic_regression):
+    def network(self, input, layer, logistic_regression):
         from yadll.network import Network
-        return Network(name='test_network', layers=[input, layer, unsupervised_layer, logistic_regression])
+        return Network(name='test_network', layers=[input, layer, logistic_regression])
+
+    @pytest.fixture(scope='module')
+    def network_unsupervised(self, input,unsupervised_layer, logistic_regression):
+        from yadll.network import Network
+        return Network(name='test_network', layers=[input, unsupervised_layer, logistic_regression])
 
     def test_no_data_found(self, model_no_data, network):
         model_no_data.network = network
@@ -84,13 +89,22 @@ class TestModel:
     def test_save_model(self, model, network):
         model.network = network
         from yadll.model import save_model, load_model
+        model.train(save_mode='end')
+        model.train(save_mode='each')
+        model.file=('model.ym')
+        model.train()
+        model.train(save_mode='end')
+        model.train(save_mode='each')
+        save_model(model)
         save_model(model, 'test_model.ym')
         test_model = load_model('test_model.ym')
 
-    def test_model(self, model, network):
+    def test_model(self, model, network, network_unsupervised):
         model.network = network
         assert model.name == 'test_model'
         model.train()
+        model.network = network_unsupervised
+        model.pretrain()
 
 
 
