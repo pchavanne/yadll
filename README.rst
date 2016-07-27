@@ -1,9 +1,6 @@
 .. image:: https://travis-ci.org/pchavanne/yadll.svg
     :target: https://travis-ci.org/pchavanne/yadll
 
-.. image:: https://coveralls.io/repos/github/pchavanne/yadll/badge.svg?branch=master
-    :target: https://coveralls.io/github/pchavanne/yadll?branch=master
-
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg
     :target: https://github.com/pchavanne/yadll/blob/master/LICENSE
 
