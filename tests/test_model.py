@@ -91,7 +91,7 @@ class TestModel:
         from yadll.model import save_model, load_model
         model.train(save_mode='end')
         model.train(save_mode='each')
-        model.file=('model.ym')
+        model.file=('test_model.ym')
         model.train()
         model.train(save_mode='end')
         model.train(save_mode='each')
