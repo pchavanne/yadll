@@ -262,6 +262,32 @@ class TestDropConnect:
         from yadll.layers import Dropconnect
         return Dropconnect
 
+    @pytest.fixture
+    def input_data(self):
+        from yadll.utils import shared_variable
+        return shared_variable(np.random.random((10, 20)))
+
+    @pytest.fixture
+    def input_layer(self, input_data):
+        from yadll.layers import InputLayer
+        shape = (10, 20)
+        return InputLayer(shape, input_var=input_data)
+
+    @pytest.fixture
+    def layer(self, dropconnect, input_layer):
+        return dropconnect(input_layer, nb_units=10, corruption_level=0.5)
+
+    @pytest.fixture
+    def layer_c0(self, dropconnect, input_layer):
+        return dropconnect(input_layer, nb_units=10, corruption_level=0)
+
+    @pytest.fixture
+    def layer_c1(self, dropconnect, input_layer):
+        return dropconnect(input_layer, nb_units=10, corruption_level=1)
+
+    def test_get_output(self, input_layer, layer, layer_c0, layer_c1):
+        assert np.all(layer_c1.get_output().eval() == 0)
+
 
 class TestDropPoolLayer:
     @pytest.fixture
