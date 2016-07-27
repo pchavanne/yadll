@@ -78,12 +78,14 @@ class TestModel:
         from yadll.exceptions import NoDataFoundException
         with pytest.raises(NoDataFoundException):
             model_no_data.pretrain()
+        with pytest.raises(NoDataFoundException):
             model_no_data.train()
 
     def test_no_network(self, model):
         from yadll.exceptions import NoNetworkFoundException
         with pytest.raises(NoNetworkFoundException):
             model.pretrain()
+        with pytest.raises(NoNetworkFoundException):
             model.train()
 
     def test_save_model(self, model, network):
