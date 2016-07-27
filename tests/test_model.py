@@ -59,9 +59,14 @@ class TestModel:
         return AutoEncoder(incoming=layer, nb_units=25, hyperparameters=hp)
 
     @pytest.fixture(scope='module')
-    def logistic_regression(self, unsupervised_layer):
+    def logistic_regression_unsupervised(self, unsupervised_layer):
         from yadll.layers import LogisticRegression
         return LogisticRegression(incoming=unsupervised_layer, nb_class=10)
+
+    @pytest.fixture(scope='module')
+    def logistic_regression(self, layer):
+        from yadll.layers import LogisticRegression
+        return LogisticRegression(incoming=layer, nb_class=10)
 
     @pytest.fixture(scope='module')
     def network(self, input, layer, logistic_regression):
@@ -69,24 +74,24 @@ class TestModel:
         return Network(name='test_network', layers=[input, layer, logistic_regression])
 
     @pytest.fixture(scope='module')
-    def network_unsupervised(self, input,unsupervised_layer, logistic_regression):
+    def network_unsupervised(self, input, unsupervised_layer, logistic_regression_unsupervised):
         from yadll.network import Network
-        return Network(name='test_network', layers=[input, unsupervised_layer, logistic_regression])
+        return Network(name='test_network', layers=[input, unsupervised_layer, logistic_regression_unsupervised])
 
-    def test_no_data_found(self, model_no_data, network):
-        model_no_data.network = network
+    def test_no_data_found(self, model_no_data, network_unsupervised):
+        model_no_data.network = network_unsupervised
         from yadll.exceptions import NoDataFoundException
         with pytest.raises(NoDataFoundException):
             model_no_data.pretrain()
         with pytest.raises(NoDataFoundException):
-            model_no_data.train()
+            model_no_data.train(unsupervised_training=False)
 
     def test_no_network(self, model):
         from yadll.exceptions import NoNetworkFoundException
         with pytest.raises(NoNetworkFoundException):
             model.pretrain()
         with pytest.raises(NoNetworkFoundException):
-            model.train()
+            model.train(unsupervised_training=False)
 
     def test_save_model(self, model, network):
         model.network = network
@@ -105,10 +110,13 @@ class TestModel:
         model.network = network
         assert model.name == 'test_model'
         model.train()
+        network_unsupervised.layers[0].input = None
         model.network = network_unsupervised
         model.pretrain()
+        model.train()
 
     def test_predict(self, data, model, network):
+        network.layers[0].input = None
         model.network = network
         model.train()
         model.predict(data.test_set_x.eval()[:10])
