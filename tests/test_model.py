@@ -108,6 +108,11 @@ class TestModel:
         model.network = network_unsupervised
         model.pretrain()
 
+    def test_predict(self, data, model, network):
+        model.network = network
+        model.train()
+        model.predict(data.test_set_x.eval()[:10])
+
 
 
 
