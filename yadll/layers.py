@@ -254,9 +254,9 @@ class Dropout(Layer):
         super(Dropout, self).__init__(incoming, **kwargs)
         self.p = 1 - corruption_level
 
-    def get_output(self, stochastic=False, **kwargs):
+    def get_output(self, stochastic=True, **kwargs):
         X = self.input_layer.get_output(stochastic=stochastic, **kwargs)
-        if self.p > 0 and stochastic:
+        if self.p != 1 and stochastic:
             X = X * T_rng.binomial(self.input_shape, n=1, p=self.p, dtype=floatX)
         return X
 
@@ -269,9 +269,9 @@ class Dropconnect(DenseLayer):
         super(Dropconnect, self).__init__(incoming, nb_units, **kwargs)
         self.p = 1 - corruption_level
 
-    def get_output(self, stochastic=False, **kwargs):
+    def get_output(self, stochastic=True, **kwargs):
         X = self.input_layer.get_output(stochastic=stochastic, **kwargs)
-        if self.p > 0 and stochastic:
+        if self.p != 1 and stochastic:
             self.W = self.W * T_rng.binomial(self.shape, n=1, p=self.p, dtype=floatX)
         return self.activation(T.dot(X, self.W) + self.b)
 

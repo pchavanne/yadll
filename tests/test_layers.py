@@ -251,9 +251,9 @@ class TestDropout:
     def layer_c1(self, dropout, input_layer):
         return dropout(input_layer, corruption_level=1)
 
-    def test_get_output(self, layer, layer_c0, layer_c1):
-        np.testing.assert_array_equal(layer.get_output().eval(), layer_c0.get_output().eval())
-        # assert np.all(layer_c1.get_output().eval() == 0)
+    def test_get_output(self, input_layer, layer, layer_c0, layer_c1):
+        np.testing.assert_array_equal(input_layer.get_output().eval(), layer_c0.get_output().eval())
+        assert np.all(layer_c1.get_output().eval() == 0)
 
 
 class TestDropConnect:
