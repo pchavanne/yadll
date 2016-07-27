@@ -84,7 +84,10 @@ class TestReshapeLayer:
         assert layer.output_shape == (16, 3, 5, 7, 2, 5)
         result = layer.get_output().eval()
         assert result.shape == (16, 3, 5, 7, 2, 5)
-
+        layer = reshape_layer(input_layer, (None, 3, 5, 7, 2, 5))
+        assert layer.output_shape == (None, 3, 5, 7, 2, 5)
+        result = layer.get_output().eval()
+        assert result.shape == (16, 3, 5, 7, 2, 5)
 
 class TestFlattenLayer:
     @pytest.fixture
@@ -135,6 +138,10 @@ class TestDenseLayer:
     def layer(self, dense_layer, input_layer):
         return dense_layer(input_layer, nb_units=2, l1=1, l2=2)
 
+    @pytest.fixture
+    def layer_from_layer(self, dense_layer, input_layer, layer):
+        return dense_layer(input_layer, W=layer.W, b=layer.b, nb_units=2, l1=1, l2=2)
+
     def test_get_params(self, layer):
         assert layer.get_params() == [layer.W, layer.b]
 
@@ -150,6 +157,10 @@ class TestDenseLayer:
     def test_reguls(self, layer):
         W = layer.W.eval()
         assert_allclose(layer.reguls.eval(), np.mean(np.abs(W)) + 2 * np.mean(np.power(W, 2)), rtol=1e-4)
+
+    def test_layer_from_layer(self, layer, layer_from_layer):
+        assert layer.W == layer_from_layer.W
+        assert layer.b == layer_from_layer.b
 
 
 class Testunsupervised_layer:
@@ -195,6 +206,14 @@ class Testunsupervised_layer:
         b = layer.b.eval()
         assert_allclose(layer.get_output().eval(), np.tanh(np.dot(X, W) + b), rtol=1e-3)
 
+    def test_get_encoded_input(self, layer):
+        with pytest.raises(NotImplementedError):
+            layer.get_encoded_input()
+
+    def test_get_unsupervised_cost(self, layer):
+        with pytest.raises(NotImplementedError):
+            layer.get_unsupervised_cost()
+
 
 class TestLogisticRegression:
     @pytest.fixture
@@ -208,6 +227,33 @@ class TestDropout:
     def dropout(self):
         from yadll.layers import Dropout
         return Dropout
+
+    @pytest.fixture
+    def input_data(self):
+        from yadll.utils import shared_variable
+        return shared_variable(np.random.random((10, 20)))
+
+    @pytest.fixture
+    def input_layer(self, input_data):
+        from yadll.layers import InputLayer
+        shape = (10, 20)
+        return InputLayer(shape, input_var=input_data)
+
+    @pytest.fixture
+    def layer(self, dropout, input_layer):
+        return dropout(input_layer, corruption_level=0.5)
+
+    @pytest.fixture
+    def layer_c0(self, dropout, input_layer):
+        return dropout(input_layer, corruption_level=0)
+
+    @pytest.fixture
+    def layer_c1(self, dropout, input_layer):
+        return dropout(input_layer, corruption_level=1)
+
+    def test_get_output(self, layer, layer_c0, layer_c1):
+        np.testing.assert_array_equal(layer.get_output().eval(), layer_c0.get_output().eval())
+        # assert np.all(layer_c1.get_output().eval() == 0)
 
 
 class TestDropConnect:
