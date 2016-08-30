@@ -256,6 +256,10 @@ class Dropout(Layer):
 
     def get_output(self, stochastic=True, **kwargs):
         X = self.input_layer.get_output(stochastic=stochastic, **kwargs)
+        if self.input_shape[0] is None:
+            lst = list(self.input_shape)
+            lst[0] = T.shape(X)[0]
+            self.input_shape = tuple(lst)
         if self.p != 1 and stochastic:
             X = X * T_rng.binomial(self.input_shape, n=1, p=self.p, dtype=floatX)
         return X
@@ -519,6 +523,43 @@ class RBM(UnsupervisedLayer):
         else:
             monitoring_cost = self.get_reconstruction_cost(updates, pre_sigmoid_nvs[-1])
         return monitoring_cost, updates
+
+
+class BatchNormalization(Layer):
+    """
+    Normalize the previous layer at each batch
+
+    References
+    ----------
+
+    ..[1] http://jmlr.org/proceedings/papers/v37/ioffe15.pdf
+    ..[2] https://github.com/fchollet/keras/blob/master/keras/layers/normalization.py#L6
+    """
+    def __init__(self, incoming, **kwargs):
+        super(BatchNormalization, self).__init__(incoming, **kwargs)
+
+    def get_output(self, **kwargs):
+        X = self.input_layer.get_output(**kwargs)
+        # TODO
+        return X
+
+
+class LayerNormalization(Layer):
+    """
+    Normalize the previous layer at each batch
+
+    References
+    ----------
+
+    ..[1] http://arxiv.org/pdf/1607.06450v1.pdf
+    """
+    def __init__(self, incoming, **kwargs):
+        super(LayerNormalization, self).__init__(incoming, **kwargs)
+
+    def get_output(self, **kwargs):
+        X = self.input_layer.get_output(**kwargs)
+        # TODO
+        return X
 
 
 class RNN(Layer):
