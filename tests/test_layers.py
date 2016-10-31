@@ -310,11 +310,7 @@ class TestPoolLayer:
     def layer(self, pool_layer, input_layer):
         return pool_layer(input_layer, poolsize=(2, 2))
 
-    def test_output_shape(self, layer):
-        assert layer.output_shape() == (layer.input_shape[0],
-                                        layer.input_shape[1],
-                                        layer.input_shape[2] / layer.poolsize[0],
-                                        layer.input_shape[3] / layer.poolsize[1])
+
 
 class TestConvLayer:
     @pytest.fixture
