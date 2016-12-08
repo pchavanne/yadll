@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 import os
-
 import yadll
-
 import logging
 
 logging.basicConfig(level=logging.DEBUG, format='%(message)s')
@@ -24,7 +22,7 @@ model = yadll.model.Model(name='mlp with dropout', data=data, file='best_model.y
 hp = yadll.hyperparameters.Hyperparameters()
 hp('batch_size', 500)
 hp('n_epochs', 1000)
-hp('learning_rate', 0.1)
+hp('learning_rate', 0.9)
 hp('momentum', 0.5)
 hp('l1_reg', 0.00)
 hp('l2_reg', 0.0000)
@@ -65,7 +63,7 @@ net.add(l_out)
 model.network = net
 
 # updates method
-model.updates = yadll.updates.nesterov_momentum
+model.updates = yadll.updates.adagrad
 
 # train the model and save it to file at each best
 model.train()

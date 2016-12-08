@@ -31,13 +31,15 @@ class Layer(object):
         The layer name.
 
     """
+    nb_instances = 0
+
     def __init__(self, incoming, name=None):
         """
         The base class that represent a single layer of any neural network.
         It has to be subclassed by any kind of layer.
 
         """
-
+        self.id = self.get_id()
         if isinstance(incoming, tuple):
             self.input_shape = incoming
             self.input_layer = None
@@ -46,8 +48,15 @@ class Layer(object):
             self.input_layer = incoming
 
         self.name = name
+        if name is None:
+            self.name = self.__class__.__name__ + ' ' + str(self.id)
         self.params = []
         self.reguls = 0
+
+    @classmethod
+    def get_id(cls):
+        cls.nb_instances += 1
+        return cls.nb_instances
 
     def get_params(self):
         """
@@ -98,6 +107,15 @@ class Layer(object):
         """
         raise NotImplementedError
 
+    def to_json(self):
+        json = {'name': self.name,
+                'input shape': self.input_shape}
+        if self.input_layer is None:
+            json['input layer'] = 'no input layer'
+        else:
+            json['input layer'] = self.input_layer.name
+        return json
+
 
 class InputLayer(Layer):
     """
@@ -105,6 +123,8 @@ class InputLayer(Layer):
      the input for any network.
      A ::class:`InputLayer` is always the first layer of any network.
     """
+    nb_instances = 0
+
     def __init__(self, shape, input_var=None, **kwargs):
         """
         The input layer of any network
@@ -123,11 +143,17 @@ class InputLayer(Layer):
     def get_output(self, **kwargs):
         return self.input
 
+    def to_json(self):
+        json = dict({'class': self.__class__.__name__}, **super(InputLayer, self).to_json())
+        return json
+
 
 class ReshapeLayer(Layer):
     """
     Reshape the incoming layer to the output_shape.
     """
+    nb_instances = 0
+
     def __init__(self, incoming, output_shape=None, **kwargs):
         super(ReshapeLayer, self).__init__(incoming, **kwargs)
         self.reshape_shape = output_shape
@@ -149,6 +175,8 @@ class FlattenLayer(Layer):
     """
     Reshape layers back to flat
     """
+    nb_instances = 0
+
     def __init__(self, incoming, ndim=2, **kwargs):
         super(FlattenLayer, self).__init__(incoming, **kwargs)
         self.ndim = ndim
@@ -166,6 +194,8 @@ class DenseLayer(Layer):
     """
     Fully connected neural network layer
     """
+    nb_instances = 0
+
     def __init__(self, incoming, nb_units, W=glorot_uniform, b=constant,
                  activation=tanh, l1=None, l2=None, **kwargs):
         super(DenseLayer, self).__init__(incoming, **kwargs)
@@ -181,9 +211,9 @@ class DenseLayer(Layer):
             self.b = initializer(b, shape=(self.shape[1],), name='b')
         self.params.append(self.b)
         self.activation = activation
-        if l1:
+        if l1 and l1 != 0:
             self.reguls += l1 * T.mean(T.abs_(self.W))
-        if l2:
+        if l2 and l2 != 0:
             self.reguls += l2 * T.mean(T.sqr(self.W))
 
     @property
@@ -194,6 +224,10 @@ class DenseLayer(Layer):
         X = self.input_layer.get_output(**kwargs)
         return self.activation(T.dot(X, self.W) + self.b)
 
+    def to_json(self):
+        json = dict({'class': self.__class__.__name__}, **super(DenseLayer, self).to_json())
+        return json
+
 
 class UnsupervisedLayer(DenseLayer):
     """
@@ -201,6 +235,8 @@ class UnsupervisedLayer(DenseLayer):
     Unsupervised layers are pre-trained against its own input.
 
     """
+    nb_instances = 0
+
     def __init__(self, incoming, nb_units, hyperparameters, **kwargs):
         super(UnsupervisedLayer, self).__init__(incoming, nb_units, **kwargs)
         self.hp = hyperparameters
@@ -241,15 +277,23 @@ class LogisticRegression(DenseLayer):
     ----------
     .. [1] http://deeplearning.net/tutorial/logreg.html
     """
+    nb_instances = 0
+
     def __init__(self, incoming, nb_class, W=constant, activation=softmax, **kwargs):
         super(LogisticRegression, self).__init__(incoming, nb_class, W=W,
                                                  activation=activation, **kwargs)
+
+    def to_json(self):
+        json = dict({'class': self.__class__.__name__}, **super(LogisticRegression, self).to_json())
+        return json
 
 
 class Dropout(Layer):
     """
     Dropout layer
     """
+    nb_instances = 0
+
     def __init__(self, incoming, corruption_level=0.5, **kwargs):
         super(Dropout, self).__init__(incoming, **kwargs)
         self.p = 1 - corruption_level
@@ -264,11 +308,16 @@ class Dropout(Layer):
             X = X * T_rng.binomial(self.input_shape, n=1, p=self.p, dtype=floatX)
         return X
 
+    def to_json(self):
+        json = dict({'class': self.__class__.__name__}, **super(Dropout, self).to_json())
+        return json
 
 class Dropconnect(DenseLayer):
     """
     DropConnect layer
     """
+    nb_instances = 0
+
     def __init__(self, incoming, nb_units, corruption_level=0.5, **kwargs):
         super(Dropconnect, self).__init__(incoming, nb_units, **kwargs)
         self.p = 1 - corruption_level
@@ -284,6 +333,8 @@ class PoolLayer(Layer):
     """
     Pooling layer, default is maxpooling
     """
+    nb_instances = 0
+
     def __init__(self, incoming, poolsize, stride=None, ignore_border=True,
                  padding=(0, 0), mode='max', **kwargs):
         super(PoolLayer, self).__init__(incoming, **kwargs)
@@ -313,6 +364,8 @@ class ConvLayer(Layer):
     """
     Convolutional layer
     """
+    nb_instances = 0
+
     def __init__(self, incoming, image_shape=None, filter_shape=None, W=glorot_uniform,
                  border_mode='valid', subsample=(1, 1), l1=None, l2=None, pool_scale=None, **kwargs):
         super(ConvLayer, self).__init__(incoming, **kwargs)
@@ -357,6 +410,8 @@ class ConvPoolLayer(ConvLayer, PoolLayer):
     ----------
     .. [1] http://deeplearning.net/tutorial/lenet.html
     """
+    nb_instances = 0
+
     def __init__(self, incoming, poolsize, image_shape=None, filter_shape=None,
                   b=constant, activation=tanh, **kwargs):
         super(ConvPoolLayer, self).__init__(incoming, poolsize=poolsize, image_shape=image_shape,
@@ -388,6 +443,8 @@ class AutoEncoder(UnsupervisedLayer):
     ----------
     .. [1] http://deeplearning.net/tutorial/dA.html
     """
+    nb_instances = 0
+
     def __init__(self, incoming, nb_units, hyperparameters, corruption_level=0.0,
                  W=(glorot_uniform, {'gain': sigmoid}), b_prime=constant,
                  sigma=None, contraction_level= None, **kwargs):
@@ -435,6 +492,8 @@ class RBM(UnsupervisedLayer):
     ----------
     .. [1] http://deeplearning.net/tutorial/rbm.html
     """
+    nb_instances = 0
+
     def __init__(self, incoming, nb_units, hyperparameters, W=glorot_uniform,
                  b_hidden=constant, activation=sigmoid, **kwargs):
         super(RBM, self).__init__(incoming, nb_units, hyperparameters, W=W,
@@ -535,6 +594,8 @@ class BatchNormalization(Layer):
     ..[1] http://jmlr.org/proceedings/papers/v37/ioffe15.pdf
     ..[2] https://github.com/fchollet/keras/blob/master/keras/layers/normalization.py#L6
     """
+    nb_instances = 0
+
     def __init__(self, incoming, **kwargs):
         super(BatchNormalization, self).__init__(incoming, **kwargs)
 
@@ -553,6 +614,8 @@ class LayerNormalization(Layer):
 
     ..[1] http://arxiv.org/pdf/1607.06450v1.pdf
     """
+    nb_instances = 0
+
     def __init__(self, incoming, **kwargs):
         super(LayerNormalization, self).__init__(incoming, **kwargs)
 
@@ -571,6 +634,8 @@ class RNN(Layer):
 
     .. [1] http://deeplearning.net/tutorial/rnnslu.html
     """
+    nb_instances = 0
+
     def __init__(self, incoming, n_hidden, n_out, activation=tanh, **kwargs):
         super(RNN, self).__init__(incoming, **kwargs)
         self.activation = activation
@@ -622,6 +687,8 @@ class LSTM(Layer):
     .. [3] http://people.idsia.ch/~juergen/lstm/
     .. [4] http://colah.github.io/posts/2015-08-Understanding-LSTMs/
     """
+    nb_instances = 0
+
     def __init__(self, incoming, n_hidden, n_out, peephole=False, tied_i_f=False, activation=tanh, **kwargs):
         super(LSTM, self).__init__(incoming, **kwargs)
         self.peephole = peephole    # gate layers look at the cell state

@@ -73,3 +73,6 @@ class Hyperparameters(object):
         for name, value in self.hp_default.iteritems():
             self.__setattr__(name, value)
         self.iteration = 0
+
+    def to_json(self):
+        return self.hp_value

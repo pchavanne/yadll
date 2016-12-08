@@ -86,6 +86,6 @@ pd_report = pd.DataFrame(reports,
                          columns=['iteration', 'test', 'validation', 'training time'])
 reports = pd.concat([param_reports, pd_report], axis=1)
 
-reports.to_html(open('/home/philippe/Python/Theano/report.html', 'w'))
+reports.to_html(open('report.html', 'w'))
 
 print reports.loc[reports['validation'].idxmin()]

@@ -120,3 +120,8 @@ class Network(object):
 
             for param in self.params:
                 param.set_value(cPickle.load(f), borrow=True)
+
+    def to_json(self):
+        return OrderedDict([('network name', self.name),
+                            ('has unsupervised layer', self.has_unsupervised_layer),
+                            ('layers', OrderedDict([(layer.name, layer.to_json()) for layer in self.layers]))])

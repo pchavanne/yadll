@@ -294,3 +294,11 @@ class Model(object):
         predict = theano.function(inputs=[self.x], outputs=prediction, name='predict')
         return predict(X)
 
+    def to_json(self):
+        return {'model name': self.name,
+                'file': self.file,
+                'network': self.network.to_json(),
+                'hyperparameters': self.hp.to_json(),
+                'update': self.updates.__name__,
+                'report': self.report}
+
