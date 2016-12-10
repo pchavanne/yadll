@@ -54,7 +54,7 @@ class TestModel:
     @pytest.fixture(scope='module')
     def input(self):
         from yadll.layers import InputLayer
-        return InputLayer(shape=(None, 25))
+        return InputLayer(input_shape=(None, 25))
 
     @pytest.fixture(scope='module')
     def layer(self, input):

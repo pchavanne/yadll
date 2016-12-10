@@ -77,7 +77,7 @@ class TestReshapeLayer:
     def input_layer(self, input_data):
         from yadll.layers import InputLayer
         shape = (16, 3, None, None, 10)
-        return InputLayer(shape, input_var=input_data)
+        return InputLayer(shape, input=input_data)
 
     def test_reshape(self, reshape_layer, input_layer):
         layer = reshape_layer(input_layer, (16, 3, 5, 7, 2, 5))
@@ -104,7 +104,7 @@ class TestFlattenLayer:
     def input_layer(self, input_data):
         from yadll.layers import InputLayer
         shape = (2, 3, 4, 5,)
-        return InputLayer(shape, input_var=input_data)
+        return InputLayer(shape, input=input_data)
 
     def test_output_shape(self, flatten_layer, input_layer):
         layer = flatten_layer(input_layer)
@@ -132,7 +132,7 @@ class TestDenseLayer:
     def input_layer(self, input_data):
         from yadll.layers import InputLayer
         shape = (10, 20)
-        return InputLayer(shape, input_var=input_data)
+        return InputLayer(shape, input=input_data)
 
     @pytest.fixture
     def layer(self, dense_layer, input_layer):
@@ -178,7 +178,7 @@ class Testunsupervised_layer:
     def input_layer(self, input_data):
         from yadll.layers import InputLayer
         shape = (10, 20)
-        return InputLayer(shape, input_var=input_data)
+        return InputLayer(shape, input=input_data)
 
     @pytest.fixture
     def hp(self):
@@ -237,7 +237,7 @@ class TestDropout:
     def input_layer(self, input_data):
         from yadll.layers import InputLayer
         shape = (None, 20)
-        return InputLayer(shape, input_var=input_data)
+        return InputLayer(shape, input=input_data)
 
     @pytest.fixture
     def layer(self, dropout, input_layer):
@@ -271,7 +271,7 @@ class TestDropConnect:
     def input_layer(self, input_data):
         from yadll.layers import InputLayer
         shape = (10, 20)
-        return InputLayer(shape, input_var=input_data)
+        return InputLayer(shape, input=input_data)
 
     @pytest.fixture
     def layer(self, dropconnect, input_layer):
@@ -304,7 +304,7 @@ class TestPoolLayer:
     def input_layer(self, input_data):
         from yadll.layers import InputLayer
         shape = (10, 20)
-        return InputLayer(shape, input_var=input_data)
+        return InputLayer(shape, input=input_data)
 
     @pytest.fixture
     def layer(self, pool_layer, input_layer):

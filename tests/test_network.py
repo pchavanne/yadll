@@ -20,7 +20,7 @@ class TestNetwork:
     @pytest.fixture
     def input(self, x):
         from yadll.layers import InputLayer
-        return InputLayer(shape=(None, 25), input_var=x)
+        return InputLayer(input_shape=(None, 25), input=x)
 
     @pytest.fixture
     def layer(self, input):
