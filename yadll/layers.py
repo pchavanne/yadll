@@ -10,7 +10,7 @@ from .utils import *
 from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 from theano.tensor.signal import pool
 from theano.tensor.nnet import conv
-
+import yadll
 import logging
 
 logger = logging.getLogger(__name__)
@@ -213,6 +213,8 @@ class DenseLayer(Layer):
             self.b = initializer(b, shape=(self.shape[1],), name='b')
         self.params.append(self.b)
         self.activation = activation
+        if isinstance(activation, basestring):
+            self.activation = getattr(yadll.activation, activation)
         self.l1 = l1
         self.l2 = l2
         if l1 and l1 != 0:
@@ -283,7 +285,11 @@ class LogisticRegression(DenseLayer):
         super(LogisticRegression, self).__init__(incoming, nb_class, W=W,
                                                  activation=activation, **kwargs)
 
-    def
+    def to_conf(self):
+        conf = super(LogisticRegression, self).to_conf()
+        conf['nb_class'] = conf.pop('nb_units')
+        return conf
+
 
 class Dropout(Layer):
     """

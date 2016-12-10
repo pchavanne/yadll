@@ -311,7 +311,7 @@ class Model(object):
         self.network = yadll.network.Network()
         self.network.from_conf(_conf['network'])
         self.updates = getattr(yadll.updates, _conf['updates'])
-        self.report = _conf['file']
+        self.report = _conf['report']
         self.file = _conf['file']
         pass
 

@@ -91,17 +91,12 @@ import json
 with open('model.json', 'w') as f:
     json.dump(model.to_json(),f)
 
-for layer in layers:
-    l = getattr(yadll.layers, 'InputLayer')(vars(model.network.layers[0]))
+net.load_params('net_params.yp')
+model_2.network.load_params('net_params.yp')
+predicted_values_2 = model_2.predict(test_set_x[:30])
+print predicted_values_2
+print test_set_y[:30]
 
+model_2.data = data
 
-class A(object):
-    def __init__(self, a, b=1, **kwargs):
-        self.a=a
-        self.b=b
-
-    def p(self):
-        print self.a
-
-
-
+model_2.train()
