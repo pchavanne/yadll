@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 import cPickle
-
+import yadll
 from .layers import *
 from .exceptions import *
 
@@ -294,11 +294,25 @@ class Model(object):
         predict = theano.function(inputs=[self.x], outputs=prediction, name='predict')
         return predict(X)
 
-    def to_json(self):
+    def to_conf(self):
         return {'model name': self.name,
-                'file': self.file,
-                'network': self.network.to_json(),
-                'hyperparameters': self.hp.to_json(),
-                'update': self.updates.__name__,
-                'report': self.report}
+                'hyperparameters': self.hp.to_conf(),
+                'network': self.network.to_conf(),
+                'updates': self.updates.__name__,
+                'report': self.report,
+                'file': self.file}
+
+    def from_conf(self, conf):
+        _conf = conf.copy()
+        self.name = _conf['model name']
+        self.hp = yadll.hyperparameters.Hyperparameters()
+        for k, v in _conf['hyperparameters'].iteritems():
+            self.hp(k, v)
+        self.network = yadll.network.Network()
+        self.network.from_conf(_conf['network'])
+        self.updates = getattr(yadll.updates, _conf['updates'])
+        self.report = _conf['file']
+        self.file = _conf['file']
+        pass
+
 

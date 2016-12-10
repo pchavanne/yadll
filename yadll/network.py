@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 import cPickle
-
+import yadll
 from .layers import *
 
 import logging
@@ -121,7 +121,20 @@ class Network(object):
             for param in self.params:
                 param.set_value(cPickle.load(f), borrow=True)
 
-    def to_json(self):
-        return OrderedDict([('network name', self.name),
-                            ('has unsupervised layer', self.has_unsupervised_layer),
-                            ('layers', OrderedDict([(layer.name, layer.to_json()) for layer in self.layers]))])
+    def to_conf(self):
+        return {'name': self.name,
+                'has_unsupervised_layer': self.has_unsupervised_layer,
+                'layers': OrderedDict([(layer.name, layer.to_conf()) for layer in self.layers])}
+
+    def from_conf(self, conf):
+        layers = conf.pop('layers', None)
+        self.__dict__.update(conf)
+        for l in layers.items():
+            layer_class = getattr(yadll.layers, l[1]['type'])
+            if layer_class is yadll.layers.InputLayer:
+                layer = layer_class(**l[1])
+            else:
+                print dict({'incoming': self.layers[-1]}, **l[1])
+                print layer_class
+                layer = layer_class(**dict({'incoming': self.layers[-1]}, **l[1])) # ony work for sequential nets
+            self.add(layer)

@@ -34,22 +34,19 @@ model.hp = hp
 
 # Create connected layers
 # Input layer
-l_in = yadll.layers.InputLayer(shape=(hp.batch_size, 28 * 28)) #, name='Input')
+l_in = yadll.layers.InputLayer(input_shape=(hp.batch_size, 28 * 28))
 # Dropout Layer 1
-l_dro1 = yadll.layers.Dropout(incoming=l_in, corruption_level=0.5)#, name='Dropout 1')
+l_dro1 = yadll.layers.Dropout(incoming=l_in, corruption_level=0.5)
 # Dense Layer 1
 l_hid1 = yadll.layers.DenseLayer(incoming=l_dro1, nb_units=500, W=yadll.init.glorot_uniform,
-                                 l1=hp.l1_reg, l2=hp.l2_reg, activation=yadll.activation.relu) #,
-                                 #name='Hidden layer 1')
+                                 l1=hp.l1_reg, l2=hp.l2_reg, activation=yadll.activation.relu)
 # Dropout Layer 2
-l_dro2 = yadll.layers.Dropout(incoming=l_hid1, corruption_level=0.25)#, name='Dropout 2')
+l_dro2 = yadll.layers.Dropout(incoming=l_hid1, corruption_level=0.25)
 # Dense Layer 2
 l_hid2 = yadll.layers.DenseLayer(incoming=l_dro2, nb_units=500, W=yadll.init.glorot_uniform,
-                                 l1=hp.l1_reg, l2=hp.l2_reg, activation=yadll.activation.relu,
-                                 )#name='Hidden layer 2')
+                                 l1=hp.l1_reg, l2=hp.l2_reg, activation=yadll.activation.relu)
 # Logistic regression Layer
-l_out = yadll.layers.LogisticRegression(incoming=l_hid2, nb_class=10, l1=hp.l1_reg,
-                                        l2=hp.l2_reg)#, name='Logistic regression')
+l_out = yadll.layers.LogisticRegression(incoming=l_hid2, nb_class=10, l1=hp.l1_reg, l2=hp.l2_reg)
 
 # Create network and add layers
 net = yadll.network.Network('2 layers mlp with dropout')
@@ -65,6 +62,9 @@ model.network = net
 
 # updates method
 model.updates = yadll.updates.sgd
+
+# saving configuration
+conf = model.to_conf()
 
 # train the model and save it to file at each best
 model.train()
@@ -83,4 +83,25 @@ print ("Model 1, predicted values for the first 30 examples in test set:")
 print predicted_values
 print test_set_y[:30]
 
-print model
+# Reconstruction of the model from configuration
+model_2 = yadll.model.Model()
+model_2.from_conf(conf)
+
+import json
+with open('model.json', 'w') as f:
+    json.dump(model.to_json(),f)
+
+for layer in layers:
+    l = getattr(yadll.layers, 'InputLayer')(vars(model.network.layers[0]))
+
+
+class A(object):
+    def __init__(self, a, b=1, **kwargs):
+        self.a=a
+        self.b=b
+
+    def p(self):
+        print self.a
+
+
+

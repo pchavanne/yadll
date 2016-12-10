@@ -33,7 +33,7 @@ class Layer(object):
     """
     nb_instances = 0
 
-    def __init__(self, incoming, name=None):
+    def __init__(self, incoming, name=None, **kwargs):
         """
         The base class that represent a single layer of any neural network.
         It has to be subclassed by any kind of layer.
@@ -107,14 +107,19 @@ class Layer(object):
         """
         raise NotImplementedError
 
-    def to_json(self):
-        json = {'name': self.name,
-                'input shape': self.input_shape}
-        if self.input_layer is None:
-            json['input layer'] = 'no input layer'
-        else:
-            json['input layer'] = self.input_layer.name
-        return json
+    def to_conf(self):
+        conf = self.__dict__.copy()
+        for key in ['id', 'params', 'reguls']:
+            conf.pop(key, None)
+        if conf['input_layer']:
+            conf['input_layer'] = conf['input_layer'].name
+        if 'activation' in conf:
+            conf['activation'] = conf['activation'].__name__
+        conf['type'] = self.__class__.__name__
+        return conf
+
+    def from_conf(self, conf):
+        self.__dict__.update(conf)
 
 
 class InputLayer(Layer):
@@ -125,7 +130,7 @@ class InputLayer(Layer):
     """
     nb_instances = 0
 
-    def __init__(self, shape, input_var=None, **kwargs):
+    def __init__(self, input_shape, input=None, **kwargs):
         """
         The input layer of any network
 
@@ -134,18 +139,14 @@ class InputLayer(Layer):
         shape : `tuple` of `int`
             The shape of the input layer the first element is the batch size
             and can be set to None.
-        input_var : `Theano shared Variables`, optional
+        input : `Theano shared Variables`, optional
             The input data of the network, used to train the model
         """
-        super(InputLayer, self).__init__(shape, **kwargs)
-        self.input = input_var
+        super(InputLayer, self).__init__(input_shape, **kwargs)
+        self.input = input
 
     def get_output(self, **kwargs):
         return self.input
-
-    def to_json(self):
-        json = dict({'class': self.__class__.__name__}, **super(InputLayer, self).to_json())
-        return json
 
 
 class ReshapeLayer(Layer):
@@ -199,6 +200,7 @@ class DenseLayer(Layer):
     def __init__(self, incoming, nb_units, W=glorot_uniform, b=constant,
                  activation=tanh, l1=None, l2=None, **kwargs):
         super(DenseLayer, self).__init__(incoming, **kwargs)
+        self.nb_units = nb_units
         self.shape = (self.input_shape[1], nb_units)
         if isinstance(W, theano.compile.SharedVariable):
             self.W = W
@@ -211,6 +213,8 @@ class DenseLayer(Layer):
             self.b = initializer(b, shape=(self.shape[1],), name='b')
         self.params.append(self.b)
         self.activation = activation
+        self.l1 = l1
+        self.l2 = l2
         if l1 and l1 != 0:
             self.reguls += l1 * T.mean(T.abs_(self.W))
         if l2 and l2 != 0:
@@ -223,10 +227,6 @@ class DenseLayer(Layer):
     def get_output(self, **kwargs):
         X = self.input_layer.get_output(**kwargs)
         return self.activation(T.dot(X, self.W) + self.b)
-
-    def to_json(self):
-        json = dict({'class': self.__class__.__name__}, **super(DenseLayer, self).to_json())
-        return json
 
 
 class UnsupervisedLayer(DenseLayer):
@@ -283,10 +283,7 @@ class LogisticRegression(DenseLayer):
         super(LogisticRegression, self).__init__(incoming, nb_class, W=W,
                                                  activation=activation, **kwargs)
 
-    def to_json(self):
-        json = dict({'class': self.__class__.__name__}, **super(LogisticRegression, self).to_json())
-        return json
-
+    def
 
 class Dropout(Layer):
     """
@@ -308,9 +305,6 @@ class Dropout(Layer):
             X = X * T_rng.binomial(self.input_shape, n=1, p=self.p, dtype=floatX)
         return X
 
-    def to_json(self):
-        json = dict({'class': self.__class__.__name__}, **super(Dropout, self).to_json())
-        return json
 
 class Dropconnect(DenseLayer):
     """

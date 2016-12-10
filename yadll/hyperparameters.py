@@ -74,5 +74,5 @@ class Hyperparameters(object):
             self.__setattr__(name, value)
         self.iteration = 0
 
-    def to_json(self):
+    def to_conf(self):
         return self.hp_value
