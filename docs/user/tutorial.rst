@@ -212,7 +212,7 @@ Once the model has been trained you can save the parameters
 
 .. code-block:: python
 
-    # saving network paramters
+    # saving network parameters
     net.save_params('net_params.yp')
 
 Now you can retrieve the model with those parameters, but first you have to recreate the model.

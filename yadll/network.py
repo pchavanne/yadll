@@ -134,7 +134,5 @@ class Network(object):
             if layer_class is yadll.layers.InputLayer:
                 layer = layer_class(**l[1])
             else:
-                print dict({'incoming': self.layers[-1]}, **l[1])
-                print layer_class
                 layer = layer_class(**dict({'incoming': self.layers[-1]}, **l[1])) # ony work for sequential nets
             self.add(layer)

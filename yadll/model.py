@@ -294,16 +294,25 @@ class Model(object):
         predict = theano.function(inputs=[self.x], outputs=prediction, name='predict')
         return predict(X)
 
-    def to_conf(self):
-        return {'model name': self.name,
+    def to_conf(self, file=None):
+        conf = {'model name': self.name,
                 'hyperparameters': self.hp.to_conf(),
                 'network': self.network.to_conf(),
                 'updates': self.updates.__name__,
                 'report': self.report,
                 'file': self.file}
+        if file is None:
+            return conf
+        else:
+            with open(file, 'wb') as f:
+                cPickle.dump(conf, f, cPickle.HIGHEST_PROTOCOL)
 
-    def from_conf(self, conf):
-        _conf = conf.copy()
+    def from_conf(self, conf=None, file = None):
+        if file:
+            with open(file, 'rb') as f:
+                _conf = cPickle.load(f)
+        else:
+            _conf = conf.copy()
         self.name = _conf['model name']
         self.hp = yadll.hyperparameters.Hyperparameters()
         for k, v in _conf['hyperparameters'].iteritems():
@@ -313,6 +322,5 @@ class Model(object):
         self.updates = getattr(yadll.updates, _conf['updates'])
         self.report = _conf['report']
         self.file = _conf['file']
-        pass
 
 

@@ -63,13 +63,13 @@ model.network = net
 # updates method
 model.updates = yadll.updates.sgd
 
-# saving configuration
+# saving configuration of the model
 conf = model.to_conf()
 
 # train the model and save it to file at each best
 model.train()
 
-# saving network paramters
+# saving network parameters
 net.save_params('net_params.yp')
 
 # make prediction
