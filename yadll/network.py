@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
+from collections import OrderedDict
 import cPickle
-import yadll
+
 from .layers import *
 
 import logging
@@ -33,6 +34,7 @@ class Network(object):
     """
     def __init__(self, name=None, layers=None):
         self.layers = []
+        self.layer_names = []
         self.params = []
         self.reguls = 0
         self.has_unsupervised_layer = False
@@ -51,6 +53,7 @@ class Network(object):
 
         """
         self.layers.append(layer)
+        self.layer_names.append(layer.name)
         self.params.extend(layer.params)
         self.reguls += layer.reguls
         if isinstance(layer, UnsupervisedLayer):
@@ -67,6 +70,23 @@ class Network(object):
 
         """
         return self.layers[-1].get_output(**kwargs)
+
+    def get_layer(self, layer_name):
+        """
+        Get a layer of the network from its name
+
+        Parameters
+        ----------
+        layer_name : `string`
+            name of the layer requested
+
+        Returns
+        -------
+        yaddl.layers object
+            a yadll layer object in the
+
+        """
+        return self.layers[self.layer_names.index(layer_name)]
 
     def save_params(self, file):
         """

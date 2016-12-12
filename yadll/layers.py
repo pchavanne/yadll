@@ -28,7 +28,8 @@ class Layer(object):
     incoming : a `Layer` or a `tuple` of `int`
         The incoming layer or shape if input layer
     name : `string`, optional
-        The layer name.
+        The layer name. default name is the class name
+        plus instantiation number i.e: 'DenseLayer 3'
 
     """
     nb_instances = 0

@@ -71,6 +71,8 @@ We now create each layers of the network by implementing :class:`yadll.layers` c
 The first layers must be a :class:`yadll.layers.Input` that give the shape of the input data.
 This network will be a mlp with two dense layer with rectified linear unit activation and dropout.
 Each layer receive as `incoming` the previous layer.
+Each layer has a name. You can provide it or it will be, by default, the name of the layer class, space, the number of
+the instantiation.
 The last layer is a :class:`yadll.layers.LogisticRegression` which is a dense layer with softmax activation.
 Layers names are optional.
 
