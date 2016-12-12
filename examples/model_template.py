@@ -33,7 +33,7 @@ model.hp = hp
 
 # Create connected layers
 # Input layer
-l_in = yadll.layers.InputLayer(shape=(hp.batch_size, 28 * 28), name='Input')
+l_in = yadll.layers.InputLayer(input_shape=(hp.batch_size, 28 * 28), name='Input')
 # Dropout Layer 1
 l_dro1 = yadll.layers.Dropout(incoming=l_in, corruption_level=0.4, name='Dropout 1')
 # Dense Layer 1

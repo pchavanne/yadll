@@ -28,6 +28,10 @@ class TestLayer:
     def test_named_layer(self, named_layer):
         assert named_layer.name == 'layer_name'
 
+    def test_unnamed_layer(self, layer):
+        from yadll.layers import Layer
+        assert layer.name == 'Layer ' + str(Layer.nb_instances)
+
     def test_get_output(self, layer):
         with pytest.raises(NotImplementedError):
             layer.get_output()

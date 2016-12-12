@@ -88,6 +88,9 @@ class Network(object):
         """
         return self.layers[self.layer_names.index(layer_name)]
 
+    def __getitem__(self, layer_name):
+        return self.get_layer(layer_name)
+
     def save_params(self, file):
         """
         Save the parameters of the network to file with cPickle

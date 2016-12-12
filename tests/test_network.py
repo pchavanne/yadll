@@ -25,7 +25,7 @@ class TestNetwork:
     @pytest.fixture
     def layer(self, input):
         from yadll.layers import DenseLayer
-        return DenseLayer(incoming=input, nb_units=25)
+        return DenseLayer(incoming=input, nb_units=25, name='DenseLayer 1')
 
     @pytest.fixture
     def layer2(self, input):
@@ -46,6 +46,8 @@ class TestNetwork:
         assert net.reguls == 0
         assert net.params == [layer.W, layer.b]
         assert net.name == 'test_network'
+        assert net.get_layer('DenseLayer 1') is layer
+        assert net['DenseLayer 1'] is layer
         assert net.has_unsupervised_layer is False
         net.add(unsupervised_layer)
         assert net.has_unsupervised_layer is True
