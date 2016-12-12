@@ -210,7 +210,7 @@ Save the network parameters
 This second method is more robust and can be used for long term storage.
 It consists in saving the parameters (pickling) of the network.
 
-Once the model has been trained you can save the parameters
+Once the model has trained the network you can save its parameters
 
 .. code-block:: python
 
@@ -274,9 +274,35 @@ When loading the parameters, the network name must match the saved parameters ne
     # add the network to the model
     model3.network = net2
 
+Save the configuration
+^^^^^^^^^^^^^^^^^^^^^^
+
+Models can be saved as configuration objects or files.
+
+.. code-block:: python
+
+    # Saving configuration of the model. Model doesn't have to be trained
+    conf = model.to_conf()    # get the configuration
+    model.to_conf('conf.yc')  # or save it to file .yc by convention
+
+
+and reloaded:
+
+.. code-block:: python
+
+    # Reconstruction the model from configuration and load paramters
+    model4 = yadll.model.Model()
+    model4.from_conf(conf)         # load from conf obj
+    model5 = yadll.model.Model()
+    model5.from_conf(file='conf.yc')    # load from conf file
+
+You can now reload parameters or train the network.
+
+Networks can be modified directly from the conf object.
+
 .. note::
-    By convention we use the .ym extension for Yadll Model file and
-    .yp for Yadll Parameters file, but it is not mandatory.
+    By convention we use the .ym extension for Yadll Model file,
+    .yp for Yadll Parameters file and .yc for configuration but it is not mandatory.
 
 Run the examples
 ================

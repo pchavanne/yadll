@@ -109,7 +109,7 @@ class TestModel:
 
     def test_save_model(self, model, network, caplog):
         model.network = network
-        from yadll.model import save_model, load_model
+        from yadll.model import save_model, load_model, Model
         caplog.setLevel(logging.ERROR)
         save_model(model)
         assert 'No file name. Model not saved.' in caplog.text()
@@ -120,9 +120,16 @@ class TestModel:
         model.train()
         model.train(save_mode='end')
         model.train(save_mode='each')
+        conf = model.to_conf()
+        model.to_conf(file='test_conf.yc')
         save_model(model)
         save_model(model, 'test_model.ym')
         test_model = load_model('test_model.ym')
+        model_from_conf = Model()
+        model_from_conf.from_conf(conf)
+        model_from_conf_file = Model()
+        model_from_conf_file.from_conf(file='test_conf.yc')
+
 
     def test_model(self, model, model_y_2D, network, network_unsupervised):
         model.network = network
