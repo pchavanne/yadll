@@ -16,6 +16,7 @@ __all__ = ['logistic_regression',
            'stacked_denoising_autoencoder',
            'rbm',
            'dbn',
+           'batch_normalization',
            'rnn',
            'lstm'
            ]
@@ -62,10 +63,10 @@ def mlp(input_var=None):
     l_in = InputLayer(input_shape=(None, 28 * 28), input_var=input_var, name='Input')
     # Dense Layer
     l_hid1 = DenseLayer(incoming=l_in, nb_units=500, W=glorot_uniform, l1=hp.l1_reg,
-                        l2=hp.l2_reg, activation=tanh, name='Hidden layer 1')
+                        l2=hp.l2_reg, activation=relu, name='Hidden layer 1')
     # Dense Layer
     l_hid2 = DenseLayer(incoming=l_hid1, nb_units=500, W=glorot_uniform, l1=hp.l1_reg,
-                        l2=hp.l2_reg, activation=tanh, name='Hidden layer 2')
+                        l2=hp.l2_reg, activation=relu, name='Hidden layer 2')
     # Logistic regression Layer
     l_out = LogisticRegression(incoming=l_hid2, nb_class=10, l1=hp.l1_reg,
                                l2=hp.l2_reg, name='Logistic regression')
@@ -470,6 +471,50 @@ def dbn(input_var=None):
     net.add(l_in)
     net.add(l_rbm1)
     net.add(l_rbm2)
+    net.add(l_out)
+
+    return net, hp
+
+
+def batch_normalization(input_var=None):
+    """Multi Layer Perceptron with Batch Normalization"""
+
+    # Hyperparameters
+    hp = Hyperparameters()
+    hp('batch_size', 50)
+    hp('n_epochs', 1000)
+    hp('learning_rate', 0.01)
+    hp('l1_reg', 0.00)
+    hp('l2_reg', 0.0001)
+    hp('patience', 5000)
+
+    # Create connected layers
+    # Input layer
+    l_in = InputLayer(input_shape=(None, 28 * 28), input_var=input_var, name='Input')
+    # Batch Normalization
+    l_bn1 = BatchNormalization(incoming=l_in, name='Batch Normalization 1')
+    # Dense Layer
+    l_hid1 = DenseLayer(incoming=l_bn1, nb_units=500, W=glorot_uniform, l1=hp.l1_reg,
+                        l2=hp.l2_reg, activation=relu, name='Hidden layer 1')
+    # Batch Normalization
+    l_bn2 = BatchNormalization(incoming=l_hid1, name='Batch Normalization 2')
+    # Dense Layer
+    l_hid2 = DenseLayer(incoming=l_bn2, nb_units=500, W=glorot_uniform, l1=hp.l1_reg,
+                        l2=hp.l2_reg, activation=relu, name='Hidden layer 2')
+    # Batch Normalization
+    l_bn3 = BatchNormalization(incoming=l_hid2, name='Batch Normalization 3')
+    # Logistic regression Layer
+    l_out = LogisticRegression(incoming=l_bn3, nb_class=10, l1=hp.l1_reg,
+                               l2=hp.l2_reg, name='Logistic regression')
+
+    # Create network and add layers
+    net = Network('mlp with batch normalization')
+    net.add(l_in)
+    net.add(l_bn1)
+    net.add(l_hid1)
+    net.add(l_bn2)
+    net.add(l_hid2)
+    net.add(l_bn3)
     net.add(l_out)
 
     return net, hp

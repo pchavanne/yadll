@@ -587,43 +587,45 @@ class RBM(UnsupervisedLayer):
 
 class BatchNormalization(Layer):
     """
-    Normalize the previous layer at each batch
+    Normalize the input layer over each mini-batch according to [1]_:
+
+    .. math::
+    x_hat = (x - E[x]) / \\sqrt(\\Var[x] + \\epsilon)
+
+    y = \\gamma * x_hat + \\beta
 
     References
     ----------
 
     ..[1] http://jmlr.org/proceedings/papers/v37/ioffe15.pdf
-    ..[2] https://github.com/fchollet/keras/blob/master/keras/layers/normalization.py#L6
     """
     nb_instances = 0
 
-    def __init__(self, incoming, **kwargs):
+    def __init__(self, incoming, axis=-2, alpha=0.1, epsilon=1e-5, **kwargs):
         super(BatchNormalization, self).__init__(incoming, **kwargs)
+        self.axis = axis
+        self.alpha = alpha
+        self.epsilon = epsilon
+        self.gamma = initializer(constant, shape=self.input_shape, value=1, name='gamma')
+        self.params.append(self.gamma)
+        self.beta = initializer(constant, shape=(self.input_shape[1],), value=0, name='beta')
+        self.params.append(self.beta)
+        self.mean = initializer(constant, shape=self.input_shape, value=0, name='mean')
+        self.var = initializer(constant, shape=self.input_shape, value=1, name='var')
 
-    def get_output(self, **kwargs):
-        X = self.input_layer.get_output(**kwargs)
-        # TODO
-        return X
-
-
-class LayerNormalization(Layer):
-    """
-    Normalize the previous layer at each batch
-
-    References
-    ----------
-
-    ..[1] http://arxiv.org/pdf/1607.06450v1.pdf
-    """
-    nb_instances = 0
-
-    def __init__(self, incoming, **kwargs):
-        super(LayerNormalization, self).__init__(incoming, **kwargs)
-
-    def get_output(self, **kwargs):
-        X = self.input_layer.get_output(**kwargs)
-        # TODO
-        return X
+    def get_output(self, stochastic=True, **kwargs):
+        x = self.input_layer.get_output(**kwargs)
+        if stochastic:
+            mean = T.mean(x, axis=self.axis)                           # mini-batch mean
+            var = T.var(x, axis=self.axis)                             # mini-batch variance
+            self.mean = self.alpha * self.mean + (1 - self.alpha) * mean
+            self.var = self.alpha * self.var + (1 - self.alpha) * var
+        else:
+            mean = self.mean
+            var = self.var
+        x_hat = (x - mean) / T.sqrt(var + self.epsilon)                 # normalize
+        y = self.gamma * x_hat + self.beta                              # scale and shift
+        return y
 
 
 class RNN(Layer):
