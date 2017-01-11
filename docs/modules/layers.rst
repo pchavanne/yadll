@@ -25,6 +25,7 @@ by any new layer.
    ConvPoolLayer
    AutoEncoder
    RBM
+   BatchNormalization
    RNN
    LSTM
 
@@ -60,6 +61,8 @@ Detailed description
 .. autoclass:: AutoEncoder
     :members:
 .. autoclass:: RBM
+    :members:
+.. autoclass:: BatchNormalization
     :members:
 .. autoclass:: RNN
     :members:
