@@ -2,7 +2,7 @@
 import numpy as np
 
 from .utils import shared_variable
-from .activation import *
+from .activations import *
 
 np_rng = np.random.RandomState(1234)
 

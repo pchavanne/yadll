@@ -38,11 +38,11 @@ model.hp = hp
 l_in = yadll.layers.InputLayer(input_shape=(hp.batch_size, 28 * 28), name='Input')
 # Dense Layer 1
 l_hid1 = yadll.layers.DenseLayer(incoming=l_in, nb_units=500, W=yadll.init.glorot_uniform,
-                                 l1=hp.l1_reg, l2=hp.l2_reg, activation=yadll.activation.relu,
+                                 l1=hp.l1_reg, l2=hp.l2_reg, activation=yadll.activations.relu,
                                  name='Hidden layer 1')
 # Dense Layer 2
 l_hid2 = yadll.layers.DenseLayer(incoming=l_hid1, nb_units=500, W=yadll.init.glorot_uniform,
-                                 l1=hp.l1_reg, l2=hp.l2_reg, activation=yadll.activation.relu,
+                                 l1=hp.l1_reg, l2=hp.l2_reg, activation=yadll.activations.relu,
                                  name='Hidden layer 2')
 # Logistic regression Layer
 l_out = yadll.layers.LogisticRegression(incoming=l_hid2, nb_class=10, l1=hp.l1_reg,
@@ -90,13 +90,13 @@ l_in = yadll.layers.InputLayer(input_shape=(hp.batch_size, 28 * 28), name='Input
 l_bn1 = yadll.layers.BatchNormalization(incoming=l_in, name='Batch Normalization 1')
 # Dense Layer 1
 l_hid1 = yadll.layers.DenseLayer(incoming=l_bn1, nb_units=500, W=yadll.init.glorot_uniform,
-                                 l1=hp.l1_reg, l2=hp.l2_reg, activation=yadll.activation.relu,
+                                 l1=hp.l1_reg, l2=hp.l2_reg, activation=yadll.activations.relu,
                                  name='Hidden layer 1')
 # Batch Normalization 2
 l_bn2 = yadll.layers.BatchNormalization(incoming=l_hid1, name='Batch Normalization 1')
 # Dense Layer 2
 l_hid2 = yadll.layers.DenseLayer(incoming=l_bn2, nb_units=500, W=yadll.init.glorot_uniform,
-                                 l1=hp.l1_reg, l2=hp.l2_reg, activation=yadll.activation.relu,
+                                 l1=hp.l1_reg, l2=hp.l2_reg, activation=yadll.activations.relu,
                                  name='Hidden layer 2')
 # Batch Normalization 3
 l_bn3 = yadll.layers.BatchNormalization(incoming=l_hid2, name='Batch Normalization 1')

@@ -1,9 +1,9 @@
-:mod:`yadll.activation`
+:mod:`yadll.activations`
 
 Activation
 ==========
 
-.. automodule:: yadll.activation
+.. automodule:: yadll.activations
 
 .. autosummary::
 

@@ -37,40 +37,40 @@ def test_init():
     assert np.abs(np.std(w.get_value()) - 0.5) < eps
 
     # Glorot
-    init_obj = (yadll.init.glorot_uniform, {'gain': yadll.activation.tanh})
+    init_obj = (yadll.init.glorot_uniform, {'gain': yadll.activations.tanh})
     w = yadll.init.initializer(init_obj=init_obj, shape=shape, name='w')
     scale = 1 * np.sqrt(6. / (shape[0] + shape[1]))
     assert np.abs(np.mean(w.get_value()) - 0.0) < eps
     assert np.abs(np.max(w.get_value()) - scale) < eps
     assert np.abs(np.min(w.get_value()) - (-scale)) < eps
 
-    init_obj = (yadll.init.glorot_uniform, {'gain': yadll.activation.sigmoid})
+    init_obj = (yadll.init.glorot_uniform, {'gain': yadll.activations.sigmoid})
     w = yadll.init.initializer(init_obj=init_obj, shape=shape, name='w')
     scale = 4 * np.sqrt(6. / (shape[0] + shape[1]))
     assert np.abs(np.mean(w.get_value()) - 0.0) < eps
     assert np.abs(np.max(w.get_value()) - scale) < eps
     assert np.abs(np.min(w.get_value()) - (-scale)) < eps
 
-    init_obj = (yadll.init.glorot_uniform, {'gain': yadll.activation.sigmoid})
+    init_obj = (yadll.init.glorot_uniform, {'gain': yadll.activations.sigmoid})
     w = yadll.init.initializer(init_obj=init_obj, shape=shape, fan=(500, 500), name='w')
     scale = 4 * np.sqrt(6. / (500 + 500))
     assert np.abs(np.mean(w.get_value()) - 0.0) < eps
     assert np.abs(np.max(w.get_value()) - scale) < eps
     assert np.abs(np.min(w.get_value()) - (-scale)) < eps
 
-    init_obj = (yadll.init.glorot_normal, {'gain': yadll.activation.tanh})
+    init_obj = (yadll.init.glorot_normal, {'gain': yadll.activations.tanh})
     w = yadll.init.initializer(init_obj=init_obj, shape=shape, name='w')
     scale = 1 * np.sqrt(2. / (shape[0] + shape[1]))
     assert np.abs(np.mean(w.get_value()) - 0.0) < eps
     assert np.abs(np.std(w.get_value()) - scale) < eps
 
-    init_obj = (yadll.init.glorot_normal, {'gain': yadll.activation.sigmoid})
+    init_obj = (yadll.init.glorot_normal, {'gain': yadll.activations.sigmoid})
     w = yadll.init.initializer(init_obj=init_obj, shape=shape, name='w')
     scale = 4 * np.sqrt(2. / (shape[0] + shape[1]))
     assert np.abs(np.mean(w.get_value()) - 0.0) < eps
     assert np.abs(np.std(w.get_value()) - scale) < eps
 
-    init_obj = (yadll.init.glorot_normal, {'gain': yadll.activation.sigmoid})
+    init_obj = (yadll.init.glorot_normal, {'gain': yadll.activations.sigmoid})
     w = yadll.init.initializer(init_obj=init_obj, shape=shape, fan=(500, 500), name='w')
     scale = 4 * np.sqrt(2. / (500 + 500))
     assert np.abs(np.mean(w.get_value()) - 0.0) < eps
@@ -96,7 +96,7 @@ def test_init():
     assert np.abs(np.mean(w.get_value()) - 0.0) < eps
     assert np.allclose(np.dot(w.get_value(), w.get_value().T), np.eye(min(shape)), atol=1e-5)
 
-    init_obj = (yadll.init.orthogonal, {'gain': yadll.activation.relu})
+    init_obj = (yadll.init.orthogonal, {'gain': yadll.activations.relu})
     w = yadll.init.initializer(init_obj=init_obj, shape=shape, name='w')
     assert np.abs(np.mean(w.get_value()) - 0.0) < eps
     assert np.allclose(np.dot(w.get_value(), w.get_value().T), np.eye(min(shape)) * 2, atol=1e-5)

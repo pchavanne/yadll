@@ -215,7 +215,7 @@ class DenseLayer(Layer):
         self.params.append(self.b)
         self.activation = activation
         if isinstance(activation, basestring):
-            self.activation = getattr(yadll.activation, activation)
+            self.activation = getattr(yadll.activations, activation)
         self.l1 = l1
         self.l2 = l2
         if l1 and l1 != 0:

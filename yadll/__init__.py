@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-from . import activation
+from . import activations
 from . import data
 from . import exceptions
 from . import hyperparameters

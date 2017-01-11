@@ -116,5 +116,13 @@ def rmsprop(cost, params, learning_rate=1.0, rho=0.9, epsilon=1e-6, **kwargs):
 
 
 def hessian_free(cost, parms, **kwargs):
+    """
+    Hessian Free optimization
+
+    References
+    ----------
+    .. [1] http://www.cs.toronto.edu/~jmartens/docs/Deep_HessianFree.pdf
+    .. [2] http://www.cs.toronto.edu/~hinton/absps/momentum.pdf
+    """
     # TODO implement hessian_free method
     raise NotImplementedError

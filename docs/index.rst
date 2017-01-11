@@ -54,7 +54,7 @@ Referencees on functions, classes or methodes, with notes and references.
   modules/layers
   modules/updates
   modules/init
-  modules/activation
+  modules/activations
   modules/objectives
   modules/utils
 
