@@ -590,14 +590,14 @@ class BatchNormalization(Layer):
     Normalize the input layer over each mini-batch according to [1]_:
 
     .. math::
-    x_hat = (x - E[x]) / \\sqrt(\\Var[x] + \\epsilon)
+        \\hat{x} = \\frac{x - E[x]}{\\sqrt(Var[x] + \\epsilon)}
 
-    y = \\gamma * x_hat + \\beta
+        y = \\gamma * \\hat{x} + \\beta
 
     References
     ----------
 
-    ..[1] http://jmlr.org/proceedings/papers/v37/ioffe15.pdf
+    .. [1] http://jmlr.org/proceedings/papers/v37/ioffe15.pdf
     """
     nb_instances = 0
 

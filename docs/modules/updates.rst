@@ -13,8 +13,11 @@ Updating functions that are passed to the network.
     momentum
     nesterov_momentum
     adagrad
-    adadelta
     rmsprop
+    adadelta
+    adam
+    admax
+    nadam
     hessian_free
 
 Detailed description
@@ -24,6 +27,9 @@ Detailed description
 .. autofunction:: momentum
 .. autofunction:: nesterov_momentum
 .. autofunction:: adagrad
-.. autofunction:: adadelta
 .. autofunction:: rmsprop
+.. autofunction:: adadelta
+.. autofunction:: adam
+.. autofunction:: admax
+.. autofunction:: nadam
 .. autofunction:: hessian_free

@@ -184,6 +184,7 @@ def orthogonal(shape, gain=1, name=None, borrow=True, **kwargs):
     ----------
 
     .. [1] http://smerity.com/articles/2016/orthogonal_init.html
+    .. [2] https://arxiv.org/pdf/1312.6120.pdf
     """
     if gain == relu:
         gain = np.sqrt(2)
