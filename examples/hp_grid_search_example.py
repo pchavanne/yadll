@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
+"""
+This example show you how to make a grid search on the Hyperparameters
+"""
 import os
 import cPickle
 import pandas as pd

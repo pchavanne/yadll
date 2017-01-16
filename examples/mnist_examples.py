@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """
-Example of dl usage on the mnist dataset
+Example of yadll usage on the mnist dataset
+many networks are predefined, to see the complete list,
 use -n or --network_list to see all available networks
 
 Usage:

@@ -20,7 +20,8 @@ from .utils import *
 
 def sgd(cost, params, learning_rate=0.1, **kwargs):
     """Stochastic Gradient Descent (SGD) updates
-    * ``param := param - learning_rate * gradient``
+
+    `param := param - learning_rate * gradient`
     """
     gparams = T.grad(cost, params)
     updates = OrderedDict()
@@ -31,8 +32,10 @@ def sgd(cost, params, learning_rate=0.1, **kwargs):
 
 def momentum(cost, params, learning_rate=0.1, momentum=0.9, **kwargs):
     """Stochastic Gradient Descent (SGD) updates with momentum
-    * ``velocity := momentum * velocity - learning_rate * gradient``
-    * ``param := param + velocity``
+
+    `velocity := momentum * velocity - learning_rate * gradient`
+
+    `param := param + velocity`
     """
     updates = sgd(cost, params, learning_rate)
     for param in params:
@@ -45,8 +48,10 @@ def momentum(cost, params, learning_rate=0.1, momentum=0.9, **kwargs):
 
 def nesterov_momentum(cost, params, learning_rate=0.1, momentum=0.9, **kwargs):
     """Stochastic Gradient Descent (SGD) updates with Nesterov momentum
-    * ``velocity := momentum * velocity - learning_rate * gradient``
-    * ``param := param + momentum * velocity - learning_rate * gradient``
+
+    `velocity := momentum * velocity - learning_rate * gradient`
+
+    `param := param + momentum * velocity - learning_rate * gradient`
 
     References
     ----------
@@ -61,7 +66,7 @@ def nesterov_momentum(cost, params, learning_rate=0.1, momentum=0.9, **kwargs):
     return updates
 
 
-def adagrad(cost, params, learning_rate=1.0, epsilon=1e-6, **kwargs):
+def adagrad(cost, params, learning_rate=0.1, epsilon=1e-6, **kwargs):
     """Adaptive Gradient Descent
     Scale learning rates by dividing with the square root of accumulated
     squared gradients
@@ -95,7 +100,7 @@ def rmsprop(cost, params, learning_rate=0.01, rho=0.9, epsilon=1e-6, **kwargs):
     return updates
 
 
-def adadelta(cost, params, learning_rate=1.0, rho=0.95, epsilon=1e-6, **kwargs):
+def adadelta(cost, params, learning_rate=0.1, rho=0.95, epsilon=1e-6, **kwargs):
     """Adadelta Gradient Descent
     Scale learning rates by a the ratio of accumulated gradients to accumulated
     step sizes
@@ -137,7 +142,7 @@ def adam(cost, params, learning_rate=0.001, beta1=0.9, beta2=0.999, epsilon=1e-6
     """
     gparams = T.grad(cost, params)
     updates = OrderedDict()
-    t = theano.shared(floatX(0.))
+    t = shared_variable(to_float_X(0.))
     t_t = 1. + t
     l_r_t = learning_rate * T.sqrt(1. - beta2 ** t_t) / (1. - beta1 ** t_t)
     for param, gparam in zip(params, gparams):
@@ -162,7 +167,7 @@ def adamax(cost, params, learning_rate=0.001, beta1=0.9, beta2=0.999, epsilon=1e
     """
     gparams = T.grad(cost, params)
     updates = OrderedDict()
-    t = theano.shared(floatX(0.))
+    t = shared_variable(to_float_X(0.))
     t_t = 1. + t
     l_r_t = learning_rate / (1. - beta1 ** t_t)
     for param, gparam in zip(params, gparams):
@@ -178,8 +183,7 @@ def adamax(cost, params, learning_rate=0.001, beta1=0.9, beta2=0.999, epsilon=1e
 
 
 def nadam(cost, params, learning_rate=1.0, rho=0.95, epsilon=1e-6, **kwargs):
-    """Adam Gradient Descent
-    Nesterov Momentum in Adam
+    """Adam Gradient Descent with nesterov momentum
 
     References
     ----------

@@ -132,6 +132,8 @@ class Model(object):
         -------
             report
         """
+        start_time = timeit.default_timer()
+
         if self.data is None:
             raise NoDataFoundException
         else:
@@ -184,6 +186,10 @@ class Model(object):
             update_param['epsilon'] = self.hp.epsilon
         if hasattr(self.hp, 'rho'):
             update_param['rho'] = self.hp.rho
+        if hasattr(self.hp, 'beta1'):
+            update_param['beta1'] = self.hp.beta1
+        if hasattr(self.hp, 'beta2'):
+            update_param['beta2'] = self.hp.beta1
         updates = self.updates(cost, self.network.params, **update_param)
 
         ################################################
@@ -211,10 +217,10 @@ class Model(object):
         logger.info('... Training the model')
 
         # early-stopping parameters
-        patience = self.hp.patience  # look at this many batches regardless
-        patience_increase = 2  # wait this much longer when a new best is found
-        improvement_threshold = 0.995  # a relative improvement of this much is considered significant
-        validation_frequency = min(n_train_batches, patience / 2)  # go through this many minibatche before checking the network
+        patience = self.hp.patience     # look at this many batches regardless
+        patience_increase = 2           # wait this much longer when a new best is found
+        improvement_threshold = 0.995   # a relative improvement of this much is considered significant
+        validation_frequency = min(n_train_batches, patience / 2)  # go through this many minibatches before checking the network
 
         best_validation_loss = np.inf
         best_iter = 0
@@ -266,6 +272,8 @@ class Model(object):
                     done_looping = True
                     break
 
+        end_time = timeit.default_timer()
+
         # save the final model
         if self.save_mode == 'end':
             save_model(self)
@@ -277,13 +285,13 @@ class Model(object):
         logger.info(' Validation score of %.3f %% obtained at iteration %i, with test performance %.3f %%' %
                     (best_validation_loss * 100., best_iter + 1, test_score * 100.))
 
-        # if save_model:
-        #     print ' Model saved as: ' + network.file if save_model else ' Model not saved!!'
+        # Report
         self.report['epoch'] = epoch
         self.report['early_stop'] = done_looping
         self.report['best_validation'] = best_validation_loss * 100.
         self.report['best_iter'] = best_iter + 1
         self.report['test_score'] = test_score * 100.
+        self.report['training_duration'] = format_sec(end_time - start_time)
 
         return self.report
 

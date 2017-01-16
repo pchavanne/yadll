@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-
+"""
+This example file show you how to creat a model, train it and save it.
+You will save a model, save the parameters and save the configuration,
+and rebuild the model.
+"""
 import os
 import yadll
 import logging
@@ -123,14 +127,14 @@ print predicted_values_3
 print test_set_y[:30]
 # Now let's load parameters
 model_3.network.load_params('net_params.yp')
-# And try prediciting again
+# And try predicting again
 predicted_values_3 = model_3.predict(test_set_x[:30])
 print ("Model 3 after loading parameters values for the first 30 examples in test set:")
 print predicted_values_3
 print test_set_y[:30]
 
 ##########################################################################
-# Reconstruction the model from configuration and load paramters
+# Reconstruction the model from configuration and load parameters
 model_4 = yadll.model.Model()
 model_4.from_conf(conf)         # load from conf obj
 model_5 = yadll.model.Model()

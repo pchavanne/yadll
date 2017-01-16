@@ -3,7 +3,7 @@
 Updates
 =======
 
-Updating functions that are passed to the network.
+Updating functions that are passed to the network for optimization.
 
 .. automodule:: yadll.updates
 
