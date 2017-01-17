@@ -54,8 +54,8 @@ class TestUpdateFunctions(object):
         ['adagrad', {'learning_rate': 0.1, 'epsilon': 1e-6}],
         ['rmsprop', {'learning_rate': 0.01, 'rho': 0.9, 'epsilon': 1e-6}],
         ['adadelta', {'learning_rate': 1, 'rho': 0.95, 'epsilon': 1e-6}],
-        # ['adam', {'learning_rate': 0.01}],
-        # ['adamax', {'learning_rate': 0.01}],
+        ['adam', {'learning_rate': 0.01, 'beta1': 0.9, 'beta2': 0.999, 'epsilon': 1e-8}],
+        ['adamax', {'learning_rate': 0.01, 'beta1': 0.9, 'beta2': 0.999, 'epsilon': 1e-8}],
         ])
     def test_updates(self, method, kwargs):
         A = yadll.utils.shared_variable([1, 1, 1])

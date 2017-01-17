@@ -678,6 +678,14 @@ class RNN(Layer):
                                           strict=True)
         return s_t
 
+class GRU(Layer):
+    """
+    Gated Recurrent unit
+
+    References
+    ----------
+    .. [1] http://deeplearning.net/tutorial/lstm.html
+    """
 
 class LSTM(Layer):
     """
