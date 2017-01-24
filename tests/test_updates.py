@@ -9,8 +9,8 @@ import theano
 import yadll
 
 
-def test_hessian_free():
-    pytest.raises(NotImplementedError, yadll.updates.hessian_free, 'cost', 'params')
+def test_nadam():
+    pytest.raises(NotImplementedError, yadll.updates.nadam, 'cost', 'params')
 
 
 PCT_TOLERANCE = 1E-5

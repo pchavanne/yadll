@@ -191,23 +191,3 @@ def nadam(cost, params, learning_rate=1.0, rho=0.95, epsilon=1e-6, **kwargs):
     """
     # TODO implement nadam method
     raise NotImplementedError
-    gparams = T.grad(cost, params)
-    updates = OrderedDict()
-
-    return updates
-
-
-def hessian_free(cost, parms, **kwargs):
-    """
-    Hessian Free optimization
-
-    References
-    ----------
-    .. [1] http://www.cs.toronto.edu/~jmartens/docs/Deep_HessianFree.pdf
-    .. [2] http://www.cs.toronto.edu/~hinton/absps/momentum.pdf
-    .. [3] http://www.cs.utoronto.ca/~ilya/pubs/2011/HF-RNN.pdf
-    .. [4] http://olivier.chapelle.cc/pub/precond.pdf
-    .. [5] http://www.cs.toronto.edu/~rkiros/papers/shf13.pdf
-    """
-    # TODO implement hessian_free method
-    raise NotImplementedError
