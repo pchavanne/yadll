@@ -15,6 +15,7 @@ by any new layer.
    InputLayer
    ReshapeLayer
    FlattenLayer
+   Activation
    DenseLayer
    UnsupervisedLayer
    LogisticRegression
@@ -28,6 +29,7 @@ by any new layer.
    BatchNormalization
    RNN
    LSTM
+   GRU
 
 .. inheritance-diagram:: yadll.layers
 
@@ -43,6 +45,8 @@ Detailed description
 .. autoclass:: FlattenLayer
     :members:
 .. autoclass:: DenseLayer
+    :members:
+.. autoclass:: Activation
     :members:
 .. autoclass:: UnsupervisedLayer
     :members:
@@ -67,4 +71,6 @@ Detailed description
 .. autoclass:: RNN
     :members:
 .. autoclass:: LSTM
+    :members:
+.. autoclass:: GRU
     :members:

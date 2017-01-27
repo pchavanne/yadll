@@ -11,6 +11,29 @@ x_val = np.asarray([[-10, -5, -1, -0.9, -0.1, 0, 0.1, 0.9, 1, 5, 10]],
                    dtype=yadll.utils.floatX)
 
 
+def test_get_activation():
+    x = T.matrix('x')
+    activation = yadll.activations.get_activation(yadll.activations.relu)
+    f = theano.function([x], activation(x))
+    actual = f(x_val)
+    desired = x_val * (x_val > 0)
+    assert_allclose(actual, desired, rtol=1e-5)
+    x = T.matrix('x')
+    alpha = 0.5
+    activation = yadll.activations.get_activation((yadll.activations.relu, {'alpha': alpha}))
+    f = theano.function([x], activation(x))
+    actual = f(x_val)
+    desired = x_val * (x_val > 0) + alpha * x_val * (x_val < 0)
+    assert_allclose(actual, desired, rtol=1e-5)
+
+
+def test_linear():
+    x = [0, -1, 1, 3.2, 1e-7, np.inf, True, None, 'foo']
+    actual = yadll.activations.linear(x)
+    desired = x
+    assert actual == desired
+
+
 def test_sigmoid():
     x = T.matrix('x')
     f = theano.function([x], yadll.activations.sigmoid(x))
@@ -65,9 +88,18 @@ def test_relu():
     assert_allclose(actual, desired, rtol=1e-5)
 
 
-def test_linear():
-    x = [0, -1, 1, 3.2, 1e-7, np.inf, True, None, 'foo']
-    actual = yadll.activations.linear(x)
-    desired = x
-    assert actual == desired
+def test_elu():
+    x = T.matrix('x')
+    f = theano.function([x], yadll.activations.elu(x))
+    actual = f(x_val)
+    desired = x_val * (x_val > 0) + (np.exp(x_val) - 1) * (x_val < 0)
+    assert_allclose(actual, desired, rtol=1e-5)
+    x = T.matrix('x')
+    alpha = 0.5
+    f = theano.function([x], yadll.activations.elu(x, alpha))
+    actual = f(x_val)
+    desired = x_val * (x_val > 0) + alpha * (np.exp(x_val) - 1) * (x_val < 0)
+    assert_allclose(actual, desired, rtol=1e-5)
+
+
 

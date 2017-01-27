@@ -192,6 +192,25 @@ class FlattenLayer(Layer):
         return X.flatten(self.ndim)
 
 
+class Activation(Layer):
+    """
+    Apply activation function to previous layer
+    """
+    nb_instances = 0
+
+    def __init__(self, incoming, activation=linear, **kwargs):
+        super(Activation, self).__init__(incoming, **kwargs)
+        self.activation = get_activation(activation)
+
+    @property
+    def output_shape(self):
+        return self.input_shape[0], np.prod(self.input_shape[1:])
+
+    def get_output(self, **kwargs):
+        X = self.input_layer.get_output(**kwargs)
+        return self.activation(X)
+
+
 class DenseLayer(Layer):
     """
     Fully connected neural network layer
@@ -213,9 +232,7 @@ class DenseLayer(Layer):
         else:
             self.b = initializer(b, shape=(self.shape[1],), name='b')
         self.params.append(self.b)
-        self.activation = activation
-        if isinstance(activation, basestring):
-            self.activation = getattr(yadll.activations, activation)
+        self.activation = get_activation(activation)
         self.l1 = l1
         self.l2 = l2
         if l1 and l1 != 0:
@@ -419,7 +436,7 @@ class ConvPoolLayer(ConvLayer, PoolLayer):
                                             filter_shape=filter_shape, pool_scale=poolsize, **kwargs)
         self.b = initializer(b, shape=(self.filter_shape[0],), name='b')
         self.params.append(self.b)
-        self.activation = activation
+        self.activation = get_activation(activation)
 
     @property
     def output_shape(self):
@@ -632,6 +649,9 @@ class RNN(Layer):
     """
     Recurrent Neural Network
 
+    .. math ::
+        h_t &= \sigma(x_t.W_x + h_{t-1}.W_h + b)
+
     References
     ----------
 
@@ -641,7 +661,7 @@ class RNN(Layer):
 
     def __init__(self, incoming, n_hidden, n_out, activation=tanh, **kwargs):
         super(RNN, self).__init__(incoming, **kwargs)
-        self.activation = activation
+        self.activation = get_activation(activation)
         if isinstance(n_hidden, tuple):
             self.n_hidden, self.n_i, self.n_c, self.n_o, self.n_f = n_hidden
         else:
@@ -650,22 +670,20 @@ class RNN(Layer):
         self.n_out = n_out
 
         self.W_x = orthogonal(shape=(self.n_in, self.n_f), name='W_x')
-        self.W_h = orthogonal(shape=(n_hidden, self.n_f), name='W_h')
+        self.W_h = orthogonal(shape=(self.n_hidden, self.n_f), name='W_h')
         self.b_h = uniform(shape=self.n_f, scale=(0, 1.), name='b_h')
-        self.W_y = orthogonal(shape=(n_hidden, n_out), name='W_y')
+        self.W_y = orthogonal(shape=(self.n_hidden, n_out), name='W_y')
         self.b_y = constant(shape=self.n_out, name='b_y')
 
         self.params.extend([self.W_x, self.W_h, self.b_h,
                             self.W_y, self.b_y])
 
         self.c0 = constant(shape=self.n_hidden, name='c0')
-        self.h0 = activation(self.c0)
+        self.h0 = self.activation(self.c0)
 
     def one_step(self, x_t, h_tm1, W_x, W_h, b_h, W_y, b_y):
-        ha_t = T.dot(x_t, W_x) + T.dot(h_tm1, W_h) + b_h
-        h_t = self.activation(ha_t)
+        h_t = self.activation(T.dot(x_t, W_x) + T.dot(h_tm1, W_h) + b_h)
         s_t = T.dot(h_t, W_y) + b_y
-
         return [h_t, s_t]
 
     def get_output(self, **kwargs):
@@ -678,18 +696,26 @@ class RNN(Layer):
                                           strict=True)
         return s_t
 
-class GRU(Layer):
-    """
-    Gated Recurrent unit
-
-    References
-    ----------
-    .. [1] http://deeplearning.net/tutorial/lstm.html
-    """
 
 class LSTM(Layer):
     """
     Long Short Term Memory
+
+    .. math ::
+        i_t &= \sigma(x_t.W_xi + h_{t-1}.W_hi + b_i)
+        f_t &= \sigma(W_xf.x_t + W_hf.h_{t-1} + b_f)
+        \tilde{C_t} &= \sigma(W_xc.x_t + W_hc.h_{t-1} + b_c)
+        C_t &= f_t * C_{t-1} + i_t * \tilde{C_t}
+        o_t &= \sigma(W_xo.x_t + W_ho.h_{t-1} + b_o)
+        h_t &= o_t * tanh(C_t)
+
+    Parameters
+    ----------
+    incoming : a `Layer`
+        The incoming layer
+    n_hidden : int or tuple of int
+        (n_hidden, n_input, n_forget, n_cell, n_output).
+        If an int is provided all gates have the same number of units
 
     References
     ----------
@@ -697,9 +723,93 @@ class LSTM(Layer):
     .. [2] http://christianherta.de/lehre/dataScience/machineLearning/neuralNetworks/LSTM.php
     .. [3] http://people.idsia.ch/~juergen/lstm/
     .. [4] http://colah.github.io/posts/2015-08-Understanding-LSTMs/
+    .. [5] https://arxiv.org/pdf/1308.0850v5.pdf
     """
     nb_instances = 0
 
+    def __init__(self, incoming, n_hidden, n_out, peephole=False, tied_i_f=False, activation=tanh, **kwargs):
+        super(LSTM, self).__init__(incoming, **kwargs)
+        self.peephole = peephole    # gate layers look at the cell state
+        self.tied = tied_i_f        # only input new values to the state when we forget something
+        self.activation = get_activation(activation)
+        if isinstance(n_hidden, tuple):
+            self.n_hidden, self.n_i, self.n_f, self.n_c, self.n_o = n_hidden
+        else:
+            self.n_hidden = self.n_i = self.n_f = self.n_c = self.n_o = n_hidden
+        self.n_in = self.input_shape[1]
+        self.n_out = n_out
+        # input gate
+        self.W_xi = orthogonal(shape=(self.n_in, self.n_i), name='W_xi')
+        self.W_hi = orthogonal(shape=(self.n_hidden, self.n_i), name='W_hi')
+        self.b_i = uniform(shape=self.n_i, scale=(-0.5, .5), name='b_i')
+        # forget gate
+        self.W_xf = orthogonal(shape=(self.n_in, self.n_f), name='W_xf')
+        self.W_hf = orthogonal(shape=(self.n_hidden, self.n_f), name='W_hf')
+        self.b_f = uniform(shape=self.n_f, scale=(0, 1.), name='b_f')
+        # cell state
+        self.W_xc = orthogonal(shape=(self.n_in, self.n_c), name='W_xc')
+        self.W_hc = orthogonal(shape=(self.n_hidden, self.n_c), name='W_hc')
+        self.b_c = constant(shape=self.n_c, name='b_c')
+        # output gate
+        self.W_xo = orthogonal(shape=(self.n_in, self.n_o), name='W_x0')
+        self.W_ho = orthogonal(shape=(self.n_hidden, self.n_o), name='W_ho')
+        self.b_o = uniform(shape=self.n_i, scale=(-0.5, .5), name='b_o')
+
+        self.W_hy = orthogonal(shape=(self.n_hidden, n_out), name='W_hy')
+        self.b_y = constant(shape=self.n_out, name='b_y')
+
+        self.params.extend([self.W_xi, self.W_hi, self.b_i,
+                            self.W_xf, self.W_hf, self.b_f,
+                            self.W_xc, self.W_hc, self.b_c,
+                            self.W_xo, self.W_ho, self.b_o,
+                            self.W_hy, self.b_y])
+
+        self.W_x = T.concatenate([self.W_xi, self.W_xf, self.W_xc, self.W_xo])
+        self.W_h = T.concatenate([self.W_hi, self.W_hf, self.W_hc, self.W_ho])
+        self.b = T.concatenate([self.b_i, self.b_f, self.b_c, self.b_o])
+
+        self.c0 = constant(shape=self.n_hidden, name='c0')
+        self.h0 = self.activation(self.c0)
+
+    def one_step(self, x_t, h_tm1, c_tm1, W_xi, W_hi, b_i,
+                                          W_xf, W_hf, b_f,
+                                          W_xc, W_hc, b_c,
+                                          W_xo, W_ho, b_o,
+                                          W_hy, b_y):
+        # forget gate
+        f_t = sigmoid(T.dot(x_t, W_xf) + T.dot(h_tm1, W_hf) + b_f)
+        # input gate
+        i_t = sigmoid(T.dot(x_t, W_xi) + T.dot(h_tm1, W_hi) + b_i)
+
+        # cell state
+        c_tt = self.activation(T.dot(x_t, W_xc) + T.dot(h_tm1, W_hc) + b_c)
+        c_t = f_t * c_tm1 + i_t * c_tt
+        if self.tied:
+            c_t = f_t * c_tm1 + (1 - f_t) * c_tt
+
+        # output gate
+        o_t = sigmoid(T.dot(x_t, W_xo) + T.dot(h_tm1, W_ho) + b_o)
+        # if self.peephole:
+        #     o_t = sigmoid(T.dot(x_t, W_xo) + T.dot(h_tm1, W_ho) + T.dot(c_t, W_co) + b_o)
+
+        h_t = o_t * self.activation(c_t)
+
+        y_t = sigmoid(T.dot(h_t, W_hy) + b_y)
+
+        return [h_t, c_t, y_t]
+
+    def get_output(self, **kwargs):
+        X = self.input_layer.get_output(**kwargs)
+        [h_vals, _, y_vals], _ = theano.scan(fn=self.one_step,
+                                             sequences=X,
+                                             outputs_info=[self.h0, self.c0, None],
+                                             non_sequences=self.params,
+                                             allow_gc=False,
+                                             strict=True)
+        return y_vals
+
+
+class LSTM_Old(Layer):
     def __init__(self, incoming, n_hidden, n_out, peephole=False, tied_i_f=False, activation=tanh, **kwargs):
         super(LSTM, self).__init__(incoming, **kwargs)
         self.peephole = peephole    # gate layers look at the cell state
@@ -736,7 +846,11 @@ class LSTM(Layer):
                             self.W_xc, self.W_hc, self.b_c,
                             self.W_xo, self.W_ho, self.b_o,
                             self.W_hy, self.b_y])
-
+        if peephole:
+            self.W_cf = orthogonal(shape=(self.n_c, self.n_f), name='W_cf')
+            self.W_ci = orthogonal(shape=(self.n_c, self.n_i), name='W_ci')
+            self.W_co = orthogonal(shape=(self.n_c, self.n_o), name='W_co')
+            self.params.extend([self.W_cf, self.W_ci, self.W_co])
 
         self.c0 = constant(shape=self.n_hidden, name='c0')
         self.h0 = activation(self.c0)
@@ -745,11 +859,15 @@ class LSTM(Layer):
                                           W_xf, W_hf, b_f,
                                           W_xc, W_hc, b_c,
                                           W_xo, W_ho, b_o,
-                                          W_hy, b_y):
+                                          W_hy, b_y,
+                                          W_cf=None, W_ci=None, W_co=None):
         # forget gate
         f_t = sigmoid(T.dot(x_t, W_xf) + T.dot(h_tm1, W_hf) + b_f)
         # input gate
         i_t = sigmoid(T.dot(x_t, W_xi) + T.dot(h_tm1, W_hi) + b_i)
+        if self.peephole:
+            f_t = sigmoid(T.dot(x_t, W_xf) + T.dot(h_tm1, W_hf) + T.dot(c_tm1, W_cf) + b_f)
+            i_t = sigmoid(T.dot(x_t, W_xi) + T.dot(h_tm1, W_hi) + T.dot(c_tm1, W_ci) + b_i)
 
         # cell state
         c_tt = self.activation(T.dot(x_t, W_xc) + T.dot(h_tm1, W_hc) + b_c)
@@ -759,8 +877,8 @@ class LSTM(Layer):
 
         # output gate
         o_t = sigmoid(T.dot(x_t, W_xo) + T.dot(h_tm1, W_ho) + b_o)
-        # if self.peephole:
-        #     o_t = sigmoid(T.dot(x_t, W_xo) + T.dot(h_tm1, W_ho) + T.dot(c_t, W_co) + b_o)
+        if self.peephole:
+            o_t = sigmoid(T.dot(x_t, W_xo) + T.dot(h_tm1, W_ho) + T.dot(c_t, W_co) + b_o)
 
         h_t = o_t * self.activation(c_t)
 
@@ -771,95 +889,19 @@ class LSTM(Layer):
     def get_output(self, **kwargs):
         X = self.input_layer.get_output(**kwargs)
         [h_vals, _, y_vals], _ = theano.scan(fn=self.one_step,
-                                             sequences=X,
+                                             sequences=dict(input=X, taps=[0]),
                                              outputs_info=[self.h0, self.c0, None],
-                                             non_sequences=self.params)
+                                             non_sequences=self.params,
+                                             allow_gc=False,
+                                             strict=True)
         return y_vals
 
 
-# class LSTM_Old(Layer):
-#     def __init__(self, incoming, n_hidden, n_out, peephole=False, tied_i_f=False, activation=tanh, **kwargs):
-#         super(LSTM, self).__init__(incoming, **kwargs)
-#         self.peephole = peephole    # gate layers look at the cell state
-#         self.tied = tied_i_f        # only input new values to the state when we forget something
-#         self.activation = activation
-#         if isinstance(n_hidden, tuple):
-#             self.n_hidden, self.n_i, self.n_c, self.n_o, self.n_f = n_hidden
-#         else:
-#             self.n_hidden = self.n_i = self.n_c = self.n_o = self.n_f = n_hidden
-#         self.n_in = self.input_shape[1]
-#         self.n_out = n_out
-#         # forget gate
-#         self.W_xf = orthogonal(shape=(self.n_in, self.n_f), name='W_xf')
-#         self.W_hf = orthogonal(shape=(n_hidden, self.n_f), name='W_hf')
-#         self.b_f = uniform(shape=self.n_f, scale=(0, 1.), name='b_f')
-#         # input gate
-#         self.W_xi = orthogonal(shape=(self.n_in, self.n_i), name='W_xi')
-#         self.W_hi = orthogonal(shape=(self.n_hidden, self.n_i), name='W_hi')
-#         self.b_i = uniform(shape=self.n_i, scale=(-0.5,.5), name='b_i')
-#         # cell state
-#         self.W_xc = orthogonal(shape=(self.n_in, self.n_c), name='W_xc')
-#         self.W_hc = orthogonal(shape=(n_hidden, self.n_c), name='W_hc')
-#         self.b_c = constant(shape=self.n_c, name='b_c')
-#         # output gate
-#         self.W_xo = orthogonal(shape=(self.n_in, self.n_o), name='W_x0')
-#         self.W_ho = orthogonal(shape=(self.n_hidden, self.n_o), name='W_ho')
-#         self.b_o = uniform(shape=self.n_i, scale=(-0.5,.5), name='b_o')
-#
-#         self.W_hy = orthogonal(shape=(n_hidden, n_out), name='W_hy')
-#         self.b_y = constant(shape=self.n_out, name='b_y')
-#
-#         self.params.extend([self.W_xi, self.W_hi, self.b_i,
-#                             self.W_xf, self.W_hf, self.b_f,
-#                             self.W_xc, self.W_hc, self.b_c,
-#                             self.W_xo, self.W_ho, self.b_o,
-#                             self.W_hy, self.b_y])
-#         if peephole:
-#             self.W_cf = orthogonal(shape=(self.n_c, self.n_f), name='W_cf')
-#             self.W_ci = orthogonal(shape=(self.n_c, self.n_i), name='W_ci')
-#             self.W_co = orthogonal(shape=(self.n_c, self.n_o), name='W_co')
-#             self.params.extend([self.W_cf, self.W_ci, self.W_co])
-#
-#         self.c0 = constant(shape=self.n_hidden, name='c0')
-#         self.h0 = activation(self.c0)
-#
-#     def one_step(self, x_t, h_tm1, c_tm1, W_xi, W_hi, b_i,
-#                                           W_xf, W_hf, b_f,
-#                                           W_xc, W_hc, b_c,
-#                                           W_xo, W_ho, b_o,
-#                                           W_hy, b_y,
-#                                           W_cf=None, W_ci=None, W_co=None):
-#         # forget gate
-#         f_t = sigmoid(T.dot(x_t, W_xf) + T.dot(h_tm1, W_hf) + b_f)
-#         # input gate
-#         i_t = sigmoid(T.dot(x_t, W_xi) + T.dot(h_tm1, W_hi) + b_i)
-#         if self.peephole:
-#             f_t = sigmoid(T.dot(x_t, W_xf) + T.dot(h_tm1, W_hf) + T.dot(c_tm1, W_cf) + b_f)
-#             i_t = sigmoid(T.dot(x_t, W_xi) + T.dot(h_tm1, W_hi) + T.dot(c_tm1, W_ci) + b_i)
-#
-#         # cell state
-#         c_tt = self.activation(T.dot(x_t, W_xc) + T.dot(h_tm1, W_hc) + b_c)
-#         c_t = f_t * c_tm1 + i_t * c_tt
-#         if self.tied:
-#             c_t = f_t * c_tm1 + (1 - f_t) * c_tt
-#
-#         # output gate
-#         o_t = sigmoid(T.dot(x_t, W_xo) + T.dot(h_tm1, W_ho) + b_o)
-#         if self.peephole:
-#             o_t = sigmoid(T.dot(x_t, W_xo) + T.dot(h_tm1, W_ho) + T.dot(c_t, W_co) + b_o)
-#
-#         h_t = o_t * self.activation(c_t)
-#
-#         y_t = sigmoid(T.dot(h_t, W_hy) + b_y)
-#
-#         return [h_t, c_t, y_t]
-#
-#     def get_output(self, **kwargs):
-#         X = self.input_layer.get_output(**kwargs)
-#         [h_vals, _, y_vals], _ = theano.scan(fn=self.one_step,
-#                                              sequences=dict(input=X, taps=[0]),
-#                                              outputs_info=[self.h0, self.c0, None],
-#                                              non_sequences=self.params,
-#                                              allow_gc=False,
-#                                              strict=True)
-#         return y_vals
+class GRU(Layer):
+    """
+    Gated Recurrent unit
+
+    References
+    ----------
+    .. [1] http://deeplearning.net/tutorial/lstm.html
+    """

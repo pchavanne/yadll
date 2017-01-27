@@ -7,21 +7,25 @@ Activation
 
 .. autosummary::
 
+   get_activation
+   linear
    sigmoid
    ultra_fast_sigmoid
    tanh
    softmax
    softplus
    relu
-   linear
+   elu
 
 Detailed description
 --------------------
 
+.. autofunction:: get_activation
+.. autofunction:: linear
 .. autofunction:: sigmoid
 .. autofunction:: ultra_fast_sigmoid
 .. autofunction:: tanh
 .. autofunction:: softmax
 .. autofunction:: softplus
 .. autofunction:: relu
-.. autofunction:: linear
+.. autofunction:: elu

@@ -6,6 +6,44 @@ Activation functions
 import theano.tensor as T
 
 
+def get_activation(activator):
+    """
+    Call an activation function from an activator object
+
+    Parameters
+    ----------
+    activator : `activator`
+            an activator is an activation function or the tuple of (activation function, dict of args)
+            example : activator = tanh  or activator = (elu, {'alpha':0.5})
+
+    Returns
+    -------
+        an activation function with proper parameters
+    """
+    if not isinstance(activator, tuple):
+        return activator
+    else:
+        return lambda x: activator[0](x, **activator[1])
+
+
+def linear(x):
+    """Linear activation function
+    :math:`\\varphi(x) = x`
+
+    Parameters
+    ----------
+    x : symbolic tensor
+        Tensor to compute the activation function for.
+
+    Returns
+    -------
+    symbolic tensor
+        The output of the identity applied to the activation `x`.
+
+    """
+    return x
+
+
 def sigmoid(x):
     """Sigmoid function
     :math:`\\varphi(x) = \\frac{1}{1 + e^{-x}}`
@@ -139,20 +177,26 @@ def relu(x, alpha=0):
     return T.nnet.relu(x, alpha)
 
 
-def linear(x):
-    """Linear activation function
-    :math:`\\varphi(x) = x`
+def elu(x, alpha=1):
+    """
+    Compute the element-wise exponential linear activation function.
 
     Parameters
     ----------
     x : symbolic tensor
         Tensor to compute the activation function for.
+    alpha : scalar
+
 
     Returns
     -------
     symbolic tensor
-        The output of the identity applied to the activation `x`.
+        Element-wise exponential linear activation function applied to `x`.
 
+    References
+    -----
+    .. [1] Djork-Arne Clevert,  Thomas Unterthiner, Sepp Hochreiter
+        "Fast and Accurate Deep Network Learning by
+        Exponential Linear Units (ELUs)" <http://arxiv.org/abs/1511.07289>`.
     """
-    return x
-
+    return T.nnet.elu(x, alpha)
