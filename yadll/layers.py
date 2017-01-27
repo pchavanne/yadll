@@ -126,8 +126,7 @@ class Layer(object):
 class InputLayer(Layer):
     """
     Input layer of the data, it has no parameters, it just shapes the data as
-     the input for any network.
-     A ::class:`InputLayer` is always the first layer of any network.
+    the input for any network. A ::class:`InputLayer` is always the first layer of any network.
     """
     nb_instances = 0
 

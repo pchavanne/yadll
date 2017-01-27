@@ -121,6 +121,35 @@ class TestFlattenLayer:
         assert (result == input.reshape(input.shape[0], -1)).all()
 
 
+class TestActivation:
+    @pytest.fixture
+    def activation(self):
+        from yadll.layers import Activation
+        return Activation
+
+    @pytest.fixture
+    def input_data(self):
+        from yadll.utils import shared_variable
+        return shared_variable(np.random.random((2, 3, 4, 5)))
+
+    @pytest.fixture
+    def input_layer(self, input_data):
+        from yadll.layers import InputLayer
+        shape = (2, 3, 4, 5,)
+        return InputLayer(shape, input=input_data)
+
+    def test_output_shape(self, activation, input_layer):
+        layer = activation(input_layer)
+        assert layer.output_shape == (2, 3 * 4 * 5)
+
+    def test_get_output(self, activation, input_layer, input_data):
+        from yadll.activations import tanh
+        layer = activation(input_layer, activation=tanh)
+        result = layer.get_output().eval()
+        input = np.asarray(input_data.eval())
+        assert np.allclose(result, np.tanh(input))
+
+
 class TestDenseLayer:
     @pytest.fixture
     def dense_layer(self):
@@ -371,3 +400,9 @@ class TestLSTM:
         from yadll.layers import LSTM
         return LSTM
 
+
+class TestGRU:
+    @pytest.fixture
+    def gru(self):
+        from yadll.layers import GRU
+        return GRU
