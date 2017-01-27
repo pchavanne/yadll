@@ -702,11 +702,11 @@ class LSTM(Layer):
     Long Short Term Memory
 
     .. math ::
-        i_t &= \sigma(x_t.W_xi + h_{t-1}.W_hi + b_i)
-        f_t &= \sigma(W_xf.x_t + W_hf.h_{t-1} + b_f)
-        \tilde{C_t} &= \sigma(W_xc.x_t + W_hc.h_{t-1} + b_c)
-        C_t &= f_t * C_{t-1} + i_t * \tilde{C_t}
-        o_t &= \sigma(W_xo.x_t + W_ho.h_{t-1} + b_o)
+        i_t &= \sigma(x_t.W_xi + h_{t-1}.W_hi + b_i)\\
+        f_t &= \sigma(W_xf.x_t + W_hf.h_{t-1} + b_f)\\
+        \tilde{C_t} &= \sigma(W_xc.x_t + W_hc.h_{t-1} + b_c)\\
+        C_t &= f_t * C_{t-1} + i_t * \tilde{C_t}\\
+        o_t &= \sigma(W_xo.x_t + W_ho.h_{t-1} + b_o)\\
         h_t &= o_t * tanh(C_t)
 
     Parameters
