@@ -19,8 +19,7 @@ Yadll
 **Y**\ et **a**\ nother **d**\ eep **l**\ earning **l**\ ab.
 
 This is an ultra light deep learning framework written in Python and based on Theano_.
-It allows you to very quickly start building Deep Learning models. It was originally the code, notes and references I gathered when following the
-`Theano's Deep Learning Tutorials`_ tutorial then I used Lasagne_, keras_ or blocks_ and restructured this code based on it.
+It allows you to very quickly start building Deep Learning models and play with toy examples.
 
 If you are looking for a light deep learning API I would recommend using Lasagne_ or keras_ in stead of yadll, both are mature, well documented and contributed projects.
 
@@ -54,6 +53,7 @@ Its main features are:
       * Restricted Boltzmann Machine
   * RNN
   * LSTM
+  * GRU
 
 * **Optimisation**:
 
@@ -63,7 +63,9 @@ Its main features are:
   * Adagrad
   * Adadelta
   * Rmsprop
-  * Hessian Free
+  * Adam
+  * Adamax
+
 
 
 * **Hyperparameters grid search**
@@ -95,8 +97,9 @@ Different networks tested on mnist:
 * Stacked Denoising Autoencoder
 * Restricted Boltzmann Machine
 * Deep Belief Network
-* Recurent Neural Networks
+* Recurrent Neural Networks
 * Long Short-Term Memory
+* Gated Recurrent unit
 
 get the list of available networks:
 

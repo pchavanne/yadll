@@ -10,8 +10,7 @@ Welcome to Yadll
 **Y**\ et **a**\ nother **d**\ eep **l**\ earning **l**\ ab.
 
 This is an ultra light deep learning framework written in Python and based on Theano_.
-It allows you to very quickly start building Deep Learning models. It was originally the code, notes and references I gathered when following the
-`Theano's Deep Learning Tutorials`_ tutorial then I used Lasagne_, keras_ or blocks_ and restructured this code based on it.
+It allows you to very quickly start building Deep Learning models and play with toy examples.
 
 If you are looking for mature deep learning APIs I would recommend Lasagne_, keras_ or blocks_ in stead of yadll, they are well documented and contributed projects.
 
@@ -42,7 +41,7 @@ neural networks using many different models on mnist.
 API Reference
 -------------
 
-Referencees on functions, classes or methodes, with notes and references.
+References on functions, classes or methods, with notes and references.
 
 .. toctree::
   :maxdepth: 2
