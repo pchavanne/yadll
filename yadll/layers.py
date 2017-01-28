@@ -671,8 +671,7 @@ class RNN(Layer):
         self.W_x = orthogonal(shape=(self.n_in, self.n_f), name='W_x')
         self.W_h = orthogonal(shape=(self.n_hidden, self.n_f), name='W_h')
         self.b_h = uniform(shape=self.n_f, scale=(0, 1.), name='b_h')
-        self.W_y = orthogonal(shape=(self.n_hidden, n_out), name='W_y')
-        self.b_y = constant(shape=self.n_out, name='b_y')
+
 
         self.params.extend([self.W_x, self.W_h, self.b_h,
                             self.W_y, self.b_y])
@@ -682,18 +681,17 @@ class RNN(Layer):
 
     def one_step(self, x_t, h_tm1, W_x, W_h, b_h, W_y, b_y):
         h_t = self.activation(T.dot(x_t, W_x) + T.dot(h_tm1, W_h) + b_h)
-        s_t = T.dot(h_t, W_y) + b_y
-        return [h_t, s_t]
+        return h_t
 
     def get_output(self, **kwargs):
         X = self.input_layer.get_output(**kwargs)
-        [h_t, s_t], updates = theano.scan(fn=self.one_step,
+        h_t, updates = theano.scan(fn=self.one_step,
                                           sequences=X,
                                           outputs_info=[self.h0, None],
                                           non_sequences=self.params,
                                           allow_gc=False,
                                           strict=True)
-        return s_t
+        return h_t
 
 
 class LSTM(Layer):
@@ -701,11 +699,11 @@ class LSTM(Layer):
     Long Short Term Memory
 
     .. math ::
-        i_t &= \sigma(x_t.W_xi + h_{t-1}.W_hi + b_i)\\
-        f_t &= \sigma(W_xf.x_t + W_hf.h_{t-1} + b_f)\\
-        \tilde{C_t} &= \sigma(W_xc.x_t + W_hc.h_{t-1} + b_c)\\
-        C_t &= f_t * C_{t-1} + i_t * \tilde{C_t}\\
-        o_t &= \sigma(W_xo.x_t + W_ho.h_{t-1} + b_o)\\
+        i_t &= \sigma(x_t.W_xi + h_{t-1}.W_hi + b_i) \\
+        f_t &= \sigma(W_xf.x_t + W_hf.h_{t-1} + b_f) \\
+        \tilde{C_t} &= \sigma(W_xc.x_t + W_hc.h_{t-1} + b_c) \\
+        C_t &= f_t * C_{t-1} + i_t * \tilde{C_t} \\
+        o_t &= \sigma(W_xo.x_t + W_ho.h_{t-1} + b_o) \\
         h_t &= o_t * tanh(C_t)
 
     Parameters
@@ -754,14 +752,10 @@ class LSTM(Layer):
         self.W_ho = orthogonal(shape=(self.n_hidden, self.n_o), name='W_ho')
         self.b_o = uniform(shape=self.n_i, scale=(-0.5, .5), name='b_o')
 
-        self.W_hy = orthogonal(shape=(self.n_hidden, n_out), name='W_hy')
-        self.b_y = constant(shape=self.n_out, name='b_y')
-
         self.params.extend([self.W_xi, self.W_hi, self.b_i,
                             self.W_xf, self.W_hf, self.b_f,
                             self.W_xc, self.W_hc, self.b_c,
-                            self.W_xo, self.W_ho, self.b_o,
-                            self.W_hy, self.b_y])
+                            self.W_xo, self.W_ho, self.b_o])
 
         self.W_x = T.concatenate([self.W_xi, self.W_xf, self.W_xc, self.W_xo])
         self.W_h = T.concatenate([self.W_hi, self.W_hf, self.W_hc, self.W_ho])
@@ -773,8 +767,7 @@ class LSTM(Layer):
     def one_step(self, x_t, h_tm1, c_tm1, W_xi, W_hi, b_i,
                                           W_xf, W_hf, b_f,
                                           W_xc, W_hc, b_c,
-                                          W_xo, W_ho, b_o,
-                                          W_hy, b_y):
+                                          W_xo, W_ho, b_o):
         # forget gate
         f_t = sigmoid(T.dot(x_t, W_xf) + T.dot(h_tm1, W_hf) + b_f)
         # input gate
@@ -793,19 +786,17 @@ class LSTM(Layer):
 
         h_t = o_t * self.activation(c_t)
 
-        y_t = sigmoid(T.dot(h_t, W_hy) + b_y)
-
-        return [h_t, c_t, y_t]
+        return [h_t, c_t]
 
     def get_output(self, **kwargs):
         X = self.input_layer.get_output(**kwargs)
-        [h_vals, _, y_vals], _ = theano.scan(fn=self.one_step,
+        [h_vals, _], _ = theano.scan(fn=self.one_step,
                                              sequences=X,
                                              outputs_info=[self.h0, self.c0, None],
                                              non_sequences=self.params,
                                              allow_gc=False,
                                              strict=True)
-        return y_vals
+        return h_vals
 
 
 class LSTM_Old(Layer):
