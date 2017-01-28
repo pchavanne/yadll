@@ -695,7 +695,7 @@ class RNN(Layer):
 
 
 class LSTM(Layer):
-    """
+    r"""
     Long Short Term Memory
 
     .. math ::
