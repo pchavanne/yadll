@@ -658,8 +658,9 @@ class RNN(Layer):
     """
     nb_instances = 0
 
-    def __init__(self, incoming, n_hidden, n_out, activation=sigmoid, **kwargs):
+    def __init__(self, incoming, n_hidden, n_out, activation=sigmoid, last_only=True, **kwargs):
         super(RNN, self).__init__(incoming, **kwargs)
+        self.last_only = last_only
         self.activation = get_activation(activation)
 
         self.n_in = self.input_shape[1]
@@ -695,27 +696,27 @@ class LSTM(Layer):
     Long Short Term Memory
 
     .. math ::
-        i_t &= \sigma(x_t.W_i + h_{t-1}.U_i + b_i)\\ && Input gate
-        f_t &= \sigma(x_t.W_f + h_{t-1}.U_f + b_f)\\ && Forget gate
-        \tilde{C_t} &= \tanh(x_t.W_c + h_{t-1}.U_c + b_c)\\ && Cell gate
-        C_t &= f_t * C_{t-1} + i_t * \tilde{C_t}\\
-        o_t &= \sigma(x_t.W_o + h_{t-1}.U_o + b_o)\\  && Output gate
-        h_t &= o_t * \tanh(C_t)
+        i_t &= \sigma(x_t.W_i + h_{t-1}.U_i + b_i) & \texte{Input gate}\\
+        f_t &= \sigma(x_t.W_f + h_{t-1}.U_f + b_f) & \texte{Forget gate}\\
+        \tilde{C_t} &= \tanh(x_t.W_c + h_{t-1}.U_c + b_c) & \texte{Cell gate}\\
+        C_t &= f_t * C_{t-1} + i_t * \tilde{C_t} & \texte{Cell state}\\
+        o_t &= \sigma(x_t.W_o + h_{t-1}.U_o + b_o) & \texte{Output gate}\\
+        h_t &= o_t * \tanh(C_t) & \texte{Hidden state}\\
 
     with Peephole connections:
 
     .. math ::
-        i_t &= \sigma(x_t.W_i + h_{t-1}.U_i + C_{t-}.P_i + b_i)\\ && Input gate
-        f_t &= \sigma(x_t.W_f + h_{t-1}.U_f + C_{t-1}.P_f + b_f)\\ && Forget gate
-        \tilde{C_t} &= \tanh(x_t.W_c + h_{t-1}.U_c + b_c)\\ && Cell gate
-        C_t &= f_t * C_{t-1} + i_t * \tilde{C_t}\\
-        o_t &= \sigma(x_t.W_o + h_{t-1}.U_o + C_t.P_o + b_o)\\  && Output gate
-        h_t &= o_t * \tanh(C_t)
+        i_t &= \sigma(x_t.W_i + h_{t-1}.U_i + C_{t-1}.P_i + b_i) & \texte{Input gate}\\
+        f_t &= \sigma(x_t.W_f + h_{t-1}.U_f + C_{t-1}.P_f + b_f) & \texte{Forget gate}\\
+        \tilde{C_t} &= \tanh(x_t.W_c + h_{t-1}.U_c + b_c) & \texte{Cell gate}\\
+        C_t &= f_t * C_{t-1} + i_t * \tilde{C_t} & \texte{Cell state}\\
+        o_t &= \sigma(x_t.W_o + h_{t-1}.U_o + C_t.P_o + b_o) & \texte{Output gate}\\
+        h_t &= o_t * \tanh(C_t) & \texte{Hidden state}\\
 
-    with tied forget and in put gates:
+    with tied forget and input gates:
 
     .. math ::
-        C_t &= f_t * C_{t-1} + (1 - f_t) * \tilde{C_t}\\
+        C_t &= f_t * C_{t-1} + (1 - f_t) * \tilde{C_t} & \texte{Cell state}\\
 
     Parameters
     ----------
@@ -724,6 +725,16 @@ class LSTM(Layer):
     n_hidden : int or tuple of int
         (n_hidden, n_input, n_forget, n_cell, n_output).
         If an int is provided all gates have the same number of units
+    n_out : int
+        number of output units
+    peephole : boolean default is False
+        use peephole connections.
+    tied_i : boolean default is false
+        tie input and forget gate
+    activation : `yadll.activations` function default is `yadll.activations.tanh`
+        activation function
+    last_only: boolean default is True
+        set to true if you only need the last element of the
 
     References
     ----------
@@ -735,8 +746,9 @@ class LSTM(Layer):
     """
     nb_instances = 0
 
-    def __init__(self, incoming, n_hidden, n_out, peephole=False, tied_i_f=False, activation=tanh, **kwargs):
+    def __init__(self, incoming, n_hidden, n_out, peephole=False, tied_i_f=False, activation=tanh, last_only=True, **kwargs):
         super(LSTM, self).__init__(incoming, **kwargs)
+        self.last_only = last_only
         self.peephole = peephole    # input and forget gates layers look at the cell state
         self.tied = tied_i_f        # only input new values to the state when we forget something
         self.activation = get_activation(activation)
