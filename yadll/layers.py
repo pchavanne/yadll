@@ -699,6 +699,7 @@ class LSTM(Layer):
     Long Short Term Memory
 
     .. math ::
+
         i_t &= \sigma(x_t.W_{xi} + h_{t-1}.W_{hi} + b_i) \\
         f_t &= \sigma(x_t.W_{xf} + h_{t-1}.W_{hf} + b_f) \\
         C_t &= \sigma(x_t.W_{xc} + h_{t-1}.W_{hc} + b_c) \\
