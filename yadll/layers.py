@@ -696,12 +696,12 @@ class LSTM(Layer):
     Long Short Term Memory
 
     .. math ::
-        i_t &= \sigma(x_t.W_i + h_{t-1}.U_i + b_i) & \text{Input gate}\\
-        f_t &= \sigma(x_t.W_f + h_{t-1}.U_f + b_f) & \text{Forget gate}\\
-        \tilde{C_t} &= \tanh(x_t.W_c + h_{t-1}.U_c + b_c) & \text{Cell gate}\\
-        C_t &= f_t * C_{t-1} + i_t * \tilde{C_t} & \text{Cell state}\\
-        o_t &= \sigma(x_t.W_o + h_{t-1}.U_o + b_o) & \text{Output gate}\\
-        h_t &= o_t * \tanh(C_t) & \text{Hidden state}\\
+        i_t &= \sigma(x_t.W_i + h_{t-1}.U_i + b_i) && \text{Input gate}\\
+        f_t &= \sigma(x_t.W_f + h_{t-1}.U_f + b_f) && \text{Forget gate}\\
+        \tilde{C_t} &= \tanh(x_t.W_c + h_{t-1}.U_c + b_c) && \text{Cell gate}\\
+        C_t &= f_t * C_{t-1} + i_t * \tilde{C_t} && \text{Cell state}\\
+        o_t &= \sigma(x_t.W_o + h_{t-1}.U_o + b_o) && \text{Output gate}\\
+        h_t &= o_t * \tanh(C_t) && \text{Hidden state}\\
 
     with Peephole connections:
 
@@ -733,7 +733,7 @@ class LSTM(Layer):
         tie input and forget gate
     activation : `yadll.activations` function default is `yadll.activations.tanh`
         activation function
-    last_only: boolean default is True
+    last_only : boolean default is True
         set to true if you only need the last element of the output sequence
 
     References
