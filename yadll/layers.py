@@ -706,17 +706,17 @@ class LSTM(Layer):
     with Peephole connections:
 
     .. math ::
-        i_t &= \sigma(x_t.W_i + h_{t-1}.U_i + C_{t-1}.P_i + b_i) & \text{Input gate}\\
-        f_t &= \sigma(x_t.W_f + h_{t-1}.U_f + C_{t-1}.P_f + b_f) & \text{Forget gate}\\
-        \tilde{C_t} &= \tanh(x_t.W_c + h_{t-1}.U_c + b_c) & \text{Cell gate}\\
+        i_t &= \sigma(x_t.W_i + h_{t-1}.U_i + C_{t-1}.P_i + b_i) && \text{Input gate}\\
+        f_t &= \sigma(x_t.W_f + h_{t-1}.U_f + C_{t-1}.P_f + b_f) && \text{Forget gate}\\
+        \tilde{C_t} &= \tanh(x_t.W_c + h_{t-1}.U_c + b_c) && \text{Cell gate}\\
         C_t &= f_t * C_{t-1} + i_t * \tilde{C_t} & \text{Cell state}\\
-        o_t &= \sigma(x_t.W_o + h_{t-1}.U_o + C_t.P_o + b_o) & \text{Output gate}\\
-        h_t &= o_t * \tanh(C_t) & \text{Hidden state}\\
+        o_t &= \sigma(x_t.W_o + h_{t-1}.U_o + C_t.P_o + b_o) && \text{Output gate}\\
+        h_t &= o_t * \tanh(C_t) && \text{Hidden state}\\
 
     with tied forget and input gates:
 
     .. math ::
-        C_t &= f_t * C_{t-1} + (1 - f_t) * \tilde{C_t} & \text{Cell state}\\
+        C_t &= f_t * C_{t-1} + (1 - f_t) * \tilde{C_t} && \text{Cell state}\\
 
     Parameters
     ----------
