@@ -649,7 +649,7 @@ class RNN(Layer):
     Recurrent Neural Network
 
     .. math ::
-        h_t &= \sigma(x_t.W_x + h_{t-1}.W_h + b)
+        h_t = \sigma(x_t.W_x + h_{t-1}.W_h + b)
 
     References
     ----------
@@ -699,13 +699,16 @@ class LSTM(Layer):
     Long Short Term Memory
 
     .. math ::
+        i_t &= \sigma_i(x_t W_{xi} + h_{t-1} W_{hi}
+               + w_{ci} \odot c_{t-1} + b_i)\\
+        f_t &= \sigma_f(x_t W_{xf} + h_{t-1} W_{hf}
+               + w_{cf} \odot c_{t-1} + b_f)\\
+        c_t &= f_t \odot c_{t - 1}
+               + i_t \odot \sigma_c(x_t W_{xc} + h_{t-1} W_{hc} + b_c)\\
+        o_t &= \sigma_o(x_t W_{xo} + h_{t-1} W_{ho} + w_{co} \odot c_t + b_o)\\
+        h_t &= o_t \odot \sigma_h(c_t)
 
-        i_t &= \sigma(x_t.W_{xi} + h_{t-1}.W_{hi} + b_i) \\
-        f_t &= \sigma(x_t.W_{xf} + h_{t-1}.W_{hf} + b_f) \\
-        C_t &= \sigma(x_t.W_{xc} + h_{t-1}.W_{hc} + b_c) \\
-        C_t &= f_t * C_{t-1} + i_t * \tilde{C_t} \\
-        o_t &= \sigma(x_t.W_{xo} + h_{t-1}.W_{ho} + b_o) \\
-        h_t &= o_t * tanh(C_t)
+
 
     Parameters
     ----------
