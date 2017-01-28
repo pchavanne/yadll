@@ -649,7 +649,7 @@ class RNN(Layer):
     Recurrent Neural Network
 
     .. math ::
-        h_t = \sigma(x_t.W_x + h_{t-1}.W_h + b)
+        h_t = \sigma(x_t.W + h_{t-1}.U + b)
 
     References
     ----------
@@ -658,29 +658,25 @@ class RNN(Layer):
     """
     nb_instances = 0
 
-    def __init__(self, incoming, n_hidden, n_out, activation=tanh, **kwargs):
+    def __init__(self, incoming, n_hidden, n_out, activation=sigmoid, **kwargs):
         super(RNN, self).__init__(incoming, **kwargs)
         self.activation = get_activation(activation)
-        if isinstance(n_hidden, tuple):
-            self.n_hidden, self.n_i, self.n_c, self.n_o, self.n_f = n_hidden
-        else:
-            self.n_hidden = self.n_i = self.n_c = self.n_o = self.n_f = n_hidden
+
         self.n_in = self.input_shape[1]
+        self.n_hidden = n_hidden
         self.n_out = n_out
 
-        self.W_x = orthogonal(shape=(self.n_in, self.n_f), name='W_x')
-        self.W_h = orthogonal(shape=(self.n_hidden, self.n_f), name='W_h')
-        self.b_h = uniform(shape=self.n_f, scale=(0, 1.), name='b_h')
+        self.W = orthogonal(shape=(self.n_in, self.n_out), name='W')
+        self.U = orthogonal(shape=(self.n_hidden, self.n_out), name='U')
+        self.b = uniform(shape=self.n_out, scale=(0, 1.), name='b')
 
-
-        self.params.extend([self.W_x, self.W_h, self.b_h,
-                            self.W_y, self.b_y])
+        self.params.extend([self.W, self.U, self.b])
 
         self.c0 = constant(shape=self.n_hidden, name='c0')
         self.h0 = self.activation(self.c0)
 
-    def one_step(self, x_t, h_tm1, W_x, W_h, b_h, W_y, b_y):
-        h_t = self.activation(T.dot(x_t, W_x) + T.dot(h_tm1, W_h) + b_h)
+    def one_step(self, x_t, h_tm1, W, U, b):
+        h_t = self.activation(T.dot(x_t, W) + T.dot(h_tm1, U) + b)
         return h_t
 
     def get_output(self, **kwargs):
@@ -699,12 +695,27 @@ class LSTM(Layer):
     Long Short Term Memory
 
     .. math ::
-        i_t &= \sigma(x_t.W_{xi} + h_{t-1}.W_{hi} + b_i)\\
-        f_t &= \sigma(x_t.W_{xf} + h_{t-1}.W_{hf} + b_f)\\
-        C_t &= \sigma(x_t.W_{xc} + h_{t-1}.W_{hc} + b_c)\\
+        i_t &= \sigma(x_t.W_i + h_{t-1}.U_i + b_i)\\ && Input gate
+        f_t &= \sigma(x_t.W_f + h_{t-1}.U_f + b_f)\\ && Forget gate
+        \tilde{C_t} &= \tanh(x_t.W_c + h_{t-1}.U_c + b_c)\\ && Cell gate
         C_t &= f_t * C_{t-1} + i_t * \tilde{C_t}\\
-        o_t &= \sigma(x_t.W_{xo} + h_{t-1}.W_{ho} + b_o)\\
-        h_t &= o_t * tanh(C_t)
+        o_t &= \sigma(x_t.W_o + h_{t-1}.U_o + b_o)\\  && Output gate
+        h_t &= o_t * \tanh(C_t)
+
+    with Peephole connections:
+
+    .. math ::
+        i_t &= \sigma(x_t.W_i + h_{t-1}.U_i + C_{t-}.P_i + b_i)\\ && Input gate
+        f_t &= \sigma(x_t.W_f + h_{t-1}.U_f + C_{t-1}.P_f + b_f)\\ && Forget gate
+        \tilde{C_t} &= \tanh(x_t.W_c + h_{t-1}.U_c + b_c)\\ && Cell gate
+        C_t &= f_t * C_{t-1} + i_t * \tilde{C_t}\\
+        o_t &= \sigma(x_t.W_o + h_{t-1}.U_o + C_t.P_o + b_o)\\  && Output gate
+        h_t &= o_t * \tanh(C_t)
+
+    with tied forget and in put gates:
+
+    .. math ::
+        C_t &= f_t * C_{t-1} + (1 - f_t) * \tilde{C_t}\\
 
     Parameters
     ----------
@@ -726,7 +737,7 @@ class LSTM(Layer):
 
     def __init__(self, incoming, n_hidden, n_out, peephole=False, tied_i_f=False, activation=tanh, **kwargs):
         super(LSTM, self).__init__(incoming, **kwargs)
-        self.peephole = peephole    # gate layers look at the cell state
+        self.peephole = peephole    # input and forget gates layers look at the cell state
         self.tied = tied_i_f        # only input new values to the state when we forget something
         self.activation = get_activation(activation)
         if isinstance(n_hidden, tuple):
@@ -736,53 +747,53 @@ class LSTM(Layer):
         self.n_in = self.input_shape[1]
         self.n_out = n_out
         # input gate
-        self.W_xi = orthogonal(shape=(self.n_in, self.n_i), name='W_xi')
-        self.W_hi = orthogonal(shape=(self.n_hidden, self.n_i), name='W_hi')
+        self.W_i = orthogonal(shape=(self.n_in, self.n_i), name='W_i')
+        self.U_i = orthogonal(shape=(self.n_hidden, self.n_i), name='U_i')
         self.b_i = uniform(shape=self.n_i, scale=(-0.5, .5), name='b_i')
         # forget gate
-        self.W_xf = orthogonal(shape=(self.n_in, self.n_f), name='W_xf')
-        self.W_hf = orthogonal(shape=(self.n_hidden, self.n_f), name='W_hf')
+        self.W_f = orthogonal(shape=(self.n_in, self.n_f), name='W_f')
+        self.U_f = orthogonal(shape=(self.n_hidden, self.n_f), name='U_f')
         self.b_f = uniform(shape=self.n_f, scale=(0, 1.), name='b_f')
         # cell state
-        self.W_xc = orthogonal(shape=(self.n_in, self.n_c), name='W_xc')
-        self.W_hc = orthogonal(shape=(self.n_hidden, self.n_c), name='W_hc')
+        self.W_c = orthogonal(shape=(self.n_in, self.n_c), name='W_c')
+        self.U_c = orthogonal(shape=(self.n_hidden, self.n_c), name='U_c')
         self.b_c = constant(shape=self.n_c, name='b_c')
         # output gate
-        self.W_xo = orthogonal(shape=(self.n_in, self.n_o), name='W_x0')
-        self.W_ho = orthogonal(shape=(self.n_hidden, self.n_o), name='W_ho')
+        self.W_o = orthogonal(shape=(self.n_in, self.n_o), name='W_o')
+        self.U_o = orthogonal(shape=(self.n_hidden, self.n_o), name='U_o')
         self.b_o = uniform(shape=self.n_i, scale=(-0.5, .5), name='b_o')
 
-        self.params.extend([self.W_xi, self.W_hi, self.b_i,
-                            self.W_xf, self.W_hf, self.b_f,
-                            self.W_xc, self.W_hc, self.b_c,
-                            self.W_xo, self.W_ho, self.b_o])
+        self.params.extend([self.W_i, self.U_i, self.b_i,
+                            self.W_f, self.U_f, self.b_f,
+                            self.W_c, self.U_c, self.b_c,
+                            self.W_o, self.U_o, self.b_o])
 
-        self.W_x = T.concatenate([self.W_xi, self.W_xf, self.W_xc, self.W_xo])
-        self.W_h = T.concatenate([self.W_hi, self.W_hf, self.W_hc, self.W_ho])
+        self.W = T.concatenate([self.W_i, self.W_f, self.W_c, self.W_o])
+        self.U = T.concatenate([self.U_i, self.U_f, self.U_c, self.U_o])
         self.b = T.concatenate([self.b_i, self.b_f, self.b_c, self.b_o])
 
         self.c0 = constant(shape=self.n_hidden, name='c0')
         self.h0 = self.activation(self.c0)
 
-    def one_step(self, x_t, h_tm1, c_tm1, W_xi, W_hi, b_i,
-                                          W_xf, W_hf, b_f,
-                                          W_xc, W_hc, b_c,
-                                          W_xo, W_ho, b_o):
+    def one_step(self, x_t, h_tm1, c_tm1, W_i, U_i, b_i,
+                                          W_f, U_f, b_f,
+                                          W_c, U_c, b_c,
+                                          W_o, U_o, b_o):
         # forget gate
-        f_t = sigmoid(T.dot(x_t, W_xf) + T.dot(h_tm1, W_hf) + b_f)
+        f_t = sigmoid(T.dot(x_t, W_f) + T.dot(h_tm1, U_f) + b_f)
         # input gate
-        i_t = sigmoid(T.dot(x_t, W_xi) + T.dot(h_tm1, W_hi) + b_i)
+        i_t = sigmoid(T.dot(x_t, W_i) + T.dot(h_tm1, U_i) + b_i)
 
         # cell state
-        c_tt = self.activation(T.dot(x_t, W_xc) + T.dot(h_tm1, W_hc) + b_c)
+        c_tt = self.activation(T.dot(x_t, W_c) + T.dot(h_tm1, U_c) + b_c)
         c_t = f_t * c_tm1 + i_t * c_tt
         if self.tied:
             c_t = f_t * c_tm1 + (1 - f_t) * c_tt
 
         # output gate
-        o_t = sigmoid(T.dot(x_t, W_xo) + T.dot(h_tm1, W_ho) + b_o)
+        o_t = sigmoid(T.dot(x_t, W_o) + T.dot(h_tm1, U_o) + b_o)
         # if self.peephole:
-        #     o_t = sigmoid(T.dot(x_t, W_xo) + T.dot(h_tm1, W_ho) + T.dot(c_t, W_co) + b_o)
+        #     o_t = sigmoid(T.dot(x_t, W_o) + T.dot(h_tm1, U_o) + T.dot(c_t, W_co) + b_o)
 
         h_t = o_t * self.activation(c_t)
 
@@ -888,8 +899,14 @@ class LSTM_Old(Layer):
 
 
 class GRU(Layer):
-    """
+    r"""
     Gated Recurrent unit
+
+    .. math ::
+        z_t &= \sigma(x_t.W_z + h_{t-1}.U_z + b_z)\\
+        r_t &= \sigma(x_t.W_r + h_{t-1}.U_r + b_r)\\
+        \tilde{h_t} &= \tanh(x_t.W_h + (r_t*h_{t-1}).U_h + b_h)\\
+        h_t &= (1 - z_t) * h_{t-1} + z_t * \tilde{h_t}
 
     References
     ----------
