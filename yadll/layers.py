@@ -700,10 +700,10 @@ class LSTM(Layer):
 
     .. math ::
         i_t &= \sigma(x_t.W_{xi} + h_{t-1}.W_{hi} + b_i) \\
-        f_t &= \sigma(W_{xf}.x_t + W_{hf}.h_{t-1} + b_f) \\
-        \tilde{C_t} &= \sigma(W_{xc}.x_t + W_{hc}.h_{t-1} + b_c) \\
+        f_t &= \sigma(x_t.W_{xf} + h_{t-1}.W_{hf} + b_f) \\
+        C_t &= \sigma(x_t.W_{xc} + h_{t-1}.W_{hc} + b_c) \\
         C_t &= f_t * C_{t-1} + i_t * \tilde{C_t} \\
-        o_t &= \sigma(W_{xo}.x_t + W_{ho}.h_{t-1} + b_o) \\
+        o_t &= \sigma(x_t.W_{xo} + h_{t-1}.W_{ho} + b_o) \\
         h_t &= o_t * tanh(C_t)
 
     Parameters
