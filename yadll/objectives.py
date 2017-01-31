@@ -41,7 +41,7 @@ def mean_absolute_error(prediction, target):
 def binary_hinge_error(prediction, target):
     r"""
     Binary Hinge Error: BHE
-    .. math:: hinge_i = \frac{1}{n} \sum_{j}{\max(1. - target_{i,j} * prediction_{i,j}, 0.)}
+    .. math:: BHE_i = \frac{1}{n} \sum_{j}{\max(1. - target_{i,j} * prediction_{i,j}, 0.)}
 
     """
     return T.mean(T.maximum(1. - target * prediction, 0.), axis=-1)
@@ -50,7 +50,7 @@ def binary_hinge_error(prediction, target):
 def categorical_hinge_error(prediction, target):
     r"""
     Categorical Hinge Error: CHE
-    .. math:: hinge_i = \frac{1}{n} \sum_{j}{\max(1. - target_{i,j} * prediction_{i,j}, 0.)}
+    .. math:: CHE_i = \frac{1}{n} \sum_{j}{\max(1. - target_{i,j} * prediction_{i,j}, 0.)}
 
     """
     return T.mean(T.maximum(1. - target * prediction, 0.), axis=-1)
@@ -60,8 +60,8 @@ def binary_crossentropy_error(prediction, target):
     r"""
     Binary Cross-entropy Error: BCE
 
-    .. math:: BCE_i = \frac{1}{n} \sum_{j}{-(target_{i,j} * \log(prediction_{i,j})
-        + (1 - target_{i,j}) * \log(1 - prediction_{i,j}))}
+    .. math:: BCE_i = - \frac{1}{n} \sum_{j}{target_{i,j} * \log(prediction_{i,j}
+        - (1 - target_{i,j}) * \log(1 - prediction_{i,j}))}
 
     """
     clip_pred = T.clip(prediction, EPSILON, 1 - EPSILON)
@@ -72,7 +72,7 @@ def categorical_crossentropy_error(prediction, target):
     r"""
     Categorical Cross-entropy Error: CCE
 
-    .. math:: MAE_i = \frac{1}{n} \sum_{j}{\big|{target_{i,j} - prediction_{i,j}\big|}
+    .. math:: CCE_i = - \frac{1}{n} \sum_{j}{target_{i,j} * \log(prediction_{i,j})}
 
     """
     prediction /= prediction.sum(axis=-1, keepdims=True)

@@ -7,7 +7,7 @@ import theano.tensor as T
 
 
 def get_activation(activator):
-    """
+    r"""
     Call an activation function from an activator object
 
     Parameters
@@ -27,8 +27,8 @@ def get_activation(activator):
 
 
 def linear(x):
-    """Linear activation function
-    :math:`\\varphi(x) = x`
+    r"""Linear activation function
+    :math:`\varphi{x} = x`
 
     Parameters
     ----------
@@ -45,8 +45,8 @@ def linear(x):
 
 
 def sigmoid(x):
-    """Sigmoid function
-    :math:`\\varphi(x) = \\frac{1}{1 + e^{-x}}`
+    r"""Sigmoid function
+    :math:`\varphi(x) = \frac{1}{1 + e^{-x}}`
 
     Parameters
     ----------
@@ -63,8 +63,8 @@ def sigmoid(x):
 
 
 def ultra_fast_sigmoid(x):
-    """Ultra fast Sigmoid function return an approximated standard sigmoid
-    :math:`\\varphi(x) = \\frac{1}{1 + e^{-x}}`
+    r"""Ultra fast Sigmoid function return an approximated standard sigmoid
+    :math:`\varphi(x) = \frac{1}{1 + e^{-x}}`
 
     Parameters
     ----------
@@ -87,7 +87,7 @@ def ultra_fast_sigmoid(x):
 
 def tanh(x):
     """Tanh activation function
-    :math:`\\varphi(x) = \\tanh(x)`
+    :math:`\varphi(x) = \tanh(x)`
 
     Parameters
     ----------
@@ -104,9 +104,8 @@ def tanh(x):
 
 
 def softmax(x):
-    """Softmax activation function
-    :math:`\\varphi(\\mathbf{x})_j =
-    \\frac{e^{\mathbf{x}_j}}{\sum_{k=1}^K e^{\mathbf{x}_k}}`
+    r"""Softmax activation function
+    :math:`\varphi(x)_j = \frac{\exp{x_j}}{\sum_{k=1}^K \exp{x_k}}`
     where :math:`K` is the total number of neurons in the layer. This
     activation function gets applied row-wise.
 
@@ -125,7 +124,7 @@ def softmax(x):
 
 
 def softplus(x):
-    """Softplus activation function :math:`\\varphi(x) = \\log(1 + e^x)`
+    r"""Softplus activation function :math:`\varphi{x} = \log{1 + \exp{x}}`
 
     Parameters
     ----------
@@ -142,8 +141,8 @@ def softplus(x):
 
 
 def relu(x, alpha=0):
-    """Rectified linear unit activation function
-    :math:`\\varphi(x) = \\max(alpha * x, x)`
+    r"""Rectified linear unit activation function
+    :math:`\varphi{x} = \max{x, \alpha * x}`
 
     Parameters
     ----------
