@@ -490,7 +490,7 @@ class AutoEncoder(UnsupervisedLayer):
     def get_unsupervised_cost(self, **kwargs):
         X = self.input_layer.get_output(stochastic=False, **kwargs)
         Y, Z = self.get_encoded_input(**kwargs)
-        cost = T.mean(categorical_crossentropy(Z, X))
+        cost = T.mean(categorical_crossentropy_error(Z, X))
         if self.contraction_level:
             # For sigmoid: J = Y * (1 - Y) * W
             # For tanh: J = (1 + Y) * (1 - Y) * W

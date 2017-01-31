@@ -38,27 +38,27 @@ def test_mean_absolute_error():
     assert_allclose(actual, desired, rtol=eps)
 
 
-def test_hinge():
+def test_binary_hinge_error():
     x_val = np.asarray(np.random.uniform(size=(10, 1)), dtype=yadll.utils.floatX)
     y_val = np.asarray(np.random.binomial(n=1,p=0.5, size=(10, 1)), dtype=yadll.utils.floatX)
     y_val = 2 * y_val - 1
-    f = theano.function([x, y], yadll.objectives.hinge(x, y))
+    f = theano.function([x, y], yadll.objectives.binary_hinge_error(x, y))
     actual = f(x_val, y_val)
     desired = np.maximum(1. - x_val * y_val, 0.).flatten()
     assert_allclose(actual, desired, rtol=eps)
 
 
-def test_binary_crossentropy():
+def test_binary_crossentropy_error():
     x_val = np.asarray(np.random.uniform(size=(10, 1)), dtype=yadll.utils.floatX)
     y_val = np.asarray(np.random.binomial(n=1,p=0.5, size=(10, 1)), dtype=yadll.utils.floatX)
-    f = theano.function([x, y], yadll.objectives.binary_crossentropy(x, y))
+    f = theano.function([x, y], yadll.objectives.binary_crossentropy_error(x, y))
     actual = f(x_val, y_val)
     desired = np.mean(-(y_val * np.log(x_val) + (1 - y_val) * np.log(1 - x_val)), axis=-1)
     assert_allclose(actual, desired, rtol=eps)
 
 
-def test_categorical_crossentropy():
-    f = theano.function([x, y], yadll.objectives.categorical_crossentropy(x, y))
+def test_categorical_crossentropy_error():
+    f = theano.function([x, y], yadll.objectives.categorical_crossentropy_error(x, y))
     actual = f(x_val, y_val)
     desired = np.mean(-np.sum(y_val * np.log(x_val), axis=-1))
     assert_allclose(actual, desired, rtol=eps)

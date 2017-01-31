@@ -79,7 +79,7 @@ class Model(object):
 
     """
     def __init__(self, network=None, data=None, hyperparameters=None, name='model',
-                 updates=sgd, objective=categorical_crossentropy, file=None):
+                 updates=sgd, objective=CCE, file=None):
         self.network = network
         self.data = data             # data [(train_set_x, train_set_y), (valid_set_x, valid_set_y), (test_set_x, test_set_y)]
         self.name = name

@@ -12,8 +12,8 @@ Objectives
     mean_absolute_error
     binary_hinge_error
     categorical_hinge_error
-    binary_crossentropy
-    categorical_crossentropy
+    binary_crossentropy_error
+    categorical_crossentropy_error
     kullback_leibler_divergence
 
 Detailed description
@@ -24,6 +24,6 @@ Detailed description
 .. autofunction:: mean_absolute_error
 .. autofunction:: binary_hinge_error
 .. autofunction:: categorical_hinge_error
-.. autofunction:: binary_crossentropy
-.. autofunction:: categorical_crossentropy
+.. autofunction:: binary_crossentropy_error
+.. autofunction:: categorical_crossentropy-error
 .. autofunction:: kullback_leibler_divergence
