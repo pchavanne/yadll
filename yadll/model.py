@@ -230,6 +230,7 @@ class Model(object):
 
         while (epoch < self.hp.n_epochs) and (not done_looping):
             epoch += 1
+
             for minibatch_index in xrange(n_train_batches):
                 # train
                 minibatch_avg_cost = train_model(minibatch_index)

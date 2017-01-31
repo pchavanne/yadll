@@ -51,13 +51,13 @@ def grid_search():
         # Input layer
         l_in = InputLayer(input_shape=(None, 28 * 28), name='Input')
         # Dense Layer 1
-        l_hid1 = DenseLayer(incoming=l_in, nb_units=5, W=hp.initialisation, l1=hp.l1_reg,
+        l_hid1 = DenseLayer(incoming=l_in, n_units=5, W=hp.initialisation, l1=hp.l1_reg,
                             l2=hp.l2_reg, activation=hp.activation, name='Hidden layer 1')
         # Dense Layer 2
-        l_hid2 = DenseLayer(incoming=l_hid1, nb_units=5, W=hp.initialisation, l1=hp.l1_reg,
+        l_hid2 = DenseLayer(incoming=l_hid1, n_units=5, W=hp.initialisation, l1=hp.l1_reg,
                             l2=hp.l2_reg, activation=hp.activation, name='Hidden layer 2')
         # Logistic regression Layer
-        l_out = LogisticRegression(incoming=l_hid2, nb_class=10, l1=hp.l1_reg,
+        l_out = LogisticRegression(incoming=l_hid2, n_class=10, l1=hp.l1_reg,
                                    l2=hp.l2_reg, name='Logistic regression')
 
         # Create network and add layers

@@ -36,7 +36,7 @@ def logistic_regression(input_var=None):
     # Input layer
     l_in = InputLayer(input_shape=(None, 28 * 28), input_var=input_var, name='Input')
     # Logistic regression Layer
-    l_out = LogisticRegression(incoming=l_in, nb_class=10, name='Logistic regression')
+    l_out = LogisticRegression(incoming=l_in, n_class=10, name='Logistic regression')
 
     # Create network and add layers
     net = Network('logistic_regression')
@@ -62,13 +62,13 @@ def mlp(input_var=None):
     # Input layer
     l_in = InputLayer(input_shape=(None, 28 * 28), input_var=input_var, name='Input')
     # Dense Layer
-    l_hid1 = DenseLayer(incoming=l_in, nb_units=500, W=glorot_uniform, l1=hp.l1_reg,
+    l_hid1 = DenseLayer(incoming=l_in, n_units=500, W=glorot_uniform, l1=hp.l1_reg,
                         l2=hp.l2_reg, activation=relu, name='Hidden layer 1')
     # Dense Layer
-    l_hid2 = DenseLayer(incoming=l_hid1, nb_units=500, W=glorot_uniform, l1=hp.l1_reg,
+    l_hid2 = DenseLayer(incoming=l_hid1, n_units=500, W=glorot_uniform, l1=hp.l1_reg,
                         l2=hp.l2_reg, activation=relu, name='Hidden layer 2')
     # Logistic regression Layer
-    l_out = LogisticRegression(incoming=l_hid2, nb_class=10, l1=hp.l1_reg,
+    l_out = LogisticRegression(incoming=l_hid2, n_class=10, l1=hp.l1_reg,
                                l2=hp.l2_reg, name='Logistic regression')
 
     # Create network and add layers
@@ -97,15 +97,15 @@ def dropout(input_var=None):
     # Dropout Layer
     l_dro1 = Dropout(incoming=l_in, corruption_level=0.4, name='Dropout 1')
     # Dense Layer
-    l_hid1 = DenseLayer(incoming=l_dro1, nb_units=500, W=glorot_uniform,
+    l_hid1 = DenseLayer(incoming=l_dro1, n_units=500, W=glorot_uniform,
                         activation=relu, name='Hidden layer 1')
     # Dropout Layer
     l_dro2 = Dropout(incoming=l_hid1, corruption_level=0.2, name='Dropout 2')
     # Dense Layer
-    l_hid2 = DenseLayer(incoming=l_dro2, nb_units=500, W=glorot_uniform,
+    l_hid2 = DenseLayer(incoming=l_dro2, n_units=500, W=glorot_uniform,
                         activation=relu, name='Hidden layer 2')
     # Logistic regression Layer
-    l_out = LogisticRegression(incoming=l_hid2, nb_class=10, name='Logistic regression')
+    l_out = LogisticRegression(incoming=l_hid2, n_class=10, name='Logistic regression')
 
     # Create network and add layers
     net = Network('dropout')
@@ -133,13 +133,13 @@ def dropconnect(input_var=None):
     # Input layer
     l_in = InputLayer(input_shape=(None, 28 * 28), input_var=input_var, name='Input')
     # DropConnect Layer
-    l_dc1 = Dropconnect(incoming=l_in, nb_units=500, corruption_level=0.4,
+    l_dc1 = Dropconnect(incoming=l_in, n_units=500, corruption_level=0.4,
                         W=glorot_uniform, activation=relu, name='Dropconnect layer 1')
     # DropConnect Layer
-    l_dc2 = Dropconnect(incoming=l_dc1, nb_units=500, corruption_level=0.2,
+    l_dc2 = Dropconnect(incoming=l_dc1, n_units=500, corruption_level=0.2,
                         W=glorot_uniform, activation=relu, name='Dropconnect layer 2')
     # Logistic regression Layer
-    l_out = LogisticRegression(incoming=l_dc2, nb_class=10, name='Logistic regression')
+    l_out = LogisticRegression(incoming=l_dc2, n_class=10, name='Logistic regression')
 
     # Create network and add layers
     net = Network('dropconnect')
@@ -175,7 +175,7 @@ def convpool(input_var=None):
     # flatten convpool output
     l_fl = FlattenLayer(incoming=l_cp, ndim=2)
     # Logistic regression Layer
-    l_out = LogisticRegression(incoming=l_fl, nb_class=10, name='Logistic regression')
+    l_out = LogisticRegression(incoming=l_fl, n_class=10, name='Logistic regression')
 
     # Create network and add layers
     net = Network('convpool')
@@ -217,9 +217,9 @@ def lenet5(input_var=None):
     # flatten convpool output
     l_fl = FlattenLayer(incoming=l_cp2, ndim=2)
     # Dense Layer
-    l_hid1 = DenseLayer(incoming=l_fl, nb_units=500, W=glorot_uniform, activation=tanh, name='Hidden layer 1')
+    l_hid1 = DenseLayer(incoming=l_fl, n_units=500, W=glorot_uniform, activation=tanh, name='Hidden layer 1')
     # Logistic regression Layer
-    l_out = LogisticRegression(incoming=l_hid1, nb_class=10, name='Logistic regression')
+    l_out = LogisticRegression(incoming=l_hid1, n_class=10, name='Logistic regression')
 
     # Create network and add layers
     net = Network('convpool')
@@ -254,10 +254,10 @@ def autoencoder(input_var=None):
     # Input layer
     l_in = InputLayer(input_shape=(None, 28 * 28), input_var=input_var, name='Input')
     # Auto Encoder Layer
-    l_ae1 = AutoEncoder(incoming=l_in, nb_units=500, hyperparameters=hp_ae,
+    l_ae1 = AutoEncoder(incoming=l_in, n_units=500, hyperparameters=hp_ae,
                         corruption_level=0.0, name='AutoEncoder')
     # Logistic regression Layer
-    l_out = LogisticRegression(incoming=l_ae1, nb_class=10, name='Logistic regression')
+    l_out = LogisticRegression(incoming=l_ae1, n_class=10, name='Logistic regression')
 
     # Create network and add layers
     net = Network('autoencoder')
@@ -288,10 +288,10 @@ def denoising_autoencoder(input_var=None):
     # Input layer
     l_in = InputLayer(input_shape=(None, 28 * 28), input_var=input_var, name='Input')
     # Auto Encoder Layer
-    l_ae1 = AutoEncoder(incoming=l_in, nb_units=500, hyperparameters=hp_ae,
+    l_ae1 = AutoEncoder(incoming=l_in, n_units=500, hyperparameters=hp_ae,
                         corruption_level=0.3, activation=relu, name='Denoising AutoEncoder')
     # Logistic regression Layer
-    l_out = LogisticRegression(incoming=l_ae1, nb_class=10, name='Logistic regression')
+    l_out = LogisticRegression(incoming=l_ae1, n_class=10, name='Logistic regression')
 
     # Create network and add layers
     net = Network('denoising_autoencoder')
@@ -322,10 +322,10 @@ def gaussian_denoising_autoencoder(input_var=None):
     # Input layer
     l_in = InputLayer(input_shape=(None, 28 * 28), input_var=input_var, name='Input')
     # Auto Encoder Layer
-    l_ae1 = AutoEncoder(incoming=l_in, nb_units=500, hyperparameters=hp_ae, sigma=0.3,
+    l_ae1 = AutoEncoder(incoming=l_in, n_units=500, hyperparameters=hp_ae, sigma=0.3,
                         activation=relu, name='Gaussian Denoising AutoEncoder')
     # Logistic regression Layer
-    l_out = LogisticRegression(incoming=l_ae1, nb_class=10, name='Logistic regression')
+    l_out = LogisticRegression(incoming=l_ae1, n_class=10, name='Logistic regression')
 
     # Create network and add layers
     net = Network('gaussian_denoising_autoencoder')
@@ -356,10 +356,10 @@ def contractive_denoising_autoencoder(input_var=None):
     # Input layer
     l_in = InputLayer(input_shape=(None, 28 * 28), input_var=input_var, name='Input')
     # Auto Encoder Layer
-    l_ae1 = AutoEncoder(incoming=l_in, nb_units=500, hyperparameters=hp_ae, contraction_level=0.3,
+    l_ae1 = AutoEncoder(incoming=l_in, n_units=500, hyperparameters=hp_ae, contraction_level=0.3,
                         activation=relu, name='Contractive Denoising AutoEncoder')
     # Logistic regression Layer
-    l_out = LogisticRegression(incoming=l_ae1, nb_class=10, name='Logistic regression')
+    l_out = LogisticRegression(incoming=l_ae1, n_class=10, name='Logistic regression')
 
     # Create network and add layers
     net = Network('contractive_denoising_autoencoder')
@@ -390,13 +390,13 @@ def stacked_denoising_autoencoder(input_var=None):
     # Input layer
     l_in = InputLayer(input_shape=(None, 28 * 28), input_var=input_var, name='Input')
     # Auto Encoder Layer
-    l_ae1 = AutoEncoder(incoming=l_in, nb_units=500, hyperparameters=hp_ae,
+    l_ae1 = AutoEncoder(incoming=l_in, n_units=500, hyperparameters=hp_ae,
                         corruption_level=0.2, name='Denoising AutoEncoder 1')
     # Auto Encoder Layer
-    l_ae2 = AutoEncoder(incoming=l_ae1, nb_units=500, hyperparameters=hp_ae,
+    l_ae2 = AutoEncoder(incoming=l_ae1, n_units=500, hyperparameters=hp_ae,
                         corruption_level=0.4, name='Denoising AutoEncoder 2')
     # Logistic regression Layer
-    l_out = LogisticRegression(incoming=l_ae2, nb_class=10, name='Logistic regression')
+    l_out = LogisticRegression(incoming=l_ae2, n_class=10, name='Logistic regression')
 
     # Create network and add layers
     net = Network('stacked_denoising_autoencoder')
@@ -428,10 +428,10 @@ def rbm(input_var=None):
     # Input layer
     l_in = InputLayer(input_shape=(None, 28 * 28), input_var=input_var, name='Input')
     # Restricted Boltzmann Machine Layer
-    l_rbm1 = RBM(incoming=l_in, nb_units=500, hyperparameters=hp_ae,
+    l_rbm1 = RBM(incoming=l_in, n_units=500, hyperparameters=hp_ae,
                  name='Restricted Boltzmann Machine')
     # Logistic regression Layer
-    l_out = LogisticRegression(incoming=l_rbm1, nb_class=10, name='Logistic regression')
+    l_out = LogisticRegression(incoming=l_rbm1, n_class=10, name='Logistic regression')
 
     # Create network and add layers
     net = Network('rbm')
@@ -460,11 +460,11 @@ def dbn(input_var=None):
 
     # Create connected layers
     l_in = InputLayer(input_shape=(None, 28 * 28), input_var=input_var, name='Input')
-    l_rbm1 = RBM(incoming=l_in, nb_units=500, hyperparameters=hp_ae,
+    l_rbm1 = RBM(incoming=l_in, n_units=500, hyperparameters=hp_ae,
                  name='Restricted Boltzmann Machine 1')
-    l_rbm2 = RBM(incoming=l_rbm1, nb_units=500, hyperparameters=hp_ae,
+    l_rbm2 = RBM(incoming=l_rbm1, n_units=500, hyperparameters=hp_ae,
                  name='Restricted Boltzmann Machine 2')
-    l_out = LogisticRegression(incoming=l_rbm2, nb_class=10, name='Logistic regression')
+    l_out = LogisticRegression(incoming=l_rbm2, n_class=10, name='Logistic regression')
 
     # Create network and add layers
     net = Network('dbn')
@@ -494,17 +494,17 @@ def batch_normalization(input_var=None):
     # Batch Normalization
     l_bn1 = BatchNormalization(incoming=l_in, name='Batch Normalization 1')
     # Dense Layer
-    l_hid1 = DenseLayer(incoming=l_bn1, nb_units=500, W=glorot_uniform, l1=hp.l1_reg,
+    l_hid1 = DenseLayer(incoming=l_bn1, n_units=500, W=glorot_uniform, l1=hp.l1_reg,
                         l2=hp.l2_reg, activation=relu, name='Hidden layer 1')
     # Batch Normalization
     l_bn2 = BatchNormalization(incoming=l_hid1, name='Batch Normalization 2')
     # Dense Layer
-    l_hid2 = DenseLayer(incoming=l_bn2, nb_units=500, W=glorot_uniform, l1=hp.l1_reg,
+    l_hid2 = DenseLayer(incoming=l_bn2, n_units=500, W=glorot_uniform, l1=hp.l1_reg,
                         l2=hp.l2_reg, activation=relu, name='Hidden layer 2')
     # Batch Normalization
     l_bn3 = BatchNormalization(incoming=l_hid2, name='Batch Normalization 3')
     # Logistic regression Layer
-    l_out = LogisticRegression(incoming=l_bn3, nb_class=10, l1=hp.l1_reg,
+    l_out = LogisticRegression(incoming=l_bn3, n_class=10, l1=hp.l1_reg,
                                l2=hp.l2_reg, name='Logistic regression')
 
     # Create network and add layers
@@ -533,7 +533,7 @@ def rnn(input_var=None):
     # Create connected layers
     l_in = InputLayer(input_shape=(None, 28 * 28), input_var=input_var, name='Input')
     l_rnn = RNN(incoming=l_in, n_hidden=100, n_out=28 * 28, name='Recurrent Neural Network')
-    l_out = LogisticRegression(incoming=l_rnn, nb_class=10, name='Logistic regression')
+    l_out = LogisticRegression(incoming=l_rnn, n_class=10, name='Logistic regression')
 
     # Create network and add layers
     net = Network('rnn')
@@ -557,7 +557,7 @@ def lstm(input_var=None):
     # Create connected layers
     l_in = InputLayer(input_shape=(None, 28 * 28), input_var=input_var, name='Input')
     l_lstm = LSTM(incoming=l_in, n_hidden=100, n_out=28 * 28, name='Long Short Term Memory')
-    l_out = LogisticRegression(incoming=l_lstm, nb_class=10, name='Logistic regression')
+    l_out = LogisticRegression(incoming=l_lstm, n_class=10, name='Logistic regression')
 
     # Create network and add layers
     net = Network('lstm')

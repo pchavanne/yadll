@@ -68,7 +68,7 @@ def one_hot_decoding(mat):
 
 class Data(object):
     """
-    Load gziped pickled data.
+    Data container.
 
     data is made of train_set, valid_set, test_set
     and  set_x, set_y = set

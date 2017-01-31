@@ -30,7 +30,7 @@ class TestLayer:
 
     def test_unnamed_layer(self, layer):
         from yadll.layers import Layer
-        assert layer.name == 'Layer ' + str(Layer.nb_instances)
+        assert layer.name == 'Layer ' + str(Layer.n_instances)
 
     def test_get_output(self, layer):
         with pytest.raises(NotImplementedError):
@@ -169,11 +169,11 @@ class TestDenseLayer:
 
     @pytest.fixture
     def layer(self, dense_layer, input_layer):
-        return dense_layer(input_layer, nb_units=2, l1=1, l2=2)
+        return dense_layer(input_layer, n_units=2, l1=1, l2=2)
 
     @pytest.fixture
     def layer_from_layer(self, dense_layer, input_layer, layer):
-        return dense_layer(input_layer, W=layer.W, b=layer.b, nb_units=2, l1=1, l2=2)
+        return dense_layer(input_layer, W=layer.W, b=layer.b, n_units=2, l1=1, l2=2)
 
     def test_get_params(self, layer):
         assert layer.get_params() == [layer.W, layer.b]
@@ -225,7 +225,7 @@ class Testunsupervised_layer:
 
     @pytest.fixture
     def layer(self, unsupervised_layer, input_layer, hp):
-        return unsupervised_layer(input_layer, nb_units=2, hyperparameters=hp)
+        return unsupervised_layer(input_layer, n_units=2, hyperparameters=hp)
 
     def test_get_params(self, layer):
         assert layer.get_params() == [layer.W, layer.b]
@@ -308,15 +308,15 @@ class TestDropConnect:
 
     @pytest.fixture
     def layer(self, dropconnect, input_layer):
-        return dropconnect(input_layer, nb_units=10, corruption_level=0.5)
+        return dropconnect(input_layer, n_units=10, corruption_level=0.5)
 
     @pytest.fixture
     def layer_c0(self, dropconnect, input_layer):
-        return dropconnect(input_layer, nb_units=10, corruption_level=0)
+        return dropconnect(input_layer, n_units=10, corruption_level=0)
 
     @pytest.fixture
     def layer_c1(self, dropconnect, input_layer):
-        return dropconnect(input_layer, nb_units=10, corruption_level=1)
+        return dropconnect(input_layer, n_units=10, corruption_level=1)
 
     def test_get_output(self, input_layer, layer, layer_c0, layer_c1):
         assert np.all(layer_c1.get_output().eval() == 0)

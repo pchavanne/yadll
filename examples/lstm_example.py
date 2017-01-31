@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
+
 """
-This example show you how to creat and train a model and make prediction.
+This example show you how to train an LSTM for text generation.
 """
 import os
 import yadll
@@ -10,20 +11,20 @@ import logging
 logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
 # load the data
-datafile = 'mnist.pkl.gz'
+datafile = 'nietzsche.txt'
 if not os.path.isfile(datafile):
     import urllib
-    origin = 'http://www.iro.umontreal.ca/~lisa/deep/data/mnist/mnist.pkl.gz'
+    origin = 'https://s3.amazonaws.com/text-datasets/nietzsche.txt'
     print 'Downloading data from %s' % origin
     urllib.urlretrieve(origin, datafile)
 data = yadll.data.Data(datafile)
 
 # create the model
-model = yadll.model.Model(name='mlp with dropout', data=data, file='best_model.ym')
+model = yadll.model.Model(name='lstm', data=data)
 
 # Hyperparameters
 hp = yadll.hyperparameters.Hyperparameters()
-hp('batch_size', 500)
+hp('batch_size', 128)
 hp('n_epochs', 1000)
 hp('learning_rate', 0.9)
 hp('momentum', 0.5)

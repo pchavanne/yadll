@@ -32,7 +32,7 @@ class Layer(object):
         plus instantiation number i.e: 'DenseLayer 3'
 
     """
-    nb_instances = 0
+    n_instances = 0
 
     def __init__(self, incoming, name=None, **kwargs):
         """
@@ -56,8 +56,8 @@ class Layer(object):
 
     @classmethod
     def get_id(cls):
-        cls.nb_instances += 1
-        return cls.nb_instances
+        cls.n_instances += 1
+        return cls.n_instances
 
     def get_params(self):
         """
@@ -128,7 +128,7 @@ class InputLayer(Layer):
     Input layer of the data, it has no parameters, it just shapes the data as
     the input for any network. A ::class:`InputLayer` is always the first layer of any network.
     """
-    nb_instances = 0
+    n_instances = 0
 
     def __init__(self, input_shape, input=None, **kwargs):
         """
@@ -153,7 +153,7 @@ class ReshapeLayer(Layer):
     """
     Reshape the incoming layer to the output_shape.
     """
-    nb_instances = 0
+    n_instances = 0
 
     def __init__(self, incoming, output_shape=None, **kwargs):
         super(ReshapeLayer, self).__init__(incoming, **kwargs)
@@ -176,7 +176,7 @@ class FlattenLayer(Layer):
     """
     Reshape layers back to flat
     """
-    nb_instances = 0
+    n_instances = 0
 
     def __init__(self, incoming, ndim=2, **kwargs):
         super(FlattenLayer, self).__init__(incoming, **kwargs)
@@ -195,7 +195,7 @@ class Activation(Layer):
     """
     Apply activation function to previous layer
     """
-    nb_instances = 0
+    n_instances = 0
 
     def __init__(self, incoming, activation=linear, **kwargs):
         super(Activation, self).__init__(incoming, **kwargs)
@@ -214,13 +214,13 @@ class DenseLayer(Layer):
     """
     Fully connected neural network layer
     """
-    nb_instances = 0
+    n_instances = 0
 
-    def __init__(self, incoming, nb_units, W=glorot_uniform, b=constant,
+    def __init__(self, incoming, n_units, W=glorot_uniform, b=constant,
                  activation=tanh, l1=None, l2=None, **kwargs):
         super(DenseLayer, self).__init__(incoming, **kwargs)
-        self.nb_units = nb_units
-        self.shape = (self.input_shape[1], nb_units)
+        self.n_units = n_units
+        self.shape = (self.input_shape[1], n_units)
         if isinstance(W, theano.compile.SharedVariable):
             self.W = W
         else:
@@ -254,10 +254,10 @@ class UnsupervisedLayer(DenseLayer):
     Unsupervised layers are pre-trained against its own input.
 
     """
-    nb_instances = 0
+    n_instances = 0
 
-    def __init__(self, incoming, nb_units, hyperparameters, **kwargs):
-        super(UnsupervisedLayer, self).__init__(incoming, nb_units, **kwargs)
+    def __init__(self, incoming, n_units, hyperparameters, **kwargs):
+        super(UnsupervisedLayer, self).__init__(incoming, n_units, **kwargs)
         self.hp = hyperparameters
         self.unsupervised_params = list(self.params)
 
@@ -296,15 +296,15 @@ class LogisticRegression(DenseLayer):
     ----------
     .. [1] http://deeplearning.net/tutorial/logreg.html
     """
-    nb_instances = 0
+    n_instances = 0
 
-    def __init__(self, incoming, nb_class, W=constant, activation=softmax, **kwargs):
-        super(LogisticRegression, self).__init__(incoming, nb_class, W=W,
+    def __init__(self, incoming, n_class, W=constant, activation=softmax, **kwargs):
+        super(LogisticRegression, self).__init__(incoming, n_class, W=W,
                                                  activation=activation, **kwargs)
 
     def to_conf(self):
         conf = super(LogisticRegression, self).to_conf()
-        conf['nb_class'] = conf.pop('nb_units')
+        conf['n_class'] = conf.pop('n_units')
         return conf
 
 
@@ -312,7 +312,7 @@ class Dropout(Layer):
     """
     Dropout layer
     """
-    nb_instances = 0
+    n_instances = 0
 
     def __init__(self, incoming, corruption_level=0.5, **kwargs):
         super(Dropout, self).__init__(incoming, **kwargs)
@@ -333,10 +333,10 @@ class Dropconnect(DenseLayer):
     """
     DropConnect layer
     """
-    nb_instances = 0
+    n_instances = 0
 
-    def __init__(self, incoming, nb_units, corruption_level=0.5, **kwargs):
-        super(Dropconnect, self).__init__(incoming, nb_units, **kwargs)
+    def __init__(self, incoming, n_units, corruption_level=0.5, **kwargs):
+        super(Dropconnect, self).__init__(incoming, n_units, **kwargs)
         self.p = 1 - corruption_level
 
     def get_output(self, stochastic=True, **kwargs):
@@ -350,7 +350,7 @@ class PoolLayer(Layer):
     """
     Pooling layer, default is maxpooling
     """
-    nb_instances = 0
+    n_instances = 0
 
     def __init__(self, incoming, poolsize, stride=None, ignore_border=True,
                  padding=(0, 0), mode='max', **kwargs):
@@ -381,7 +381,7 @@ class ConvLayer(Layer):
     """
     Convolutional layer
     """
-    nb_instances = 0
+    n_instances = 0
 
     def __init__(self, incoming, image_shape=None, filter_shape=None, W=glorot_uniform,
                  border_mode='valid', subsample=(1, 1), l1=None, l2=None, pool_scale=None, **kwargs):
@@ -427,7 +427,7 @@ class ConvPoolLayer(ConvLayer, PoolLayer):
     ----------
     .. [1] http://deeplearning.net/tutorial/lenet.html
     """
-    nb_instances = 0
+    n_instances = 0
 
     def __init__(self, incoming, poolsize, image_shape=None, filter_shape=None,
                   b=constant, activation=tanh, **kwargs):
@@ -460,12 +460,12 @@ class AutoEncoder(UnsupervisedLayer):
     ----------
     .. [1] http://deeplearning.net/tutorial/dA.html
     """
-    nb_instances = 0
+    n_instances = 0
 
-    def __init__(self, incoming, nb_units, hyperparameters, corruption_level=0.0,
+    def __init__(self, incoming, n_units, hyperparameters, corruption_level=0.0,
                  W=(glorot_uniform, {'gain': sigmoid}), b_prime=constant,
                  sigma=None, contraction_level= None, **kwargs):
-        super(AutoEncoder, self).__init__(incoming, nb_units, hyperparameters, W=W, **kwargs)
+        super(AutoEncoder, self).__init__(incoming, n_units, hyperparameters, W=W, **kwargs)
         self.W_prime = self.W.T
         if isinstance(b_prime, theano.compile.SharedVariable):
             self.b_prime = b_prime
@@ -509,11 +509,11 @@ class RBM(UnsupervisedLayer):
     ----------
     .. [1] http://deeplearning.net/tutorial/rbm.html
     """
-    nb_instances = 0
+    n_instances = 0
 
-    def __init__(self, incoming, nb_units, hyperparameters, W=glorot_uniform,
+    def __init__(self, incoming, n_units, hyperparameters, W=glorot_uniform,
                  b_hidden=constant, activation=sigmoid, **kwargs):
-        super(RBM, self).__init__(incoming, nb_units, hyperparameters, W=W,
+        super(RBM, self).__init__(incoming, n_units, hyperparameters, W=W,
                                   activation=activation, **kwargs)
         if isinstance(b_hidden, theano.compile.SharedVariable):
             self.b_hidden = b_hidden
@@ -615,7 +615,7 @@ class BatchNormalization(Layer):
 
     .. [1] http://jmlr.org/proceedings/papers/v37/ioffe15.pdf
     """
-    nb_instances = 0
+    n_instances = 0
 
     def __init__(self, incoming, axis=-2, alpha=0.1, epsilon=1e-5, **kwargs):
         super(BatchNormalization, self).__init__(incoming, **kwargs)
@@ -656,7 +656,7 @@ class RNN(Layer):
 
     .. [1] http://deeplearning.net/tutorial/rnnslu.html
     """
-    nb_instances = 0
+    n_instances = 0
 
     def __init__(self, incoming, n_hidden, n_out, activation=sigmoid,
                  last_only=True, go_backwards=False, allow_gc=False, **kwargs):
@@ -719,10 +719,10 @@ class LSTM(Layer):
     Parameters
     ----------
     incoming : a `Layer`
-        The incoming layer with an output_shape = (nb_batches, nb_time_steps, nb_dim)
-    n_hidden : int or tuple of int
-        (n_hidden, n_input, n_forget, n_cell, n_output).
-        If an int is provided all gates have the same number of units
+        The incoming layer with an output_shape = (n_batches, n_time_steps, n_dim)
+    n_units : int
+        n_hidden = n_input_gate = n_forget_gate = n_cell_gate = n_output_gate = n_units
+        All gates have the same number of units
     n_out : int
         number of output units
     peephole : boolean default is False
@@ -732,7 +732,8 @@ class LSTM(Layer):
     activation : `yadll.activations` function default is `yadll.activations.tanh`
         activation function
     last_only : boolean default is True
-        set to true if you only need the last element of the output sequence
+        set to true if you only need the last element of the output sequence.
+        Theano will optimize graph.
 
     References
     ----------
@@ -742,9 +743,9 @@ class LSTM(Layer):
     .. [4] http://colah.github.io/posts/2015-08-Understanding-LSTMs/
     .. [5] https://arxiv.org/pdf/1308.0850v5.pdf
     """
-    nb_instances = 0
+    n_instances = 0
 
-    def __init__(self, incoming, n_hidden, n_out, peephole=False, tied_i_f=False, activation=tanh,
+    def __init__(self, incoming, n_units, peephole=False, tied_i_f=False, activation=tanh,
                  last_only=True, go_backwards=False, allow_gc=False, **kwargs):
         super(LSTM, self).__init__(incoming, **kwargs)
         self.allow_gc = allow_gc
@@ -753,171 +754,182 @@ class LSTM(Layer):
         self.peephole = peephole    # input and forget gates layers look at the cell state
         self.tied = tied_i_f        # only input new values to the state when we forget something
         self.activation = get_activation(activation)
-        if isinstance(n_hidden, tuple):
-            self.n_hidden, self.n_i, self.n_f, self.n_c, self.n_o = n_hidden
-        else:
-            self.n_hidden = self.n_i = self.n_f = self.n_c = self.n_o = n_hidden
-        self.n_in = self.input_shape[1]
-        self.n_out = n_out
+        self.n_input = self.input_shape[1]
+        self.n_units = self.n_hidden = self.n_ig = self.n_fg = self.n_cg = self.n_og = n_units
         # input gate
-        self.W_i = orthogonal(shape=(self.n_in, self.n_i), name='W_i')
-        self.U_i = orthogonal(shape=(self.n_hidden, self.n_i), name='U_i')
-        self.b_i = uniform(shape=self.n_i, scale=(-0.5, .5), name='b_i')
-        if self.peephole:
-            self.P_i = orthogonal(shape=(self.n_hidden, self.n_i), name='P_i')
+        self.W_i = orthogonal(shape=(self.n_input, self.n_ig), name='W_i')
+        self.U_i = orthogonal(shape=(self.n_hidden, self.n_ig), name='U_i')
+        self.b_i = uniform(shape=self.n_ig, scale=(-0.5, .5), name='b_i')
         # forget gate
-        self.W_f = orthogonal(shape=(self.n_in, self.n_f), name='W_f')
-        self.U_f = orthogonal(shape=(self.n_hidden, self.n_f), name='U_f')
-        self.b_f = uniform(shape=self.n_f, scale=(0, 1.), name='b_f')
-        # cell state
-        self.W_c = orthogonal(shape=(self.n_in, self.n_c), name='W_c')
-        self.U_c = orthogonal(shape=(self.n_hidden, self.n_c), name='U_c')
-        self.b_c = constant(shape=self.n_c, name='b_c')
+        self.W_f = orthogonal(shape=(self.n_input, self.n_fg), name='W_f')
+        self.U_f = orthogonal(shape=(self.n_hidden, self.n_fg), name='U_f')
+        self.b_f = uniform(shape=self.n_fg, scale=(0, 1.), name='b_f')
+        # cell gate
+        self.W_c = orthogonal(shape=(self.n_input, self.n_cg), name='W_c')
+        self.U_c = orthogonal(shape=(self.n_hidden, self.n_cg), name='U_c')
+        self.b_c = constant(shape=self.n_cg, name='b_c')
         # output gate
-        self.W_o = orthogonal(shape=(self.n_in, self.n_o), name='W_o')
-        self.U_o = orthogonal(shape=(self.n_hidden, self.n_o), name='U_o')
-        self.b_o = uniform(shape=self.n_i, scale=(-0.5, .5), name='b_o')
-
-        self.params.extend([self.W_i, self.U_i, self.b_i,
-                            self.W_f, self.U_f, self.b_f,
-                            self.W_c, self.U_c, self.b_c,
-                            self.W_o, self.U_o, self.b_o])
-
+        self.W_o = orthogonal(shape=(self.n_input, self.n_og), name='W_o')
+        self.U_o = orthogonal(shape=(self.n_hidden, self.n_og), name='U_o')
+        self.b_o = uniform(shape=self.n_ig, scale=(-0.5, .5), name='b_o')
+        # Row representation
         self.W = T.concatenate([self.W_i, self.W_f, self.W_c, self.W_o])
         self.U = T.concatenate([self.U_i, self.U_f, self.U_c, self.U_o])
         self.b = T.concatenate([self.b_i, self.b_f, self.b_c, self.b_o])
+        # Non sequence for the scan operator
+        self.non_seq = [self.W, self.U, self.b]
+
+        if True:
+            self.params.extend([self.W_i, self.U_i, self.b_i,
+                                self.W_f, self.U_f, self.b_f,
+                                self.W_c, self.U_c, self.b_c,
+                                self.W_o, self.U_o, self.b_o])
+        else:
+            self.params.extend([self.W, self.U, self.b])
 
         if peephole:
-            self.P_i = orthogonal(shape=(self.n_c, self.n_i), name='W_ci')
-            self.P_f = orthogonal(shape=(self.n_c, self.n_f), name='W_cf')
-            self.P_o = orthogonal(shape=(self.n_c, self.n_o), name='W_co')
-            self.params.extend([self.P_i, self.P_f, self.P_o])
+            self.P_i = orthogonal(shape=(self.n_cg, self.n_ig), name='W_ci')
+            self.P_f = orthogonal(shape=(self.n_cg, self.n_fg), name='W_cf')
+            self.P_o = orthogonal(shape=(self.n_cg, self.n_og), name='W_co')
+            self.P = T.concatenate([self.P_i, self.P_f, self.P_o])
+            self.non_seq.append(self.P)
+            if True:
+                self.params.extend([self.P_i, self.P_f, self.P_o])
+            else:
+                self.params.extend([self.P])
 
         self.c0 = constant(shape=self.n_hidden, name='c0')
         self.h0 = self.activation(self.c0)
 
-    def one_step(self, x_t, h_tm1, c_tm1, W_i, U_i, b_i, W_f, U_f, b_f, W_c, U_c, b_c, W_o, U_o, b_o):
-        # forget gate
-        f_t = sigmoid(T.dot(x_t, W_f) + T.dot(h_tm1, U_f) + b_f)
-        # input gate
-        if self.tied:
-            i_t = 1. - f_t
-        else:
-            i_t = sigmoid(T.dot(x_t, W_i) + T.dot(h_tm1, U_i) + b_i)
-        # cell state
-        c_tilde_t = self.activation(T.dot(x_t, W_c) + T.dot(h_tm1, U_c) + b_c)
-        c_t = f_t * c_tm1 + i_t * c_tilde_t
-        # output gate
-        o_t = sigmoid(T.dot(x_t, W_o) + T.dot(h_tm1, U_o) + b_o)
-        # if self.peephole:
-        #     o_t = sigmoid(T.dot(x_t, W_o) + T.dot(h_tm1, U_o) + T.dot(c_t, W_co) + b_o)
-
-        h_t = o_t * self.activation(c_t)
-
-        return [h_t, c_t]
-
     def get_output(self, **kwargs):
         X = self.input_layer.get_output(**kwargs)
-        [h_vals, _], _ = theano.scan(fn=self.one_step,
+
+        if X.ndim > 3:
+            X = T.flatten(X, 3)
+        # (n_batch, n_time_steps, n_dim) ->  (n_time_steps, n_batch, n_dim)
+        X = X.dimshuffle(1, 0, 2)
+        # Input dot product is out side of the scan
+        X = T.dot(X, self.W) + self.b
+
+        def one_step(x_t, h_tm1, c_tm1, *args):
+            pre_act = x_t + T.dot(h_tm1, self.U)  # if self.peephole:
+            # gates
+            i_t = sigmoid(pre_act[:, 0:self.n_units])
+            f_t = sigmoid(pre_act[:, self.n_units: 2*self.n_units])
+            c_t = self.activation(pre_act[:, 2*self.n_units: 3*self.n_units])
+            o_t = sigmoid(pre_act[:, 3*self.n_units: 4*self.n_units])
+
+            if self.tied:
+                i_t = 1. - f_t
+            # cell state
+            c_t = f_t * c_tm1 + i_t * c_t
+            h_t = o_t * self.activation(c_t)
+
+            return [h_t, c_t]
+
+        [h_vals, _], _ = theano.scan(fn=one_step,
                                      sequences=X,
                                      outputs_info=[self.h0, self.c0, None],
-                                     non_sequences=self.params,
+                                     non_sequences=self.non_seq,
                                      go_backwards=self.go_backwards,
                                      allow_gc=self.allow_gc,
                                      strict=True)
         if self.last_only:
             h_vals = h_vals[-1]
+        else:
+            h_vals = h_vals.dimshuffle(1, 0, 2)
+            if self.go_backwards:
+                h_vals = h_vals[:, ::-1]
 
         return h_vals
 
 
-class LSTM_Old(Layer):
-    def __init__(self, incoming, n_hidden, n_out, peephole=False, tied_i_f=False, activation=tanh, **kwargs):
-        super(LSTM, self).__init__(incoming, **kwargs)
-        self.peephole = peephole    # gate layers look at the cell state
-        self.tied = tied_i_f        # only input new values to the state when we forget something
-        self.activation = activation
-        if isinstance(n_hidden, tuple):
-            self.n_hidden, self.n_i, self.n_c, self.n_o, self.n_f = n_hidden
-        else:
-            self.n_hidden = self.n_i = self.n_c = self.n_o = self.n_f = n_hidden
-        self.n_in = self.input_shape[1]
-        self.n_out = n_out
-        # forget gate
-        self.W_xf = orthogonal(shape=(self.n_in, self.n_f), name='W_xf')
-        self.W_hf = orthogonal(shape=(n_hidden, self.n_f), name='W_hf')
-        self.b_f = uniform(shape=self.n_f, scale=(0, 1.), name='b_f')
-        # input gate
-        self.W_xi = orthogonal(shape=(self.n_in, self.n_i), name='W_xi')
-        self.W_hi = orthogonal(shape=(self.n_hidden, self.n_i), name='W_hi')
-        self.b_i = uniform(shape=self.n_i, scale=(-0.5,.5), name='b_i')
-        # cell state
-        self.W_xc = orthogonal(shape=(self.n_in, self.n_c), name='W_xc')
-        self.W_hc = orthogonal(shape=(n_hidden, self.n_c), name='W_hc')
-        self.b_c = constant(shape=self.n_c, name='b_c')
-        # output gate
-        self.W_xo = orthogonal(shape=(self.n_in, self.n_o), name='W_x0')
-        self.W_ho = orthogonal(shape=(self.n_hidden, self.n_o), name='W_ho')
-        self.b_o = uniform(shape=self.n_i, scale=(-0.5,.5), name='b_o')
-
-        self.W_hy = orthogonal(shape=(n_hidden, n_out), name='W_hy')
-        self.b_y = constant(shape=self.n_out, name='b_y')
-
-        self.params.extend([self.W_xi, self.W_hi, self.b_i,
-                            self.W_xf, self.W_hf, self.b_f,
-                            self.W_xc, self.W_hc, self.b_c,
-                            self.W_xo, self.W_ho, self.b_o,
-                            self.W_hy, self.b_y])
-        if peephole:
-            self.W_cf = orthogonal(shape=(self.n_c, self.n_f), name='W_cf')
-            self.W_ci = orthogonal(shape=(self.n_c, self.n_i), name='W_ci')
-            self.W_co = orthogonal(shape=(self.n_c, self.n_o), name='W_co')
-            self.params.extend([self.W_cf, self.W_ci, self.W_co])
-
-        self.c0 = constant(shape=self.n_hidden, name='c0')
-        self.h0 = activation(self.c0)
-
-    def one_step(self, x_t, h_tm1, c_tm1, W_xi, W_hi, b_i,
-                                          W_xf, W_hf, b_f,
-                                          W_xc, W_hc, b_c,
-                                          W_xo, W_ho, b_o,
-                                          W_hy, b_y,
-                                          W_cf=None, W_ci=None, W_co=None):
-        # forget gate
-        f_t = sigmoid(T.dot(x_t, W_xf) + T.dot(h_tm1, W_hf) + b_f)
-        # input gate
-        i_t = sigmoid(T.dot(x_t, W_xi) + T.dot(h_tm1, W_hi) + b_i)
-        if self.peephole:
-            f_t = sigmoid(T.dot(x_t, W_xf) + T.dot(h_tm1, W_hf) + T.dot(c_tm1, W_cf) + b_f)
-            i_t = sigmoid(T.dot(x_t, W_xi) + T.dot(h_tm1, W_hi) + T.dot(c_tm1, W_ci) + b_i)
-
-        # cell state
-        c_tt = self.activation(T.dot(x_t, W_xc) + T.dot(h_tm1, W_hc) + b_c)
-        c_t = f_t * c_tm1 + i_t * c_tt
-        if self.tied:
-            c_t = f_t * c_tm1 + (1 - f_t) * c_tt
-
-        # output gate
-        o_t = sigmoid(T.dot(x_t, W_xo) + T.dot(h_tm1, W_ho) + b_o)
-        if self.peephole:
-            o_t = sigmoid(T.dot(x_t, W_xo) + T.dot(h_tm1, W_ho) + T.dot(c_t, W_co) + b_o)
-
-        h_t = o_t * self.activation(c_t)
-
-        y_t = sigmoid(T.dot(h_t, W_hy) + b_y)
-
-        return [h_t, c_t, y_t]
-
-    def get_output(self, **kwargs):
-        X = self.input_layer.get_output(**kwargs)
-        [h_vals, _, y_vals], _ = theano.scan(fn=self.one_step,
-                                             sequences=dict(input=X, taps=[0]),
-                                             outputs_info=[self.h0, self.c0, None],
-                                             non_sequences=self.params,
-                                             allow_gc=False,
-                                             strict=True)
-        return y_vals
-
+# class LSTM_Old(Layer):
+#     def __init__(self, incoming, n_hidden, n_out, peephole=False, tied_i_f=False, activation=tanh,
+#                  last_only=True, go_backwards=False, allow_gc=False, **kwargs):
+#         super(LSTM, self).__init__(incoming, **kwargs)
+#         self.allow_gc = allow_gc
+#         self.go_backwards = go_backwards
+#         self.last_only = last_only
+#         self.peephole = peephole    # input and forget gates layers look at the cell state
+#         self.tied = tied_i_f        # only input new values to the state when we forget something
+#         self.activation = get_activation(activation)
+#         if isinstance(n_hidden, tuple):
+#             self.n_hidden, self.n_i, self.n_f, self.n_c, self.n_o = n_hidden
+#         else:
+#             self.n_hidden = self.n_i = self.n_f = self.n_c = self.n_o = n_hidden
+#         self.n_in = self.input_shape[1]
+#         self.n_out = n_out
+#         # input gate
+#         self.W_i = orthogonal(shape=(self.n_in, self.n_i), name='W_i')
+#         self.U_i = orthogonal(shape=(self.n_hidden, self.n_i), name='U_i')
+#         self.b_i = uniform(shape=self.n_i, scale=(-0.5, .5), name='b_i')
+#         if self.peephole:
+#             self.P_i = orthogonal(shape=(self.n_hidden, self.n_i), name='P_i')
+#         # forget gate
+#         self.W_f = orthogonal(shape=(self.n_in, self.n_f), name='W_f')
+#         self.U_f = orthogonal(shape=(self.n_hidden, self.n_f), name='U_f')
+#         self.b_f = uniform(shape=self.n_f, scale=(0, 1.), name='b_f')
+#         # cell state
+#         self.W_c = orthogonal(shape=(self.n_in, self.n_c), name='W_c')
+#         self.U_c = orthogonal(shape=(self.n_hidden, self.n_c), name='U_c')
+#         self.b_c = constant(shape=self.n_c, name='b_c')
+#         # output gate
+#         self.W_o = orthogonal(shape=(self.n_in, self.n_o), name='W_o')
+#         self.U_o = orthogonal(shape=(self.n_hidden, self.n_o), name='U_o')
+#         self.b_o = uniform(shape=self.n_i, scale=(-0.5, .5), name='b_o')
+#
+#         self.params.extend([self.W_i, self.U_i, self.b_i,
+#                             self.W_f, self.U_f, self.b_f,
+#                             self.W_c, self.U_c, self.b_c,
+#                             self.W_o, self.U_o, self.b_o])
+#
+#         self.W = T.concatenate([self.W_i, self.W_f, self.W_c, self.W_o])
+#         self.U = T.concatenate([self.U_i, self.U_f, self.U_c, self.U_o])
+#         self.b = T.concatenate([self.b_i, self.b_f, self.b_c, self.b_o])
+#
+#         if peephole:
+#             self.P_i = orthogonal(shape=(self.n_c, self.n_i), name='W_ci')
+#             self.P_f = orthogonal(shape=(self.n_c, self.n_f), name='W_cf')
+#             self.P_o = orthogonal(shape=(self.n_c, self.n_o), name='W_co')
+#             self.params.extend([self.P_i, self.P_f, self.P_o])
+#
+#         self.c0 = constant(shape=self.n_hidden, name='c0')
+#         self.h0 = self.activation(self.c0)
+#
+#     def one_step(self, x_t, h_tm1, c_tm1, W_i, U_i, b_i, W_f, U_f, b_f, W_c, U_c, b_c, W_o, U_o, b_o):
+#         # forget gate
+#         f_t = sigmoid(T.dot(x_t, W_f) + T.dot(h_tm1, U_f) + b_f)
+#         # input gate
+#         if self.tied:
+#             i_t = 1. - f_t
+#         else:
+#             i_t = sigmoid(T.dot(x_t, W_i) + T.dot(h_tm1, U_i) + b_i)
+#         # cell state
+#         c_tilde_t = self.activation(T.dot(x_t, W_c) + T.dot(h_tm1, U_c) + b_c)
+#         c_t = f_t * c_tm1 + i_t * c_tilde_t
+#         # output gate
+#         o_t = sigmoid(T.dot(x_t, W_o) + T.dot(h_tm1, U_o) + b_o)
+#         # if self.peephole:
+#         #     o_t = sigmoid(T.dot(x_t, W_o) + T.dot(h_tm1, U_o) + T.dot(c_t, W_co) + b_o)
+#
+#         h_t = o_t * self.activation(c_t)
+#
+#         return [h_t, c_t]
+#
+#     def get_output(self, **kwargs):
+#         X = self.input_layer.get_output(**kwargs)
+#         [h_vals, _], _ = theano.scan(fn=self.one_step,
+#                                      sequences=X,
+#                                      outputs_info=[self.h0, self.c0, None],
+#                                      non_sequences=self.params,
+#                                      go_backwards=self.go_backwards,
+#                                      allow_gc=self.allow_gc,
+#                                      strict=True)
+#         if self.last_only:
+#             h_vals = h_vals[-1]
+#
+#         return h_vals
 
 class GRU(Layer):
     r"""

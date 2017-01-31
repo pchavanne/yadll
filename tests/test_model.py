@@ -59,7 +59,7 @@ class TestModel:
     @pytest.fixture(scope='module')
     def layer(self, input):
         from yadll.layers import DenseLayer
-        return DenseLayer(incoming=input, nb_units=25, l1=0.1)
+        return DenseLayer(incoming=input, n_units=25, l1=0.1)
 
     @pytest.fixture(scope='module')
     def unsupervised_layer(self, layer):
@@ -70,17 +70,17 @@ class TestModel:
         hp('n_epochs', 10)
         hp('learning_rate', 0.1)
         hp('patience', 1000)
-        return AutoEncoder(incoming=layer, nb_units=25, hyperparameters=hp)
+        return AutoEncoder(incoming=layer, n_units=25, hyperparameters=hp)
 
     @pytest.fixture(scope='module')
     def logistic_regression_unsupervised(self, unsupervised_layer):
         from yadll.layers import LogisticRegression
-        return LogisticRegression(incoming=unsupervised_layer, nb_class=10)
+        return LogisticRegression(incoming=unsupervised_layer, n_class=10)
 
     @pytest.fixture(scope='module')
     def logistic_regression(self, layer):
         from yadll.layers import LogisticRegression
-        return LogisticRegression(incoming=layer, nb_class=10)
+        return LogisticRegression(incoming=layer, n_class=10)
 
     @pytest.fixture(scope='module')
     def network(self, input, layer, logistic_regression):

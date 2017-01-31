@@ -84,17 +84,17 @@ Layers names are optional.
     # Dropout Layer 1
     l_dro1 = yadll.layers.Dropout(incoming=l_in, corruption_level=0.4, name='Dropout 1')
     # Dense Layer 1
-    l_hid1 = yadll.layers.DenseLayer(incoming=l_dro1, nb_units=500, W=yadll.init.glorot_uniform,
+    l_hid1 = yadll.layers.DenseLayer(incoming=l_dro1, n_units=500, W=yadll.init.glorot_uniform,
                                      l1=hp.l1_reg, l2=hp.l2_reg, activation=yadll.activations.relu,
                                      name='Hidden layer 1')
     # Dropout Layer 2
     l_dro2 = yadll.layers.Dropout(incoming=l_hid1, corruption_level=0.2, name='Dropout 2')
     # Dense Layer 2
-    l_hid2 = yadll.layers.DenseLayer(incoming=l_dro2, nb_units=500, W=yadll.init.glorot_uniform,
+    l_hid2 = yadll.layers.DenseLayer(incoming=l_dro2, n_units=500, W=yadll.init.glorot_uniform,
                                      l1=hp.l1_reg, l2=hp.l2_reg, activation=yadll.activations.relu,
                                      name='Hidden layer 2')
     # Logistic regression Layer
-    l_out = yadll.layers.LogisticRegression(incoming=l_hid2, nb_class=10, l1=hp.l1_reg,
+    l_out = yadll.layers.LogisticRegression(incoming=l_hid2, n_class=10, l1=hp.l1_reg,
                                             l2=hp.l2_reg, name='Logistic regression')
 
 We create a :class:`yadll.network.Network` object and add all the layers sequentially.
@@ -246,17 +246,17 @@ When loading the parameters, the network name must match the saved parameters ne
     # Dropout Layer 1
     l_dro1 = yadll.layers.Dropout(incoming=l_in, corruption_level=0.4, name='Dropout 1')
     # Dense Layer 1
-    l_hid1 = yadll.layers.DenseLayer(incoming=l_dro1, nb_units=500, W=yadll.init.glorot_uniform,
+    l_hid1 = yadll.layers.DenseLayer(incoming=l_dro1, n_units=500, W=yadll.init.glorot_uniform,
                                      l1=hp.l1_reg, l2=hp.l2_reg, activation=yadll.activations.relu,
                                      name='Hidden layer 1')
     # Dropout Layer 2
     l_dro2 = yadll.layers.Dropout(incoming=l_hid1, corruption_level=0.2, name='Dropout 2')
     # Dense Layer 2
-    l_hid2 = yadll.layers.DenseLayer(incoming=l_dro2, nb_units=500, W=yadll.init.glorot_uniform,
+    l_hid2 = yadll.layers.DenseLayer(incoming=l_dro2, n_units=500, W=yadll.init.glorot_uniform,
                                      l1=hp.l1_reg, l2=hp.l2_reg, activation=yadll.activations.relu,
                                      name='Hidden layer 2')
     # Logistic regression Layer
-    l_out = yadll.layers.LogisticRegression(incoming=l_hid2, nb_class=10, l1=hp.l1_reg,
+    l_out = yadll.layers.LogisticRegression(incoming=l_hid2, n_class=10, l1=hp.l1_reg,
                                             l2=hp.l2_reg, name='Logistic regression')
 
     # Create network and add layers
@@ -382,13 +382,13 @@ Now we will loop over each possible combination
         # Input layer
         l_in = InputLayer(shape=(None, 28 * 28), name='Input')
         # Dense Layer 1
-        l_hid1 = DenseLayer(incoming=l_in, nb_units=5, W=hp.initialisation, l1=hp.l1_reg,
+        l_hid1 = DenseLayer(incoming=l_in, n_units=5, W=hp.initialisation, l1=hp.l1_reg,
                             l2=hp.l2_reg, activation=hp.activation, name='Hidden layer 1')
         # Dense Layer 2
-        l_hid2 = DenseLayer(incoming=l_hid1, nb_units=5, W=hp.initialisation, l1=hp.l1_reg,
+        l_hid2 = DenseLayer(incoming=l_hid1, n_units=5, W=hp.initialisation, l1=hp.l1_reg,
                             l2=hp.l2_reg, activation=hp.activation, name='Hidden layer 2')
         # Logistic regression Layer
-        l_out = LogisticRegression(incoming=l_hid2, nb_class=10, l1=hp.l1_reg,
+        l_out = LogisticRegression(incoming=l_hid2, n_class=10, l1=hp.l1_reg,
                                    l2=hp.l2_reg, name='Logistic regression')
 
         # Create network and add layers

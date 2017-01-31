@@ -41,15 +41,15 @@ l_in = yadll.layers.InputLayer(input_shape=(hp.batch_size, 28 * 28))
 # Dropout Layer 1
 l_dro1 = yadll.layers.Dropout(incoming=l_in, corruption_level=0.5)
 # Dense Layer 1
-l_hid1 = yadll.layers.DenseLayer(incoming=l_dro1, nb_units=500, W=yadll.init.glorot_uniform,
+l_hid1 = yadll.layers.DenseLayer(incoming=l_dro1, n_units=500, W=yadll.init.glorot_uniform,
                                  l1=hp.l1_reg, l2=hp.l2_reg, activation=yadll.activations.relu)
 # Dropout Layer 2
 l_dro2 = yadll.layers.Dropout(incoming=l_hid1, corruption_level=0.25)
 # Dense Layer 2
-l_hid2 = yadll.layers.DenseLayer(incoming=l_dro2, nb_units=250, W=yadll.init.glorot_uniform,
+l_hid2 = yadll.layers.DenseLayer(incoming=l_dro2, n_units=250, W=yadll.init.glorot_uniform,
                                  l1=hp.l1_reg, l2=hp.l2_reg, activation=yadll.activations.relu)
 # Logistic regression Layer
-l_out = yadll.layers.LogisticRegression(incoming=l_hid2, nb_class=10)
+l_out = yadll.layers.LogisticRegression(incoming=l_hid2, n_class=10)
 
 # Create network and add layers
 net = yadll.network.Network('2 layers mlp with dropout')
@@ -103,12 +103,12 @@ model_3 = yadll.model.Model()
 l_in = yadll.layers.InputLayer(input_shape=(hp.batch_size, 28 * 28))
 l_dro1 = yadll.layers.Dropout(incoming=l_in, corruption_level=0.5)
 
-l_hid1 = yadll.layers.DenseLayer(incoming=l_dro1, nb_units=500, W=yadll.init.glorot_uniform,
+l_hid1 = yadll.layers.DenseLayer(incoming=l_dro1, n_units=500, W=yadll.init.glorot_uniform,
                                  l1=hp.l1_reg, l2=hp.l2_reg, activation=yadll.activations.relu)
 l_dro2 = yadll.layers.Dropout(incoming=l_hid1, corruption_level=0.25)
-l_hid2 = yadll.layers.DenseLayer(incoming=l_dro2, nb_units=250, W=yadll.init.glorot_uniform,
+l_hid2 = yadll.layers.DenseLayer(incoming=l_dro2, n_units=250, W=yadll.init.glorot_uniform,
                                  l1=hp.l1_reg, l2=hp.l2_reg, activation=yadll.activations.relu)
-l_out = yadll.layers.LogisticRegression(incoming=l_hid2, nb_class=10)
+l_out = yadll.layers.LogisticRegression(incoming=l_hid2, n_class=10)
 
 # Create network and add layers
 net = yadll.network.Network('2 layers mlp with dropout')

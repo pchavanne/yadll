@@ -25,17 +25,17 @@ class TestNetwork:
     @pytest.fixture
     def layer(self, input):
         from yadll.layers import DenseLayer
-        return DenseLayer(incoming=input, nb_units=25, name='DenseLayer 1')
+        return DenseLayer(incoming=input, n_units=25, name='DenseLayer 1')
 
     @pytest.fixture
     def layer2(self, input):
         from yadll.layers import DenseLayer
-        return DenseLayer(incoming=input, nb_units=25)
+        return DenseLayer(incoming=input, n_units=25)
 
     @pytest.fixture
     def unsupervised_layer(self, layer):
         from yadll.layers import AutoEncoder
-        return AutoEncoder(incoming=layer, nb_units=25, hyperparameters=mock())
+        return AutoEncoder(incoming=layer, n_units=25, hyperparameters=mock())
 
     def test_network(self, network, x, input, layer, layer2, unsupervised_layer, caplog):
         net = network(name='test_network', layers=[input, layer, unsupervised_layer])
