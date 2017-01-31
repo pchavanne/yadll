@@ -79,12 +79,13 @@ class Model(object):
 
     """
     def __init__(self, network=None, data=None, hyperparameters=None, name='model',
-                 updates=sgd, file=None):
+                 updates=sgd, objective=categorical_crossentropy, file=None):
         self.network = network
         self.data = data             # data [(train_set_x, train_set_y), (valid_set_x, valid_set_y), (test_set_x, test_set_y)]
         self.name = name
         self.hp = hyperparameters
         self.updates = updates
+        self.objective = objective
         self.file = file
         self.save_mode = None        # None, 'end' or 'each'
         self.index = T.iscalar()     # index to a [mini]batch
@@ -170,7 +171,8 @@ class Model(object):
         n_valid_batches = self.data.valid_set_x.get_value(borrow=True).shape[0] / self.hp.batch_size
         n_test_batches = self.data.test_set_x.get_value(borrow=True).shape[0] / self.hp.batch_size
 
-        cost = -T.mean(T.log(self.network.get_output(stochastic=True))[T.arange(self.y.shape[0]), self.y])
+        #cost = -T.mean(T.log(self.network.get_output(stochastic=True))[T.arange(self.y.shape[0]), self.y])
+        cost = - self.objective(prediction=self.network.get_output(stochastic=True), target=self.y)
         # add regularisation
         cost += self.network.reguls
 

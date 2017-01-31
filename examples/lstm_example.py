@@ -5,83 +5,76 @@
 This example show you how to train an LSTM for text generation.
 """
 import os
+import numpy as np
 import yadll
+
 import logging
 
 logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
-# load the data
-datafile = 'nietzsche.txt'
-if not os.path.isfile(datafile):
-    import urllib
-    origin = 'https://s3.amazonaws.com/text-datasets/nietzsche.txt'
-    print 'Downloading data from %s' % origin
-    urllib.urlretrieve(origin, datafile)
-data = yadll.data.Data(datafile)
+# Creat the data
+alphabet = 'abcdefghijklmnopqrstuvwxyz'
+number_of_chars = len(alphabet)
+sequence_length = 2
+sentences = [alphabet[i: i + sequence_length] for i in range(len(alphabet) - sequence_length)]
+next_chars = [alphabet[i + sequence_length] for i in range(len(alphabet) - sequence_length)]
+
+# Transform sequences and labels into 'one-hot' encoding
+X = np.zeros((len(sentences), sequence_length, number_of_chars), dtype=np.bool)
+y = np.zeros((len(sentences), number_of_chars), dtype=np.bool)
+for i, sentence in enumerate(sentences):
+    for t, char in enumerate(sentence):
+        X[i, t, ord(char) - ord('a')] = 1
+    y[i, ord(next_chars[i]) - ord('a')] = 1
+data = yadll.data.Data(data=[(X, y), (X, y), (X, y)])
 
 # create the model
 model = yadll.model.Model(name='lstm', data=data)
 
 # Hyperparameters
 hp = yadll.hyperparameters.Hyperparameters()
-hp('batch_size', 128)
-hp('n_epochs', 1000)
-hp('learning_rate', 0.9)
-hp('momentum', 0.5)
-hp('l1_reg', 0.00)
-hp('l2_reg', 0.0000)
-hp('patience', 10000)
+hp('batch_size', 1)
+hp('n_epochs', 60)
 
 # add the hyperparameters to the model
 model.hp = hp
 
 # Create connected layers
 # Input layer
-l_in = yadll.layers.InputLayer(input_shape=(hp.batch_size, 28 * 28), name='Input')
-# Dropout Layer 1
-l_dro1 = yadll.layers.Dropout(incoming=l_in, corruption_level=0.4, name='Dropout 1')
-# Dense Layer 1
-l_hid1 = yadll.layers.DenseLayer(incoming=l_dro1, n_units=100, W=yadll.init.glorot_uniform,
-                                 l1=hp.l1_reg, l2=hp.l2_reg, activation=yadll.activations.relu,
-                                 name='Hidden layer 1')
-# Dropout Layer 2
-l_dro2 = yadll.layers.Dropout(incoming=l_hid1, corruption_level=0.2, name='Dropout 2')
-# Dense Layer 2
-l_hid2 = yadll.layers.DenseLayer(incoming=l_dro2, n_units=100, W=yadll.init.glorot_uniform,
-                                 l1=hp.l1_reg, l2=hp.l2_reg, activation=yadll.activations.relu,
-                                 name='Hidden layer 2')
+l_in = yadll.layers.InputLayer(input_shape=(hp.batch_size, sequence_length, number_of_chars))
+# LSTM 1
+l_lstm1 = yadll.layers.LSTM(incoming=l_in, n_units=16, last_only=False)
+# LSTM 2
+l_lstm2 = yadll.layers.LSTM(incoming=l_lstm1, n_units=16)
 # Logistic regression Layer
-l_out = yadll.layers.LogisticRegression(incoming=l_hid2, n_class=10, l1=hp.l1_reg,
-                                        l2=hp.l2_reg, name='Logistic regression')
+l_out = yadll.layers.LogisticRegression(incoming=l_lstm2, n_class=number_of_chars)
 
 # Create network and add layers
-net = yadll.network.Network('2 layers mlp with dropout')
+net = yadll.network.Network('stacked lstm')
 net.add(l_in)
-net.add(l_dro1)
-net.add(l_hid1)
-net.add(l_dro2)
-net.add(l_hid2)
+net.add(l_lstm1)
+net.add(l_lstm2)
 net.add(l_out)
 
 # add the network to the model
 model.network = net
-
 # updates method
-model.updates = yadll.updates.newton
+model.updates = yadll.updates.adam
 
 # train the model and save it to file at each best
 model.train()
 
-# saving network paramters
-net.save_params('net_params.yp')
+# prime the model with 'ab' sequence and let it generate the learned alphabet
+sentence = alphabet[:sequence_length]
+generated = sentence
+for iteration in range(number_of_chars - sequence_length):
+    x = np.zeros((1, sequence_length, number_of_chars))
+    for t, char in enumerate(sentence):
+        x[0, t, ord(char) - ord('a')] = 1.
+    preds = model.predict(x)[0]
+    next_char = chr(np.argmax(preds) + ord('a'))
+    generated += next_char
+    sentence = sentence[1:] + next_char
 
-# make prediction
-# We can test it on some examples from test
-test_set_x = data.test_set_x.get_value()
-test_set_y = data.test_set_y.eval()
-
-predicted_values = model.predict(test_set_x[:30])
-
-print ("Model 1, predicted values for the first 30 examples in test set:")
-print predicted_values
-print test_set_y[:30]
+# check that it did generate the alphabet correctly
+assert(generated == alphabet)
