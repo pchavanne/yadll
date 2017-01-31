@@ -28,7 +28,7 @@ def get_activation(activator):
 
 def linear(x):
     r"""Linear activation function
-    :math:`\varphi{x} = x`
+    :math: \varphi{x} = x
 
     Parameters
     ----------
@@ -46,7 +46,7 @@ def linear(x):
 
 def sigmoid(x):
     r"""Sigmoid function
-    :math:`\varphi(x) = \frac{1}{1 + e^{-x}}`
+    :math:`\varphi(x) = \frac{1}{1 + \exp{-x}}`
 
     Parameters
     ----------
@@ -64,7 +64,7 @@ def sigmoid(x):
 
 def ultra_fast_sigmoid(x):
     r"""Ultra fast Sigmoid function return an approximated standard sigmoid
-    :math:`\varphi(x) = \frac{1}{1 + e^{-x}}`
+    :math:`\varphi{x} = \frac{1}{1+\exp{-x}}`
 
     Parameters
     ----------
