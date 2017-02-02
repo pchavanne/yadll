@@ -17,12 +17,10 @@ Options:
     --version           Show version
 """
 import os
-import cPickle
 import logging
 
-import theano
 from docopt import docopt
-
+import numpy as np
 import yadll
 import examples.networks as networks
 
@@ -60,7 +58,7 @@ def train(network_name, data):
     test_set_x = data.test_set_x.get_value()
     test_set_y = data.test_set_y.eval()
 
-    predicted_values = model.predict(test_set_x[:30])
+    predicted_values = [np.argmax(prediction) for prediction in model.predict(test_set_x[:30])]
     print ("Predicted values for the first 30 examples in test set:")
     print predicted_values
     print test_set_y[:30]

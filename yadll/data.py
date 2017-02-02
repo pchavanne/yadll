@@ -66,6 +66,7 @@ def one_hot_decoding(mat):
     return np.argmax(mat, axis=1)
 
 
+
 class Data(object):
     """
     Data container.
@@ -87,7 +88,10 @@ class Data(object):
     Methods
     -------
     dataset :
-        return the dataset
+        return the dataset as Theano shared variables
+        [(train_set_x, train_set_y),
+         (valid_set_x, valid_set_y),
+         (test_set_x, test_set_y)]
 
     Examples
     --------
@@ -96,7 +100,7 @@ class Data(object):
     >>> yadll.data.Data('data/mnist/mnist.pkl.gz')
 
     """
-    def __init__(self, data, shared=True, borrow=True, cast_y=True):
+    def __init__(self, data, shared=True, borrow=True, cast_y=False):
         if isinstance(data, str):
             f = gzip.open(data, 'rb')
             train_set, valid_set, test_set = cPickle.load(f)
