@@ -5,6 +5,7 @@ from functools import wraps
 import numpy as np
 
 import theano
+from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 
 import logging
 
@@ -12,7 +13,11 @@ logger = logging.getLogger(__name__)
 
 floatX = theano.config.floatX
 intX = 'int32'
+
 EPSILON = 1e-8
+
+np_rng = np.random.RandomState(1234)
+T_rng = RandomStreams(np_rng.randint(2 ** 30))
 
 
 def to_float_X(arr):

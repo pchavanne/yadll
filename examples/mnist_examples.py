@@ -28,9 +28,9 @@ logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
 
 @yadll.utils.timer(' Loading the data')
-def load_data(dataset):
+def load_data(data_loader):
     print '... Loading the data'
-    return yadll.data.Data(dataset)
+    return yadll.data.Data(data_loader)
 
 
 def build_network(network_name='Logistic_regression', input_var=None):
@@ -50,7 +50,7 @@ def train(network_name, data):
     # add the hyperparameters to the model
     model.hp = hp
     # updates method
-    model.updates = yadll.updates.sgd
+    model.updates = yadll.updates.momentum
     # train the model
     model.train(unsupervised_training=True)
 
@@ -59,10 +59,10 @@ def train(network_name, data):
     test_set_y = data.test_set_y.eval()
 
     predicted_values = [np.argmax(prediction) for prediction in model.predict(test_set_x[:30])]
+    true_values = [np.argmax(true_value) for true_value in test_set_y[:30]]
     print ("Predicted values for the first 30 examples in test set:")
     print predicted_values
-    print test_set_y[:30]
-
+    print true_values
 
 if __name__ == '__main__':
     arguments = docopt(__doc__, version='0.0.1')
@@ -80,14 +80,8 @@ if __name__ == '__main__':
             raise TypeError('netwok name provided is not supported. Check supported network'
                             ' with option -n')
         # Load dataset
-        datafile = 'mnist.pkl.gz'
-        if not os.path.isfile(datafile):
-            import urllib
-            origin = 'http://www.iro.umontreal.ca/~lisa/deep/data/mnist/mnist.pkl.gz'
-            print 'Downloading data from %s' % origin
-            urllib.urlretrieve(origin, datafile)
-
-        data = load_data(datafile)
-
+        data_loader = yadll.data.mnist_loader
+        data = load_data(data_loader())
+        # Train
         train(network_name, data=data)
 

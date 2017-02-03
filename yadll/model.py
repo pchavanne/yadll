@@ -88,9 +88,10 @@ class Model(object):
         self.objective = objective
         self.metric = evaluation_metric
         self.file = file
-        self.save_mode = None        # None, 'end' or 'each'
-        self.index = T.iscalar()     # index to a [mini]batch
-        self.x = T.matrix('x')       # the input data is presented as a matrix
+        self.save_mode = None          # None, 'end' or 'each'
+        self.index = T.iscalar()       # index to a [mini]batch
+        self.epoch_index = T.ivector() # index per epoch
+        self.x = T.matrix('x')         # the input data is presented as a matrix
         self.report = dict()
 
     @timer(' Unsupervised Pre-Training')
@@ -116,7 +117,7 @@ class Model(object):
                 layer.unsupervised_training(self.x, self.data.train_set_x)
 
     @timer(' Training')
-    def train(self, unsupervised_training=True, save_mode=None):
+    def train(self, unsupervised_training=True, save_mode=None, shuffle=True):
         """
         Training the network
 
@@ -172,6 +173,8 @@ class Model(object):
         n_valid_batches = self.data.valid_set_x.get_value(borrow=True).shape[0] / self.hp.batch_size
         n_test_batches = self.data.test_set_x.get_value(borrow=True).shape[0] / self.hp.batch_size
 
+        train_idx = np.arange(n_train_batches * self.hp.batch_size, dtype='int32')
+
         ################################################
         # cost
         cost = T.mean(self.objective(prediction=self.network.get_output(stochastic=True), target=self.y))
@@ -203,9 +206,9 @@ class Model(object):
         ################################################
         # Compiling functions for training, validating and testing the model
         logger.info('... Compiling the model')
-        train_model = theano.function(inputs=[self.index], outputs=cost, updates=updates, name='train',
-                                      givens={self.x: self.data.train_set_x[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size],
-                                              self.y: self.data.train_set_y[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size]})
+        train_model = theano.function(inputs=[self.index, self.epoch_index], outputs=cost, updates=updates, name='train',
+                                      givens={self.x: self.data.train_set_x[self.epoch_index[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size]],
+                                              self.y: self.data.train_set_y[self.epoch_index[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size]]})
 
         validate_model = theano.function(inputs=[self.index], outputs=error, name='validate',
                                          givens={self.x: self.data.valid_set_x[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size],
@@ -233,10 +236,11 @@ class Model(object):
 
         while (epoch < self.hp.n_epochs) and (not done_looping):
             epoch += 1
-
+            if shuffle:
+                np_rng.shuffle(train_idx)
             for minibatch_index in xrange(n_train_batches):
                 # train
-                minibatch_avg_cost = train_model(minibatch_index)
+                minibatch_avg_cost = train_model(minibatch_index, train_idx)
                 # iteration number
                 iter = (epoch - 1) * n_train_batches + minibatch_index
 

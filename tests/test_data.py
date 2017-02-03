@@ -34,58 +34,6 @@ class Testdata:
     def train_test_data(self):
         return [[1., 2.], [5., 6.]]
 
-    @pytest.fixture
-    def train_valid_test_data_file(self, train_valid_test_data):
-        data_file = 'data.pkl'
-        f = gzip.open(data_file, 'wb')
-        cPickle.dump(train_valid_test_data, f)
-        f.close()
-        return data_file
-
-    def test_train_valid_test_data_file(self, train_valid_test_data_file):
-        from yadll.data import Data
-        data = Data(train_valid_test_data_file, cast_y=False)
-        assert np.asarray(data.train_set_x.eval()) == 1.
-        assert np.asarray(data.train_set_y.eval()) == 2.
-        assert np.asarray(data.valid_set_x.eval()) == 3.
-        assert np.asarray(data.valid_set_y.eval()) == 4.
-        assert np.asarray(data.test_set_x.eval()) == 5.
-        assert np.asarray(data.test_set_y.eval()) == 6.
-        assert data.train_set_y.eval().dtype == 'float32'
-        assert data.valid_set_y.eval().dtype == 'float32'
-        assert data.test_set_y.eval().dtype == 'float32'
-        assert data.train_set_x.name == 'train_set_x'
-        assert data.train_set_y.name == 'train_set_y'
-        assert data.valid_set_x.name == 'valid_set_x'
-        assert data.valid_set_y.name == 'valid_set_y'
-        assert data.test_set_x.name == 'test_set_x'
-        assert data.test_set_y.name == 'test_set_y'
-        assert np.asarray(data.dataset()[0][0].eval()) == 1
-        assert np.asarray(data.dataset()[0][1].eval()) == 2
-        assert np.asarray(data.dataset()[1][0].eval()) == 3
-        assert np.asarray(data.dataset()[1][1].eval()) == 4
-        assert np.asarray(data.dataset()[2][0].eval()) == 5
-        assert np.asarray(data.dataset()[2][1].eval()) == 6
-        data = Data(train_valid_test_data_file, cast_y=True)
-        assert np.asarray(data.train_set_x.eval()) == 1.
-        assert np.asarray(data.train_set_y.eval()) == 2.
-        assert np.asarray(data.valid_set_x.eval()) == 3.
-        assert np.asarray(data.valid_set_y.eval()) == 4.
-        assert np.asarray(data.test_set_x.eval()) == 5.
-        assert np.asarray(data.test_set_y.eval()) == 6.
-        assert data.train_set_y.eval().dtype == 'int32'
-        assert data.valid_set_y.eval().dtype == 'int32'
-        assert data.test_set_y.eval().dtype == 'int32'
-        assert data.train_set_x.name == 'train_set_x'
-        assert data.valid_set_x.name == 'valid_set_x'
-        assert data.test_set_x.name == 'test_set_x'
-        assert np.asarray(data.dataset()[0][0].eval()) == 1
-        assert np.asarray(data.dataset()[0][1].eval()) == 2
-        assert np.asarray(data.dataset()[1][0].eval()) == 3
-        assert np.asarray(data.dataset()[1][1].eval()) == 4
-        assert np.asarray(data.dataset()[2][0].eval()) == 5
-        assert np.asarray(data.dataset()[2][1].eval()) == 6
-
     def test_train_valid_test_data(self, train_valid_test_data):
         from yadll.data import Data
         data = Data(train_valid_test_data, cast_y=False)

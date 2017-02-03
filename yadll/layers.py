@@ -7,7 +7,7 @@ from .objectives import *
 from .updates import *
 from .utils import *
 
-from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
+
 from theano.tensor.signal import pool
 from theano.tensor.nnet import conv
 import yadll
@@ -15,7 +15,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-T_rng = RandomStreams(np_rng.randint(2 ** 30))
+
 
 
 class Layer(object):

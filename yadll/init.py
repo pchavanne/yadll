@@ -1,10 +1,10 @@
 # -*- coding: UTF-8 -*-
 import numpy as np
 
-from .utils import shared_variable
+from .utils import shared_variable, np_rng
 from .activations import *
 
-np_rng = np.random.RandomState(1234)
+
 
 # init_obj = glorot_uniform  or init_obj = (glorot_uniform, {'gain':tanh, 'borrow':False})
 
