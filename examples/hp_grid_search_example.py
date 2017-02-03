@@ -18,13 +18,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
 # load the data
-datafile = 'mnist.pkl.gz'
-if not os.path.isfile(datafile):
-    import urllib
-    origin = 'http://www.iro.umontreal.ca/~lisa/deep/data/mnist/mnist.pkl.gz'
-    print 'Downloading data from %s' % origin
-    urllib.urlretrieve(origin, datafile)
-data = yadll.data.Data(datafile)
+data = yadll.data.Data(yadll.data.mnist_loader())
 
 # Hyperparameters
 hps = Hyperparameters()

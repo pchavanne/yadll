@@ -3,20 +3,14 @@
 """
 This example show you how to creat and train a model and make prediction.
 """
-import os
+import numpy as np
 import yadll
 import logging
 
 logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
 # load the data
-datafile = 'mnist.pkl.gz'
-if not os.path.isfile(datafile):
-    import urllib
-    origin = 'http://www.iro.umontreal.ca/~lisa/deep/data/mnist/mnist.pkl.gz'
-    print 'Downloading data from %s' % origin
-    urllib.urlretrieve(origin, datafile)
-data = yadll.data.Data(datafile)
+data = yadll.data.Data(yadll.data.mnist_loader())
 
 # create the model
 model = yadll.model.Model(name='mlp with dropout', data=data, file='best_model.ym')
@@ -79,8 +73,9 @@ net.save_params('net_params.yp')
 test_set_x = data.test_set_x.get_value()
 test_set_y = data.test_set_y.eval()
 
-predicted_values = model.predict(test_set_x[:30])
+predicted_values = [np.argmax(prediction) for prediction in model.predict(test_set_x[:30])]
+true_values = [np.argmax(true_value) for true_value in test_set_y[:30]]
 
-print ("Model 1, predicted values for the first 30 examples in test set:")
+print ("Predicted & True values for the first 30 examples in test set:")
 print predicted_values
-print test_set_y[:30]
+print true_values

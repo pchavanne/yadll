@@ -60,7 +60,7 @@ def train(network_name, data):
 
     predicted_values = [np.argmax(prediction) for prediction in model.predict(test_set_x[:30])]
     true_values = [np.argmax(true_value) for true_value in test_set_y[:30]]
-    print ("Predicted values for the first 30 examples in test set:")
+    print ("Predicted & True values for the first 30 examples in test set:")
     print predicted_values
     print true_values
 
