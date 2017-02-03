@@ -32,7 +32,7 @@ def mean_absolute_error(prediction, target):
     r"""
     Mean Absolute Error:
 
-    .. math:: MAE_i = \frac{1}{n} \sum_{j}{|target_{i,j} - prediction_{i,j}}
+    .. math:: MAE_i = \frac{1}{n} \sum_{j}{|target_{i,j} - prediction_{i,j}|}
 
     """
     return T.mean(T.abs_(prediction - target), axis=-1)
@@ -42,10 +42,10 @@ def binary_hinge_error(prediction, target):
     r"""
     Binary Hinge Error:
 
-    .. math:: BHE_i = \frac{1}{n} \sum_{j}{\max(1 - target_{i,j} * prediction_{i,j}, 0)}
+    .. math:: BHE_i = \frac{1}{n} \sum_{j}{\max(0, 1 - target_{i,j} * prediction_{i,j})}
 
     """
-    return T.mean(T.maximum(1. - target * prediction, 0.), axis=-1)
+    return T.mean(T.maximum(0., 1. - target * prediction), axis=-1)
 
 
 def categorical_hinge_error(prediction, target):
@@ -55,14 +55,14 @@ def categorical_hinge_error(prediction, target):
     .. math:: CHE_i = \frac{1}{n} \sum_{j}{\max(1 - target_{i,j} * prediction_{i,j}, 0)}
 
     """
-    return T.mean(T.maximum(1. - target * prediction, 0.), axis=-1)
+    return T.mean(T.maximum(0., 1. - target * prediction), axis=-1)
 
 
 def binary_crossentropy_error(prediction, target):
     r"""
     Binary Cross-entropy Error:
 
-    .. math:: BCE_i = - \frac{1}{n} \sum_{j}{target_{i,j} * \log(prediction_{i,j}
+    .. math:: BCE_i = - \frac{1}{n} \sum_{j}{(target_{i,j} * \log(prediction_{i,j})
         - (1 - target_{i,j}) * \log(1 - prediction_{i,j}))}
 
     """
@@ -86,7 +86,7 @@ def kullback_leibler_divergence(prediction, target):
     r"""
     Kullback Leibler Divergence:
 
-    .. math:: KLD_i = \sum_{j}{target_{i,j}*\log{frac{target_{i,j}}{prediction_{i,j}}}
+    .. math:: KLD_i = \sum_{j}{target_{i,j}*\log(frac{target_{i,j}}{prediction_{i,j}})}
 
     """
     prediction = T.clip(prediction, EPSILON, 1)

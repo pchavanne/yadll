@@ -85,6 +85,23 @@ def mnist_loader():
             (test_set_x, one_hot_encoding(test_set_y))]
 
 
+def alphabet_loader(sequence):
+    alphabet = 'abcdefghijklmnopqrstuvwxyz'
+    number_of_chars = len(alphabet)
+    sequence_length = sequence  # 2
+    sentences = [alphabet[i: i + sequence_length] for i in range(len(alphabet) - sequence_length)]
+    next_chars = [alphabet[i + sequence_length] for i in range(len(alphabet) - sequence_length)]
+
+    # Transform sequences and labels into 'one-hot' encoding
+    X = np.zeros((len(sentences), sequence_length, number_of_chars), dtype=np.bool)
+    y = np.zeros((len(sentences), number_of_chars), dtype=np.bool)
+    for i, sentence in enumerate(sentences):
+        for t, char in enumerate(sentence):
+            X[i, t, ord(char) - ord('a')] = 1
+        y[i, ord(next_chars[i]) - ord('a')] = 1
+    return [(X, y), (X, y), (X, y)]
+
+
 class Data(object):
     """
     Data container.

@@ -4,7 +4,6 @@
 """
 This example show you how to train an LSTM for text generation.
 """
-import os
 import numpy as np
 import yadll
 
@@ -12,21 +11,12 @@ import logging
 
 logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
-# Creat the data
 alphabet = 'abcdefghijklmnopqrstuvwxyz'
-number_of_chars = len(alphabet)
-sequence_length = 2
-sentences = [alphabet[i: i + sequence_length] for i in range(len(alphabet) - sequence_length)]
-next_chars = [alphabet[i + sequence_length] for i in range(len(alphabet) - sequence_length)]
+sequence_length = len(alphabet)
+number_of_chars = 26
+# load the data
+data = yadll.data.Data(yadll.data.alphabet_loader(sequence_length))
 
-# Transform sequences and labels into 'one-hot' encoding
-X = np.zeros((len(sentences), sequence_length, number_of_chars), dtype=np.bool)
-y = np.zeros((len(sentences), number_of_chars), dtype=np.bool)
-for i, sentence in enumerate(sentences):
-    for t, char in enumerate(sentence):
-        X[i, t, ord(char) - ord('a')] = 1
-    y[i, ord(next_chars[i]) - ord('a')] = 1
-data = yadll.data.Data(data=[(X, y), (X, y), (X, y)])
 
 # create the model
 model = yadll.model.Model(name='lstm', data=data)

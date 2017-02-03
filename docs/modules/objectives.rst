@@ -25,5 +25,5 @@ Detailed description
 .. autofunction:: binary_hinge_error
 .. autofunction:: categorical_hinge_error
 .. autofunction:: binary_crossentropy_error
-.. autofunction:: categorical_crossentropy-error
+.. autofunction:: categorical_crossentropy_error
 .. autofunction:: kullback_leibler_divergence

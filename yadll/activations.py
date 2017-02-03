@@ -28,7 +28,7 @@ def get_activation(activator):
 
 def linear(x):
     r"""Linear activation function
-    :math: \varphi{x} = x
+    :math: `\varphi(x) = x`
 
     Parameters
     ----------
@@ -64,7 +64,7 @@ def sigmoid(x):
 
 def ultra_fast_sigmoid(x):
     r"""Ultra fast Sigmoid function return an approximated standard sigmoid
-    :math:`\varphi{x} = \frac{1}{1+\exp{-x}}`
+    :math:`\varphi(x) = \frac{1}{1+\exp{-x}}`
 
     Parameters
     ----------
@@ -86,7 +86,7 @@ def ultra_fast_sigmoid(x):
 
 
 def tanh(x):
-    """Tanh activation function
+    r"""Tanh activation function
     :math:`\varphi(x) = \tanh(x)`
 
     Parameters
@@ -106,6 +106,7 @@ def tanh(x):
 def softmax(x):
     r"""Softmax activation function
     :math:`\varphi(x)_j = \frac{\exp{x_j}}{\sum_{k=1}^K \exp{x_k}}`
+
     where :math:`K` is the total number of neurons in the layer. This
     activation function gets applied row-wise.
 
@@ -124,7 +125,7 @@ def softmax(x):
 
 
 def softplus(x):
-    r"""Softplus activation function :math:`\varphi{x} = \log{1 + \exp{x}}`
+    r"""Softplus activation function :math:`\varphi(x) = \log{1 + \exp{x}}`
 
     Parameters
     ----------
@@ -142,7 +143,7 @@ def softplus(x):
 
 def relu(x, alpha=0):
     r"""Rectified linear unit activation function
-    :math:`\varphi{x} = \max{x, \alpha * x}`
+    :math:`\varphi(x) = \max{x, \alpha * x}`
 
     Parameters
     ----------
@@ -177,7 +178,7 @@ def relu(x, alpha=0):
 
 
 def elu(x, alpha=1):
-    """
+    r"""
     Compute the element-wise exponential linear activation function.
 
     Parameters
