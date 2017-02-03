@@ -119,11 +119,17 @@ class Data(object):
 
     """
     def __init__(self, data, shared=True, borrow=True, cast_y=False):
-
-        train_set, valid_set, test_set = data
-        train_set_x, train_set_y = train_set
-        valid_set_x, valid_set_y = valid_set
-        test_set_x, test_set_y = test_set
+        #TODO: Check data input
+        if len(data) == 3:
+            train_set, valid_set, test_set = data
+            train_set_x, train_set_y = train_set
+            valid_set_x, valid_set_y = valid_set
+            test_set_x, test_set_y = test_set
+        if len(data) == 2:
+            train_set, test_set = data
+            train_set_x, train_set_y = train_set
+            valid_set_x, valid_set_y = None, None
+            test_set_x, test_set_y = test_set
 
         if shared:
             self.train_set_x = shared_variable(train_set_x, name='train_set_x', borrow=borrow)

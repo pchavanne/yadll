@@ -106,14 +106,3 @@ class Testdata:
         assert np.asarray(data.dataset()[0][1].eval()) == 2
         assert np.asarray(data.dataset()[2][0].eval()) == 5
         assert np.asarray(data.dataset()[2][1].eval()) == 6
-
-    def test_len_raise_error(self):
-        from yadll.data import Data
-        with pytest.raises(TypeError):
-            data = Data([[1, 2]], cast_y=False)
-
-    def test_raise_error(self):
-        from yadll.data import Data
-        with pytest.raises(TypeError):
-            data = Data(1, cast_y=False)
-

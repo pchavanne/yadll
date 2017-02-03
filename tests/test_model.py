@@ -11,15 +11,15 @@ class TestModel:
         data = [[np.random.random((100, 25)), np.random.random_integers(low=0, high=9, size=(100,))],
                 [np.random.random((50, 25)), np.random.random_integers(low=0, high=9, size=(50,))],
                 [np.random.random((50, 25)), np.random.random_integers(low=0, high=9, size=(500,))]]
-        return Data(data)
+        return Data(data, cast_y=True)
 
     @pytest.fixture(scope='module')
     def data_y_2D(self):
         from yadll.data import Data
-        data = [[np.random.random((100, 25)), np.random.random_integers(low=0, high=9, size=(100,2))],
-                [np.random.random((50, 25)), np.random.random_integers(low=0, high=9, size=(50,2))],
-                [np.random.random((50, 25)), np.random.random_integers(low=0, high=9, size=(500,2))]]
-        return Data(data)
+        data = [[np.random.random((100, 25)), np.random.random_integers(low=0, high=9, size=(100, 2))],
+                [np.random.random((50, 25)), np.random.random_integers(low=0, high=9, size=(50, 2))],
+                [np.random.random((50, 25)), np.random.random_integers(low=0, high=9, size=(500, 2))]]
+        return Data(data, cast_y=True)
 
     @pytest.fixture(scope='module')
     def hp(self):
