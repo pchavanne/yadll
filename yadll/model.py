@@ -91,7 +91,7 @@ class Model(object):
         self.save_mode = None          # None, 'end' or 'each'
         self.index = T.iscalar()       # index to a [mini]batch
         self.epoch_index = T.ivector() # index per epoch
-        self.x = T.matrix('x')         # the input data is presented as a matrix
+        self.x = T.tensor3(name='x')    # the input data is presented as a matrix
         self.report = dict()
 
     @timer(' Unsupervised Pre-Training')
@@ -292,6 +292,8 @@ class Model(object):
 
         logger.info(' Validation score of %.3f %% obtained at iteration %i, with test performance %.3f %%' %
                     (best_validation_loss * 100., best_iter + 1, test_score * 100.))
+
+        self.trained = True
 
         # Report
         self.report['epoch'] = epoch

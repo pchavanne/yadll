@@ -754,30 +754,30 @@ class LSTM(Layer):
         self.peephole = peephole    # input and forget gates layers look at the cell state
         self.tied = tied_i_f        # only input new values to the state when we forget something
         self.activation = get_activation(activation)
-        self.n_input = self.input_shape[1]
+        self.n_feature = self.input_shape[2] # (n_batch, n_time_steps, n_dim)
         self.n_units = self.n_hidden = self.n_ig = self.n_fg = self.n_cg = self.n_og = n_units
         # input gate
-        self.W_i = orthogonal(shape=(self.n_input, self.n_ig), name='W_i')
+        self.W_i = orthogonal(shape=(self.n_feature, self.n_ig), name='W_i')
         self.U_i = orthogonal(shape=(self.n_hidden, self.n_ig), name='U_i')
-        self.b_i = uniform(shape=self.n_ig, scale=(-0.5, .5), name='b_i')
+        self.b_i = uniform(shape=(self.n_ig,), scale=(-0.5, .5), name='b_i')
         # forget gate
-        self.W_f = orthogonal(shape=(self.n_input, self.n_fg), name='W_f')
+        self.W_f = orthogonal(shape=(self.n_feature, self.n_fg), name='W_f')
         self.U_f = orthogonal(shape=(self.n_hidden, self.n_fg), name='U_f')
-        self.b_f = uniform(shape=self.n_fg, scale=(0, 1.), name='b_f')
+        self.b_f = uniform(shape=(self.n_fg,), scale=(0, 1.), name='b_f')
         # cell gate
-        self.W_c = orthogonal(shape=(self.n_input, self.n_cg), name='W_c')
+        self.W_c = orthogonal(shape=(self.n_feature, self.n_cg), name='W_c')
         self.U_c = orthogonal(shape=(self.n_hidden, self.n_cg), name='U_c')
-        self.b_c = constant(shape=self.n_cg, name='b_c')
+        self.b_c = constant(shape=(self.n_cg,), name='b_c')
         # output gate
-        self.W_o = orthogonal(shape=(self.n_input, self.n_og), name='W_o')
+        self.W_o = orthogonal(shape=(self.n_feature, self.n_og), name='W_o')
         self.U_o = orthogonal(shape=(self.n_hidden, self.n_og), name='U_o')
-        self.b_o = uniform(shape=self.n_ig, scale=(-0.5, .5), name='b_o')
+        self.b_o = uniform(shape=(self.n_ig,), scale=(-0.5, .5), name='b_o')
         # Row representation
-        self.W = T.concatenate([self.W_i, self.W_f, self.W_c, self.W_o])
-        self.U = T.concatenate([self.U_i, self.U_f, self.U_c, self.U_o])
-        self.b = T.concatenate([self.b_i, self.b_f, self.b_c, self.b_o])
+        self.W = T.concatenate([self.W_i, self.W_f, self.W_c, self.W_o], axis=1)
+        self.U = T.concatenate([self.U_i, self.U_f, self.U_c, self.U_o], axis=1)
+        self.b = T.concatenate([self.b_i, self.b_f, self.b_c, self.b_o], axis=0)
         # Non sequence for the scan operator
-        self.non_seq = [self.W, self.U, self.b]
+        self.non_seq = [self.U]
 
         if True:
             self.params.extend([self.W_i, self.U_i, self.b_i,
@@ -791,30 +791,36 @@ class LSTM(Layer):
             self.P_i = orthogonal(shape=(self.n_cg, self.n_ig), name='W_ci')
             self.P_f = orthogonal(shape=(self.n_cg, self.n_fg), name='W_cf')
             self.P_o = orthogonal(shape=(self.n_cg, self.n_og), name='W_co')
-            self.P = T.concatenate([self.P_i, self.P_f, self.P_o])
+            self.P = T.concatenate([self.P_i, self.P_f, self.P_o], axis=1)
             self.non_seq.append(self.P)
             if True:
                 self.params.extend([self.P_i, self.P_f, self.P_o])
             else:
                 self.params.extend([self.P])
 
-        self.c0 = constant(shape=self.n_hidden, name='c0')
-        self.h0 = self.activation(self.c0)
+    # @property
+    # def output_shape(self):
+    #     return
 
     def get_output(self, **kwargs):
         X = self.input_layer.get_output(**kwargs)
 
         if X.ndim > 3:
             X = T.flatten(X, 3)
+
         # (n_batch, n_time_steps, n_dim) ->  (n_time_steps, n_batch, n_dim)
         X = X.dimshuffle(1, 0, 2)
+        n_batch = self.input_shape[0]
         # Input dot product is out side of the scan
         X = T.dot(X, self.W) + self.b
+
+        c0 = constant(shape=(n_batch, self.n_hidden), name='c0')
+        h0 = self.activation(c0)
 
         def one_step(x_t, h_tm1, c_tm1, *args):
             pre_act = x_t + T.dot(h_tm1, self.U)  # if self.peephole:
             # gates
-            i_t = sigmoid(pre_act[:, 0:self.n_units])
+            i_t = sigmoid(pre_act[:, 0: self.n_units])
             f_t = sigmoid(pre_act[:, self.n_units: 2*self.n_units])
             c_t = self.activation(pre_act[:, 2*self.n_units: 3*self.n_units])
             o_t = sigmoid(pre_act[:, 3*self.n_units: 4*self.n_units])
@@ -829,7 +835,7 @@ class LSTM(Layer):
 
         [h_vals, _], _ = theano.scan(fn=one_step,
                                      sequences=X,
-                                     outputs_info=[self.h0, self.c0, None],
+                                     outputs_info=[h0, c0],
                                      non_sequences=self.non_seq,
                                      go_backwards=self.go_backwards,
                                      allow_gc=self.allow_gc,

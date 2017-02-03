@@ -12,19 +12,19 @@ import logging
 logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
 alphabet = 'abcdefghijklmnopqrstuvwxyz'
-sequence_length = len(alphabet)
-number_of_chars = 26
+sequence_length = 5
+number_of_chars = len(alphabet)
 # load the data
 data = yadll.data.Data(yadll.data.alphabet_loader(sequence_length))
-
 
 # create the model
 model = yadll.model.Model(name='lstm', data=data)
 
 # Hyperparameters
 hp = yadll.hyperparameters.Hyperparameters()
-hp('batch_size', 1)
+hp('batch_size', 3)
 hp('n_epochs', 60)
+hp('patience', 10)
 
 # add the hyperparameters to the model
 model.hp = hp
@@ -33,16 +33,16 @@ model.hp = hp
 # Input layer
 l_in = yadll.layers.InputLayer(input_shape=(hp.batch_size, sequence_length, number_of_chars))
 # LSTM 1
-l_lstm1 = yadll.layers.LSTM(incoming=l_in, n_units=16, last_only=False)
+#l_lstm1 = yadll.layers.LSTM(incoming=l_in, n_units=16, last_only=False)
 # LSTM 2
-l_lstm2 = yadll.layers.LSTM(incoming=l_lstm1, n_units=16)
+l_lstm2 = yadll.layers.LSTM(incoming=l_in, n_units=16)
 # Logistic regression Layer
 l_out = yadll.layers.LogisticRegression(incoming=l_lstm2, n_class=number_of_chars)
 
 # Create network and add layers
 net = yadll.network.Network('stacked lstm')
 net.add(l_in)
-net.add(l_lstm1)
+#net.add(l_lstm1)
 net.add(l_lstm2)
 net.add(l_out)
 
