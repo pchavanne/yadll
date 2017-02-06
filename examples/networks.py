@@ -324,6 +324,7 @@ def gaussian_denoising_autoencoder(input_var=None):
     # Auto Encoder Layer
     l_ae1 = AutoEncoder(incoming=l_in, n_units=500, hyperparameters=hp_ae, sigma=0.3,
                         activation=relu, name='Gaussian Denoising AutoEncoder')
+
     # Logistic regression Layer
     l_out = LogisticRegression(incoming=l_ae1, n_class=10, name='Logistic regression')
 

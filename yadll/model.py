@@ -91,7 +91,7 @@ class Model(object):
         self.save_mode = None          # None, 'end' or 'each'
         self.index = T.iscalar()       # index to a [mini]batch
         self.epoch_index = T.ivector() # index per epoch
-        self.x = T.tensor3(name='x')    # the input data is presented as a matrix
+        # self.x = T.tensor3(name='x')    # the input data is presented as a matrix
         self.report = dict()
 
     @timer(' Unsupervised Pre-Training')
@@ -139,11 +139,16 @@ class Model(object):
 
         if self.data is None:
             raise NoDataFoundException
-        else:
-            if self.data.train_set_y.ndim == 1:
-                self.y = T.ivector('y')  # the output labels are presented as 1D vector of[int] labels
-            else:
-                self.y = T.matrix('y')
+        # else:
+        #     y_tensor_type = theano.tensor.TensorType(dtype=floatX, broadcastable=(False,)*self.data.train_set_y.ndim)
+        #     if self.data.train_set_y.ndim == 1:
+        #         self.y = T.ivector('y')  # the output labels are presented as 1D vector of[int] labels
+        #     else:
+        #         self.y = T.matrix('y')
+        y_tensor_type = theano.tensor.TensorType(dtype=floatX, broadcastable=(False,)*self.data.train_set_y.ndim)
+        self.y = y_tensor_type('y')
+        x_tensor_type = theano.tensor.TensorType(dtype=floatX, broadcastable=(False,)*self.data.train_set_x.ndim)
+        self.x = x_tensor_type('y')
 
         if self.network is None:
             raise NoNetworkFoundException
@@ -206,7 +211,7 @@ class Model(object):
         ################################################
         # Compiling functions for training, validating and testing the model
         logger.info('... Compiling the model')
-        train_model = theano.function(inputs=[self.index, self.epoch_index], outputs=cost, updates=updates, name='train',
+        train_model = theano.function(inputs=[self.index, self.epoch_index], outputs=cost, updates=updates, name='train', # mode='DebugMode',
                                       givens={self.x: self.data.train_set_x[self.epoch_index[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size]],
                                               self.y: self.data.train_set_y[self.epoch_index[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size]]})
 

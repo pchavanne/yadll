@@ -61,7 +61,7 @@ for iteration in range(number_of_chars - sequence_length):
     x = np.zeros((1, sequence_length, number_of_chars))
     for t, char in enumerate(sentence):
         x[0, t, ord(char) - ord('a')] = 1.
-    preds = model.predict(x)[0]
+    preds = model.predict(np.asarray(x, dtype='float32'))[0]
     next_char = chr(np.argmax(preds) + ord('a'))
     generated += next_char
     sentence = sentence[1:] + next_char

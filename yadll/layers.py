@@ -798,16 +798,19 @@ class LSTM(Layer):
             else:
                 self.params.extend([self.P])
 
-    # @property
-    # def output_shape(self):
-    #     return
+    @property
+    def output_shape(self):
+        if self.last_only:
+            out_shape = (self.input_shape[0], self.n_units)
+        else:
+            out_shape = (self.input_shape[0], self.input_shape[1], self.n_units)
+        return out_shape
 
     def get_output(self, **kwargs):
         X = self.input_layer.get_output(**kwargs)
 
         if X.ndim > 3:
             X = T.flatten(X, 3)
-
         # (n_batch, n_time_steps, n_dim) ->  (n_time_steps, n_batch, n_dim)
         X = X.dimshuffle(1, 0, 2)
         n_batch = self.input_shape[0]
