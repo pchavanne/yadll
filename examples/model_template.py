@@ -30,7 +30,7 @@ model.hp = hp
 
 # Create connected layers
 # Input layer
-l_in = yadll.layers.InputLayer(input_shape=(hp.batch_size, 28 * 28), name='Input')
+l_in = yadll.layers.InputLayer(input_shape=(None, 28 * 28), name='Input')
 # Dropout Layer 1
 l_dro1 = yadll.layers.Dropout(incoming=l_in, corruption_level=0.4, name='Dropout 1')
 # Dense Layer 1
@@ -60,7 +60,7 @@ net.add(l_out)
 model.network = net
 
 # updates method
-model.updates = yadll.updates.newton
+model.updates = yadll.updates.nesterov_momentum
 
 # train the model and save it to file at each best
 model.train()

@@ -813,11 +813,11 @@ class LSTM(Layer):
             X = T.flatten(X, 3)
         # (n_batch, n_time_steps, n_dim) ->  (n_time_steps, n_batch, n_dim)
         X = X.dimshuffle(1, 0, 2)
-        n_batch = self.input_shape[0]
-        # Input dot product is out side of the scan
+        _, n_batch, _ = T.shape(X)
+        # Input dot product is outside of the scan
         X = T.dot(X, self.W) + self.b
 
-        c0 = constant(shape=(n_batch, self.n_hidden), name='c0')
+        c0 = T.ones((n_batch, self.n_hidden), dtype=floatX)  # constant(shape=(n_batch, self.n_hidden), name='c0')
         h0 = self.activation(c0)
 
         def one_step(x_t, h_tm1, c_tm1, *args):

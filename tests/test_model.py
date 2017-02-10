@@ -4,36 +4,39 @@ import pytest
 
 import logging
 
+
 class TestModel:
     @pytest.fixture(scope='module')
     def data(self):
         from yadll.data import Data
-        data = [[np.random.random((100, 25)), np.random.random_integers(low=0, high=9, size=(100,))],
-                [np.random.random((50, 25)), np.random.random_integers(low=0, high=9, size=(50,))],
-                [np.random.random((50, 25)), np.random.random_integers(low=0, high=9, size=(500,))]]
-        return Data(data, cast_y=True)
+        from yadll.data import mnist_loader
+        # data = [[np.random.random((100, 25)).astype('float32'), np.random.random_integers(low=0, high=9, size=(100,)).astype('float32')],
+        #         [np.random.random((50, 25)).astype('float32'), np.random.random_integers(low=0, high=9, size=(50,)).astype('float32')],
+        #         [np.random.random((50, 25)).astype('float32'), np.random.random_integers(low=0, high=9, size=(50,)).astype('float32')]]
+        return Data(mnist_loader()) #, cast_y=True)
 
     @pytest.fixture(scope='module')
     def data_y_2D(self):
         from yadll.data import Data
-        data = [[np.random.random((100, 25)), np.random.random_integers(low=0, high=9, size=(100, 2))],
-                [np.random.random((50, 25)), np.random.random_integers(low=0, high=9, size=(50, 2))],
-                [np.random.random((50, 25)), np.random.random_integers(low=0, high=9, size=(500, 2))]]
-        return Data(data, cast_y=True)
+        from yadll.data import mnist_loader
+        # data = [[np.random.random((100, 25)).astype('float32'), one_hot_encoding(np.random.random_integers(low=0, high=9, size=(100, ))).astype('float32')],
+        #         [np.random.random((50, 25)).astype('float32'), one_hot_encoding(np.random.random_integers(low=0, high=9, size=(50, ))).astype('float32')],
+        #         [np.random.random((50, 25)).astype('float32'), one_hot_encoding(np.random.random_integers(low=0, high=9, size=(50, ))).astype('float32')]]
+        return Data(mnist_loader())
 
     @pytest.fixture(scope='module')
     def hp(self):
         from yadll.hyperparameters import Hyperparameters
         hp = Hyperparameters()
         hp('batch_size', 10)
-        hp('n_epochs', 105)
+        hp('n_epochs', 10)
         hp('learning_rate', 0.1)
         hp('momentum', 0.9)
         hp('epsilon', 1e-6)
         hp('rho', 0.95)
         hp('l1_reg', 0.00)
         hp('l2_reg', 0.000)
-        hp('patience', 1000)
+        hp('patience', 100)
         return hp
 
     @pytest.fixture(scope='module')
@@ -54,7 +57,7 @@ class TestModel:
     @pytest.fixture(scope='module')
     def input(self):
         from yadll.layers import InputLayer
-        return InputLayer(input_shape=(None, 25))
+        return InputLayer(input_shape=(None, 784))
 
     @pytest.fixture(scope='module')
     def layer(self, input):
@@ -130,7 +133,6 @@ class TestModel:
         model_from_conf_file = Model()
         model_from_conf_file.from_conf(file='test_conf.yc')
 
-
     def test_model(self, model, model_y_2D, network, network_unsupervised):
         model.network = network
         assert model.name == 'test_model'
@@ -141,12 +143,12 @@ class TestModel:
         model.train()
         model_y_2D.network = network
         #model_y_2D.train()
-
-    def test_predict(self, data, model, network):
-        model.network = network
-        model.train()
-        model.network.layers[0].input = None
-        model.predict(data.test_set_x.eval()[:10])
+    #
+    # def test_predict(self, data, model, network):
+    #     model.network = network
+    #     model.train()
+    #     model.network.layers[0].input = None
+    #     model.predict(data.test_set_x.eval()[:10])
 
 
 

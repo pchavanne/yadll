@@ -91,7 +91,7 @@ class Model(object):
         self.save_mode = None          # None, 'end' or 'each'
         self.index = T.iscalar()       # index to a [mini]batch
         self.epoch_index = T.ivector() # index per epoch
-        # self.x = T.tensor3(name='x')    # the input data is presented as a matrix
+        self.x = None # T.tensor3(name='x')    # the input data is presented as a matrix
         self.report = dict()
 
     @timer(' Unsupervised Pre-Training')
@@ -148,7 +148,7 @@ class Model(object):
         y_tensor_type = theano.tensor.TensorType(dtype=floatX, broadcastable=(False,)*self.data.train_set_y.ndim)
         self.y = y_tensor_type('y')
         x_tensor_type = theano.tensor.TensorType(dtype=floatX, broadcastable=(False,)*self.data.train_set_x.ndim)
-        self.x = x_tensor_type('y')
+        self.x = x_tensor_type('x')
 
         if self.network is None:
             raise NoNetworkFoundException
