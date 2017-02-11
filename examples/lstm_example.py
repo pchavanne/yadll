@@ -33,9 +33,9 @@ model.hp = hp
 # Input layer
 l_in = yadll.layers.InputLayer(input_shape=(hp.batch_size, sequence_length, number_of_chars))
 # LSTM 1
-l_lstm1 = yadll.layers.LSTM(incoming=l_in, n_units=16, last_only=False)
+l_lstm1 = yadll.layers.LSTM(incoming=l_in, n_units=16, last_only=False, grad_clipping=0.95)
 # LSTM 2
-l_lstm2 = yadll.layers.LSTM(incoming=l_lstm1, n_units=16)
+l_lstm2 = yadll.layers.LSTM(incoming=l_lstm1, n_units=16, grad_clipping=0.95)
 # Logistic regression Layer
 l_out = yadll.layers.LogisticRegression(incoming=l_lstm2, n_class=number_of_chars)
 
@@ -70,3 +70,4 @@ for iteration in range(number_of_chars - sequence_length):
 assert(generated == alphabet)
 x = model.data.test_set_x.get_value()[0:3]
 model.predict(x)
+chr(np.argmax(model.predict(x)) + ord('a'))

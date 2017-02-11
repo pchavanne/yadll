@@ -658,41 +658,76 @@ class RNN(Layer):
     """
     n_instances = 0
 
-    def __init__(self, incoming, n_hidden, n_out, activation=sigmoid,
-                 last_only=True, go_backwards=False, allow_gc=False, **kwargs):
+    def __init__(self, incoming, n_units, n_out=None, activation=sigmoid,
+                 last_only=True, grad_clipping=0, go_backwards=False, allow_gc=False, **kwargs):
         super(RNN, self).__init__(incoming, **kwargs)
         self.allow_gc = allow_gc
         self.go_backwards = go_backwards
+        self.grad_clipping = grad_clipping
         self.last_only = last_only
         self.activation = get_activation(activation)
 
-        self.n_in = self.input_shape[1]
-        self.n_hidden = n_hidden
-        self.n_out = n_out
-
-        self.W = orthogonal(shape=(self.n_in, self.n_out), name='W')
+        self.n_feature = self.input_shape[2]  # (n_batch, n_time_steps, n_dim)
+        self.n_hidden = n_units
+        if n_out is None:
+            self.n_out = n_units
+        else:
+            self.n_out = n_out
+        self.W = orthogonal(shape=(self.n_feature, self.n_out), name='W')
         self.U = orthogonal(shape=(self.n_hidden, self.n_out), name='U')
         self.b = uniform(shape=self.n_out, scale=(0, 1.), name='b')
-
+        # trainable parameters
         self.params.extend([self.W, self.U, self.b])
+        # Non sequence for the scan operator
+        self.non_seq = [self.U]
 
-        self.c0 = constant(shape=self.n_hidden, name='c0')
-        self.h0 = self.activation(self.c0)
-
-    def one_step(self, x_t, h_tm1, W, U, b):
-        h_t = self.activation(T.dot(x_t, W) + T.dot(h_tm1, U) + b)
-        return h_t
+    @property
+    def output_shape(self):
+        if self.last_only:
+            out_shape = (self.input_shape[0], self.n_out)
+        else:
+            out_shape = (self.input_shape[0], self.input_shape[1], self.n_out)
+        return out_shape
 
     def get_output(self, **kwargs):
         X = self.input_layer.get_output(**kwargs)
-        h_t, updates = theano.scan(fn=self.one_step,
-                                   sequences=X,
-                                   outputs_info=[self.h0, None],
-                                   non_sequences=self.params,
-                                   go_backwards=self.go_backwards,
-                                   allow_gc=self.allow_gc,
-                                   strict=True)
-        return h_t
+
+        if X.ndim > 3:
+            X = T.flatten(X, 3)
+        # (n_batch, n_time_steps, n_dim) ->  (n_time_steps, n_batch, n_dim)
+        X = X.dimshuffle(1, 0, 2)
+        n_batch = X.shape[1]
+        # Input dot product is outside of the scan
+        X = T.dot(X, self.W) + self.b
+
+        c0 = T.ones((n_batch, self.n_hidden), dtype=floatX)
+        h0 = self.activation(c0)
+
+        def one_step(x_t, h_tm1, *args):
+            # pre-activation
+            pre_act = x_t + T.dot(h_tm1, self.U)
+            # Clip gradients
+            if self.grad_clipping:
+                pre_act = theano.gradient.grad_clip(pre_act, -self.grad_clipping, self.grad_clipping)
+            h_t = self.activation(pre_act)
+
+            return h_t
+
+        h_vals, _ = theano.scan(fn=one_step,
+                                sequences=X,
+                                outputs_info=h0,
+                                non_sequences=self.non_seq,
+                                go_backwards=self.go_backwards,
+                                allow_gc=self.allow_gc,
+                                strict=True)
+        if self.last_only:
+            h_vals = h_vals[-1]
+        else:
+            h_vals = h_vals.dimshuffle(1, 0, 2)
+            if self.go_backwards:
+                h_vals = h_vals[:, ::-1]
+
+        return h_vals
 
 
 class LSTM(Layer):
@@ -745,16 +780,17 @@ class LSTM(Layer):
     """
     n_instances = 0
 
-    def __init__(self, incoming, n_units, peephole=False, tied_i_f=False, activation=tanh,
-                 last_only=True, go_backwards=False, allow_gc=False, **kwargs):
+    def __init__(self, incoming, n_units, peepholes=False, tied_i_f=False, activation=tanh,
+                 last_only=True, grad_clipping=0, go_backwards=False, allow_gc=False, **kwargs):
         super(LSTM, self).__init__(incoming, **kwargs)
         self.allow_gc = allow_gc
+        self.grad_clipping = grad_clipping
         self.go_backwards = go_backwards
         self.last_only = last_only
-        self.peephole = peephole    # input and forget gates layers look at the cell state
+        self.peepholes = peepholes    # input and forget gates layers look at the cell state
         self.tied = tied_i_f        # only input new values to the state when we forget something
         self.activation = get_activation(activation)
-        self.n_feature = self.input_shape[2] # (n_batch, n_time_steps, n_dim)
+        self.n_feature = self.input_shape[2]  # (n_batch, n_time_steps, n_dim)
         self.n_units = self.n_hidden = self.n_ig = self.n_fg = self.n_cg = self.n_og = n_units
         # input gate
         self.W_i = orthogonal(shape=(self.n_feature, self.n_ig), name='W_i')
@@ -787,14 +823,15 @@ class LSTM(Layer):
         else:
             self.params.extend([self.W, self.U, self.b])
 
-        if peephole:
-            self.P_i = orthogonal(shape=(self.n_cg, self.n_ig), name='W_ci')
-            self.P_f = orthogonal(shape=(self.n_cg, self.n_fg), name='W_cf')
-            self.P_o = orthogonal(shape=(self.n_cg, self.n_og), name='W_co')
-            self.P = T.concatenate([self.P_i, self.P_f, self.P_o], axis=1)
+        if peepholes:
+            self.P_i = orthogonal(shape=(self.n_cg, self.n_ig), name='P_i')
+            self.P_f = orthogonal(shape=(self.n_cg, self.n_fg), name='P_f')
+            self.P_c = constant((self.n_cg, self.n_cg), name='P_c')
+            self.P_o = orthogonal(shape=(self.n_cg, self.n_og), name='P_o')
+            self.P = T.concatenate([self.P_i, self.P_f, self.P_c, self.P_o], axis=1)
             self.non_seq.append(self.P)
             if True:
-                self.params.extend([self.P_i, self.P_f, self.P_o])
+                self.params.extend([self.P_i, self.P_f, self.P_o])  # P_c is not a param
             else:
                 self.params.extend([self.P])
 
@@ -813,15 +850,22 @@ class LSTM(Layer):
             X = T.flatten(X, 3)
         # (n_batch, n_time_steps, n_dim) ->  (n_time_steps, n_batch, n_dim)
         X = X.dimshuffle(1, 0, 2)
-        _, n_batch, _ = T.shape(X)
+        n_batch = X.shape[1]
         # Input dot product is outside of the scan
         X = T.dot(X, self.W) + self.b
 
-        c0 = T.ones((n_batch, self.n_hidden), dtype=floatX)  # constant(shape=(n_batch, self.n_hidden), name='c0')
+        c0 = T.ones((n_batch, self.n_hidden), dtype=floatX)
         h0 = self.activation(c0)
 
         def one_step(x_t, h_tm1, c_tm1, *args):
-            pre_act = x_t + T.dot(h_tm1, self.U)  # if self.peephole:
+            # pre-activation
+            if self.peepholes:
+                pre_act = x_t + T.dot(h_tm1, self.U) + T.dot(c_tm1, self.P)
+            else:
+                pre_act = x_t + T.dot(h_tm1, self.U)
+            # Clip gradients
+            if self.grad_clipping:
+                pre_act = theano.gradient.grad_clip(pre_act, -self.grad_clipping, self.grad_clipping)
             # gates
             i_t = sigmoid(pre_act[:, 0: self.n_units])
             f_t = sigmoid(pre_act[:, self.n_units: 2*self.n_units])
@@ -852,93 +896,6 @@ class LSTM(Layer):
 
         return h_vals
 
-
-# class LSTM_Old(Layer):
-#     def __init__(self, incoming, n_hidden, n_out, peephole=False, tied_i_f=False, activation=tanh,
-#                  last_only=True, go_backwards=False, allow_gc=False, **kwargs):
-#         super(LSTM, self).__init__(incoming, **kwargs)
-#         self.allow_gc = allow_gc
-#         self.go_backwards = go_backwards
-#         self.last_only = last_only
-#         self.peephole = peephole    # input and forget gates layers look at the cell state
-#         self.tied = tied_i_f        # only input new values to the state when we forget something
-#         self.activation = get_activation(activation)
-#         if isinstance(n_hidden, tuple):
-#             self.n_hidden, self.n_i, self.n_f, self.n_c, self.n_o = n_hidden
-#         else:
-#             self.n_hidden = self.n_i = self.n_f = self.n_c = self.n_o = n_hidden
-#         self.n_in = self.input_shape[1]
-#         self.n_out = n_out
-#         # input gate
-#         self.W_i = orthogonal(shape=(self.n_in, self.n_i), name='W_i')
-#         self.U_i = orthogonal(shape=(self.n_hidden, self.n_i), name='U_i')
-#         self.b_i = uniform(shape=self.n_i, scale=(-0.5, .5), name='b_i')
-#         if self.peephole:
-#             self.P_i = orthogonal(shape=(self.n_hidden, self.n_i), name='P_i')
-#         # forget gate
-#         self.W_f = orthogonal(shape=(self.n_in, self.n_f), name='W_f')
-#         self.U_f = orthogonal(shape=(self.n_hidden, self.n_f), name='U_f')
-#         self.b_f = uniform(shape=self.n_f, scale=(0, 1.), name='b_f')
-#         # cell state
-#         self.W_c = orthogonal(shape=(self.n_in, self.n_c), name='W_c')
-#         self.U_c = orthogonal(shape=(self.n_hidden, self.n_c), name='U_c')
-#         self.b_c = constant(shape=self.n_c, name='b_c')
-#         # output gate
-#         self.W_o = orthogonal(shape=(self.n_in, self.n_o), name='W_o')
-#         self.U_o = orthogonal(shape=(self.n_hidden, self.n_o), name='U_o')
-#         self.b_o = uniform(shape=self.n_i, scale=(-0.5, .5), name='b_o')
-#
-#         self.params.extend([self.W_i, self.U_i, self.b_i,
-#                             self.W_f, self.U_f, self.b_f,
-#                             self.W_c, self.U_c, self.b_c,
-#                             self.W_o, self.U_o, self.b_o])
-#
-#         self.W = T.concatenate([self.W_i, self.W_f, self.W_c, self.W_o])
-#         self.U = T.concatenate([self.U_i, self.U_f, self.U_c, self.U_o])
-#         self.b = T.concatenate([self.b_i, self.b_f, self.b_c, self.b_o])
-#
-#         if peephole:
-#             self.P_i = orthogonal(shape=(self.n_c, self.n_i), name='W_ci')
-#             self.P_f = orthogonal(shape=(self.n_c, self.n_f), name='W_cf')
-#             self.P_o = orthogonal(shape=(self.n_c, self.n_o), name='W_co')
-#             self.params.extend([self.P_i, self.P_f, self.P_o])
-#
-#         self.c0 = constant(shape=self.n_hidden, name='c0')
-#         self.h0 = self.activation(self.c0)
-#
-#     def one_step(self, x_t, h_tm1, c_tm1, W_i, U_i, b_i, W_f, U_f, b_f, W_c, U_c, b_c, W_o, U_o, b_o):
-#         # forget gate
-#         f_t = sigmoid(T.dot(x_t, W_f) + T.dot(h_tm1, U_f) + b_f)
-#         # input gate
-#         if self.tied:
-#             i_t = 1. - f_t
-#         else:
-#             i_t = sigmoid(T.dot(x_t, W_i) + T.dot(h_tm1, U_i) + b_i)
-#         # cell state
-#         c_tilde_t = self.activation(T.dot(x_t, W_c) + T.dot(h_tm1, U_c) + b_c)
-#         c_t = f_t * c_tm1 + i_t * c_tilde_t
-#         # output gate
-#         o_t = sigmoid(T.dot(x_t, W_o) + T.dot(h_tm1, U_o) + b_o)
-#         # if self.peephole:
-#         #     o_t = sigmoid(T.dot(x_t, W_o) + T.dot(h_tm1, U_o) + T.dot(c_t, W_co) + b_o)
-#
-#         h_t = o_t * self.activation(c_t)
-#
-#         return [h_t, c_t]
-#
-#     def get_output(self, **kwargs):
-#         X = self.input_layer.get_output(**kwargs)
-#         [h_vals, _], _ = theano.scan(fn=self.one_step,
-#                                      sequences=X,
-#                                      outputs_info=[self.h0, self.c0, None],
-#                                      non_sequences=self.params,
-#                                      go_backwards=self.go_backwards,
-#                                      allow_gc=self.allow_gc,
-#                                      strict=True)
-#         if self.last_only:
-#             h_vals = h_vals[-1]
-#
-#         return h_vals
 
 class GRU(Layer):
     r"""
