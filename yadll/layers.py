@@ -911,3 +911,94 @@ class GRU(Layer):
     ----------
     .. [1] http://deeplearning.net/tutorial/lstm.html
     """
+    n_instances = 0
+
+    def __init__(self, incoming, n_units, activation=tanh, last_only=True, grad_clipping=0,
+                 go_backwards=False, allow_gc=False, **kwargs):
+        super(GRU, self).__init__(incoming, **kwargs)
+        self.allow_gc = allow_gc
+        self.grad_clipping = grad_clipping
+        self.go_backwards = go_backwards
+        self.last_only = last_only
+        self.activation = get_activation(activation)
+        self.n_feature = self.input_shape[2]  # (n_batch, n_time_steps, n_dim)
+        self.n_units = self.n_hidden = self.n_ig = self.n_fg = self.n_cg = self.n_og = n_units
+        # update gate
+        self.W_z = orthogonal(shape=(self.n_feature, self.n_ig), name='W_z')
+        self.U_z = orthogonal(shape=(self.n_hidden, self.n_ig), name='U_z')
+        self.b_z = uniform(shape=(self.n_ig,), scale=(-0.5, .5), name='b_z')
+        # reset gate
+        self.W_r = orthogonal(shape=(self.n_feature, self.n_fg), name='W_r')
+        self.U_r = orthogonal(shape=(self.n_hidden, self.n_fg), name='U_r')
+        self.b_r = uniform(shape=(self.n_fg,), scale=(0, 1.), name='b_r')
+        # output gate
+        self.W_o = orthogonal(shape=(self.n_feature, self.n_og), name='W_o')
+        self.U_o = orthogonal(shape=(self.n_hidden, self.n_og), name='U_o')
+        self.b_o = uniform(shape=(self.n_ig,), scale=(-0.5, .5), name='b_o')
+        # Row representation
+        self.W = T.concatenate([self.W_z, self.W_r, self.W_o], axis=1)
+        self.U = T.concatenate([self.U_z, self.U_r, self.U_o], axis=1)
+        self.b = T.concatenate([self.b_z, self.b_r, self.b_o], axis=0)
+        # Non sequence for the scan operator
+        self.non_seq = [self.U]
+
+        if True:
+            self.params.extend([self.W_z, self.U_z, self.b_z,
+                                self.W_r, self.U_r, self.b_r,
+                                self.W_o, self.U_o, self.b_o])
+        else:
+            self.params.extend([self.W, self.U, self.b])
+
+    @property
+    def output_shape(self):
+        if self.last_only:
+            out_shape = (self.input_shape[0], self.n_units)
+        else:
+            out_shape = (self.input_shape[0], self.input_shape[1], self.n_units)
+        return out_shape
+
+    def get_output(self, **kwargs):
+        X = self.input_layer.get_output(**kwargs)
+
+        if X.ndim > 3:
+            X = T.flatten(X, 3)
+        # (n_batch, n_time_steps, n_dim) ->  (n_time_steps, n_batch, n_dim)
+        X = X.dimshuffle(1, 0, 2)
+        n_batch = X.shape[1]
+        # Input dot product is outside of the scan
+        X = T.dot(X, self.W) + self.b
+
+        c0 = T.ones((n_batch, self.n_hidden), dtype=floatX)
+        h0 = self.activation(c0)
+
+        def one_step(x_t, h_tm1, *args):
+            # pre-activation
+            pre_act = T.dot(h_tm1, self.U)
+            # Clip gradients
+            if self.grad_clipping:
+                pre_act = theano.gradient.grad_clip(pre_act, -self.grad_clipping, self.grad_clipping)
+            # gates
+            z_t = sigmoid(x_t[:, 0: self.n_units] + pre_act[:, 0: self.n_units])
+            r_t = sigmoid(x_t[:, self.n_units: 2*self.n_units] + pre_act[:, self.n_units: 2*self.n_units])
+            h_t = x_t[:, 2*self.n_units: 3*self.n_units] + r_t * pre_act[:, 2*self.n_units: 3*self.n_units]
+
+            # hidden state
+            h_t = (1 - z_t) * h_tm1 + z_t * h_t
+
+            return h_t
+
+        h_vals, _ = theano.scan(fn=one_step,
+                                sequences=X,
+                                outputs_info=[h0],
+                                non_sequences=self.non_seq,
+                                go_backwards=self.go_backwards,
+                                allow_gc=self.allow_gc,
+                                strict=True)
+        if self.last_only:
+            h_vals = h_vals[-1]
+        else:
+            h_vals = h_vals.dimshuffle(1, 0, 2)
+            if self.go_backwards:
+                h_vals = h_vals[:, ::-1]
+
+        return h_vals
