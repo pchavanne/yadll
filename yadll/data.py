@@ -136,6 +136,7 @@ class Data(object):
 
     """
     def __init__(self, data, shared=True, borrow=True, cast_y=False):
+        self.data = data
         #TODO: Check data input
         if len(data) == 3:
             train_set, valid_set, test_set = data
@@ -167,4 +168,5 @@ class Data(object):
                 (self.valid_set_x, self.valid_set_y),
                 (self.test_set_x, self.test_set_y)]
 
-
+    def shape(self):
+        return [(data[0].shape, data[1].shape) for data in self.data]

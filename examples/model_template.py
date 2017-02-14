@@ -71,7 +71,7 @@ net.save_params('net_params.yp')
 # make prediction
 # We can test it on some examples from test
 test_set_x = data.test_set_x.get_value()
-test_set_y = data.test_set_y.eval()
+test_set_y = data.test_set_y.get_value()
 
 predicted_values = [np.argmax(prediction) for prediction in model.predict(test_set_x[:30])]
 true_values = [np.argmax(true_value) for true_value in test_set_y[:30]]
