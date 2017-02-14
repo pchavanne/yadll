@@ -10,12 +10,10 @@ from .utils import *
 
 from theano.tensor.signal import pool
 from theano.tensor.nnet import conv
-import yadll
+
 import logging
 
 logger = logging.getLogger(__name__)
-
-
 
 
 class Layer(object):
@@ -655,6 +653,8 @@ class RNN(Layer):
     ----------
 
     .. [1] http://deeplearning.net/tutorial/rnnslu.html
+    .. [2] https://arxiv.org/pdf/1602.06662.pdf
+    .. [3] https://arxiv.org/pdf/1511.06464.pdf
     """
     n_instances = 0
 
@@ -910,6 +910,8 @@ class GRU(Layer):
     References
     ----------
     .. [1] http://deeplearning.net/tutorial/lstm.html
+    .. [2] https://arxiv.org/pdf/1412.3555.pdf
+    .. [3] http://jmlr.org/proceedings/papers/v37/jozefowicz15.pdf
     """
     n_instances = 0
 
@@ -1002,3 +1004,37 @@ class GRU(Layer):
                 h_vals = h_vals[:, ::-1]
 
         return h_vals
+
+
+class BNLSTM(Layer):
+    r"""
+    Batch Normalization Long Short Term Memory
+
+    .. math ::
+        i_t &= \sigma(x_t.W_i + h_{t-1}.U_i + b_i)\\
+        f_t &= \sigma(x_t.W_f + h_{t-1}.U_f + b_f)\\
+        \tilde{C_t} &= \tanh(x_t.W_c + h_{t-1}.U_c + b_c)\\
+        C_t &= f_t * C_{t-1} + i_t * \tilde{C_t}\\
+        o_t &= \sigma(x_t.W_o + h_{t-1}.U_o + b_o)\\
+        h_t &= o_t * \tanh(C_t) && \text{Hidden state}\\
+
+    Parameters
+    ----------
+    incoming : a `Layer`
+        The incoming layer with an output_shape = (n_batches, n_time_steps, n_dim)
+    n_units : int
+        n_hidden = n_input_gate = n_forget_gate = n_cell_gate = n_output_gate = n_units
+        All gates have the same number of units
+    n_out : int
+        number of output units
+    activation : `yadll.activations` function default is `yadll.activations.tanh`
+        activation function
+    last_only : boolean default is True
+        set to true if you only need the last element of the output sequence.
+        Theano will optimize graph.
+
+    References
+    ----------
+    .. [1] https://arxiv.org/pdf/1603.09025.pdf
+    """
+    n_instances = 0

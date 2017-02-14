@@ -93,6 +93,7 @@ class TestReshapeLayer:
         result = layer.get_output().eval()
         assert result.shape == (16, 3, 5, 7, 2, 5)
 
+
 class TestFlattenLayer:
     @pytest.fixture
     def flatten_layer(self):
@@ -342,7 +343,6 @@ class TestPoolLayer:
     @pytest.fixture
     def layer(self, pool_layer, input_layer):
         return pool_layer(input_layer, poolsize=(2, 2))
-
 
 
 class TestConvLayer:
