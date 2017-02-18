@@ -491,7 +491,7 @@ def batch_normalization(input_var=None):
 
     # Create connected layers
     # Input layer
-    l_in = InputLayer(input_shape=(None, 28 * 28), input_var=input_var, name='Input')
+    l_in = InputLayer(input_shape=(hp.batch_size, 28 * 28), input_var=input_var, name='Input')
     # Batch Normalization
     l_bn1 = BatchNormalization(incoming=l_in, name='Batch Normalization 1')
     # Dense Layer

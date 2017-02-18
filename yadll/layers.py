@@ -23,8 +23,8 @@ class Layer(object):
 
     Parameters
     ----------
-    incoming : a `Layer` or a `tuple` of `int`
-        The incoming layer or shape if input layer
+    incoming : a `Layer` , a `List` of `Layers` or a `tuple` of `int`
+        The incoming layer, a list of incoming layers or the shape of the input layer
     name : `string`, optional
         The layer name. default name is the class name
         plus instantiation number i.e: 'DenseLayer 3'
@@ -39,10 +39,20 @@ class Layer(object):
 
         """
         self.id = self.get_id()
-        if isinstance(incoming, tuple):
+        if incoming is None:
+            # incoming can be set to None to creat nested layers.
+            self.input_shape = None
+            self.input_layer = None
+        elif isinstance(incoming, tuple):
+            # incoming is a tuple for input layer
             self.input_shape = incoming
             self.input_layer = None
+        elif isinstance(incoming, list):
+            # incoming can be a list of layer
+            self.input_shape = [inc if isinstance(inc, tuple) else inc.output_shape for inc in incoming]
+            self.input_layer = [None if isinstance(inc, tuple) else inc for inc in incoming]
         else:
+            # incoming is a layer
             self.input_shape = incoming.output_shape
             self.input_layer = incoming
 
@@ -176,9 +186,9 @@ class FlattenLayer(Layer):
     """
     n_instances = 0
 
-    def __init__(self, incoming, ndim=2, **kwargs):
+    def __init__(self, incoming, n_dim=2, **kwargs):
         super(FlattenLayer, self).__init__(incoming, **kwargs)
-        self.ndim = ndim
+        self.n_dim = n_dim
 
     @property
     def output_shape(self):
@@ -186,7 +196,7 @@ class FlattenLayer(Layer):
 
     def get_output(self, **kwargs):
         X = self.input_layer.get_output(**kwargs)
-        return X.flatten(self.ndim)
+        return X.flatten(self.n_dim)
 
 
 class Activation(Layer):
@@ -392,7 +402,7 @@ class ConvLayer(Layer):
         self.fan_in = np.prod(filter_shape[1:])
         self.fan_out = filter_shape[0] * np.prod(filter_shape[2:])
         if pool_scale:
-            self.fan_out = self.fan_out / np.prod(pool_scale)
+            self.fan_out /= np.prod(pool_scale)
         self.W = initializer(W, shape=self.filter_shape, fan=(self.fan_in, self.fan_out), name='W')
         self.params.append(self.W)
         if l1:
@@ -462,7 +472,7 @@ class AutoEncoder(UnsupervisedLayer):
 
     def __init__(self, incoming, n_units, hyperparameters, corruption_level=0.0,
                  W=(glorot_uniform, {'gain': sigmoid}), b_prime=constant,
-                 sigma=None, contraction_level= None, **kwargs):
+                 sigma=None, contraction_level=None, **kwargs):
         super(AutoEncoder, self).__init__(incoming, n_units, hyperparameters, W=W, **kwargs)
         self.W_prime = self.W.T
         if isinstance(b_prime, theano.compile.SharedVariable):
@@ -608,6 +618,13 @@ class BatchNormalization(Layer):
 
         y = \gamma * \hat{x} + \beta
 
+    Warning
+    _______
+
+    When a BatchNormalization layer is used the batch size has to be given at compile time.
+    You can not use None as the first dimension anymore.
+    Prediction has to be made on the same batch size.
+
     References
     ----------
 
@@ -615,20 +632,26 @@ class BatchNormalization(Layer):
     """
     n_instances = 0
 
-    def __init__(self, incoming, axis=-2, alpha=0.1, epsilon=1e-5, **kwargs):
+    def __init__(self, incoming, axis=-2, alpha=0.1, epsilon=1e-5, beta=True, **kwargs):
         super(BatchNormalization, self).__init__(incoming, **kwargs)
         self.axis = axis
         self.alpha = alpha
         self.epsilon = epsilon
-        self.gamma = initializer(constant, shape=self.input_shape, value=1, name='gamma')
+        self.beta = self.gamma = self.mean = self.var = None
+        if self.input_shape is not None:
+            self.init_params(self.input_shape, beta=beta)
+
+    def init_params(self, input_shape, beta):
+        self.gamma = initializer(constant, shape=input_shape, value=1, name='gamma')
         self.params.append(self.gamma)
-        self.beta = initializer(constant, shape=(self.input_shape[1],), value=0, name='beta')
-        self.params.append(self.beta)
-        self.mean = initializer(constant, shape=self.input_shape, value=0, name='mean')
-        self.var = initializer(constant, shape=self.input_shape, value=1, name='var')
+        self.beta = initializer(constant, shape=(input_shape[1],), value=0, name='beta')
+        if beta:
+            self.params.append(self.beta)
+        self.mean = initializer(constant, shape=input_shape, value=0, name='mean')
+        self.var = initializer(constant, shape=input_shape, value=1, name='var')
 
     def get_output(self, stochastic=True, **kwargs):
-        x = self.input_layer.get_output(**kwargs)
+        x = self.input_layer.get_output(stochastic=stochastic, **kwargs)
         if stochastic:
             mean = T.mean(x, axis=self.axis)                           # mini-batch mean
             var = T.var(x, axis=self.axis)                             # mini-batch variance
@@ -740,7 +763,7 @@ class LSTM(Layer):
         \tilde{C_t} &= \tanh(x_t.W_c + h_{t-1}.U_c + b_c)\\
         C_t &= f_t * C_{t-1} + i_t * \tilde{C_t}\\
         o_t &= \sigma(x_t.W_o + h_{t-1}.U_o + b_o)\\
-        h_t &= o_t * \tanh(C_t) && \text{Hidden state}\\
+        h_t &= o_t * \tanh(C_t)
         \text{with Peephole connections:}\\
         i_t &= \sigma(x_t.W_i + h_{t-1}.U_i + C_{t-1}.P_i + b_i)\\
         f_t &= \sigma(x_t.W_f + h_{t-1}.U_f + C_{t-1}.P_f + b_f)\\
@@ -1006,7 +1029,7 @@ class GRU(Layer):
         return h_vals
 
 
-class BNLSTM(Layer):
+class BNLSTM(LSTM):
     r"""
     Batch Normalization Long Short Term Memory
 
@@ -1038,3 +1061,84 @@ class BNLSTM(Layer):
     .. [1] https://arxiv.org/pdf/1603.09025.pdf
     """
     n_instances = 0
+
+    def __init__(self, incoming, n_units, activation=tanh, last_only=True, grad_clipping=0,
+                 go_backwards=False, allow_gc=False, **kwargs):
+        super(BNLSTM, self).__init__(incoming, n_units, activation=activation, last_only=last_only,
+                                     grad_clipping=grad_clipping, go_backwards=go_backwards,
+                                     allow_gc=allow_gc, **kwargs)
+        # Batch Normalise the input
+        self.bn_x = BatchNormalization(None, nested=True)
+        self.bn_x.init_params(input_shape=(self.input_shape[1], self.input_shape[0], n_units), beta=False)
+        self.params.extend(self.bn_x.params)
+        # Batch Normalise the hidden state
+        self.bn_h = BatchNormalization(None, nested=True)
+        self.bn_h.init_params(input_shape=(self.input_shape[1], self.input_shape[0], n_units), beta=False)
+        self.params.extend(self.bn_h.params)
+        # Batch Normalise the cell state
+        self.bn_c = BatchNormalization(None, nested=True)
+        self.bn_c.init_params(input_shape=(self.input_shape[1], self.input_shape[0], n_units), beta=False)
+        self.params.extend(self.bn_c.params)
+
+    def get_output(self, **kwargs):
+        X = self.input_layer.get_output(**kwargs)
+
+        if X.ndim > 3:
+            X = T.flatten(X, 3)
+        # (n_batch, n_time_steps, n_dim) ->  (n_time_steps, n_batch, n_dim)
+        X = X.dimshuffle(1, 0, 2)
+        n_batch = X.shape[1]
+        # Input dot product is outside of the scan
+        X = T.dot(X, self.W)
+        # Batch Normalise the input
+        self.bn_x.input_layer = X
+        X = self.bn_x.get_output(**kwargs) + self.b
+
+        c0 = T.ones((n_batch, self.n_hidden), dtype=floatX)
+        h0 = self.activation(c0)
+
+        def one_step(x_t, h_tm1, c_tm1, *args):
+            H = T.dot(h_tm1, self.U)
+            # Batch Normalise the hidden state
+            self.bn_h.input_layer = H
+            H = self.bn_h.get_output(**kwargs)
+            # pre-activation
+            if self.peepholes:
+                pre_act = x_t + H + T.dot(c_tm1, self.P)
+            else:
+                pre_act = x_t + H
+            # Clip gradients
+            if self.grad_clipping:
+                pre_act = theano.gradient.grad_clip(pre_act, -self.grad_clipping, self.grad_clipping)
+            # gates
+            i_t = sigmoid(pre_act[:, 0: self.n_units])
+            f_t = sigmoid(pre_act[:, self.n_units: 2*self.n_units])
+            c_t = self.activation(pre_act[:, 2*self.n_units: 3*self.n_units])
+            o_t = sigmoid(pre_act[:, 3*self.n_units: 4*self.n_units])
+
+            if self.tied:
+                i_t = 1. - f_t
+            # cell state
+            c_t = f_t * c_tm1 + i_t * c_t
+            # Batch Normalise the cell state
+            self.bn_c.input_layer = c_t
+            c_t = self.bn_c.get_output(**kwargs)
+            h_t = o_t * self.activation(c_t)
+
+            return [h_t, c_t]
+
+        [h_vals, _], _ = theano.scan(fn=one_step,
+                                     sequences=X,
+                                     outputs_info=[h0, c0],
+                                     non_sequences=self.non_seq,
+                                     go_backwards=self.go_backwards,
+                                     allow_gc=self.allow_gc,
+                                     strict=True)
+        if self.last_only:
+            h_vals = h_vals[-1]
+        else:
+            h_vals = h_vals.dimshuffle(1, 0, 2)
+            if self.go_backwards:
+                h_vals = h_vals[:, ::-1]
+
+        return h_vals

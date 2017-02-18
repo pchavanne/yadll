@@ -91,95 +91,24 @@ class Model(object):
         self.save_mode = None          # None, 'end' or 'each'
         self.index = T.iscalar()       # index to a [mini]batch
         self.epoch_index = T.ivector() # index per epoch
-        self.x = T.matrix(name='x')    # the input data is presented as a matrix
-        self.y = T.matrix(name='y')
+        self.x = self.y = None  # T.matrix(name='y')
+        self.train_model = self.validate_model = self.test_model = None
         self.report = dict()
 
-    @timer(' Unsupervised Pre-Training')
-    def pretrain(self):
-        """
-        Pre-training of the unsupervised layers sequentially
-
-        Returns
-        -------
-            update unsupervised layers weights
-        """
+    @timer(' Compiling')
+    def compile(self):
         if self.data is None:
             raise NoDataFoundException
+        y_tensor_type = theano.tensor.TensorType(dtype=floatX, broadcastable=(False,)*self.data.train_set_y.ndim)
+        self.y = y_tensor_type('y')
+        x_tensor_type = theano.tensor.TensorType(dtype=floatX, broadcastable=(False,)*self.data.train_set_x.ndim)
+        self.x = x_tensor_type('x')
 
         if self.network is None:
             raise NoNetworkFoundException
         else:
             if self.network.layers[0].input is None:
                 self.network.layers[0].input = self.x
-
-        for layer in self.network.layers:
-            if isinstance(layer, UnsupervisedLayer):
-                layer.unsupervised_training(self.x, self.data.train_set_x)
-
-    @timer(' Training')
-    def train(self, unsupervised_training=True, save_mode=None, shuffle=True):
-        """
-        Training the network
-
-        Parameters
-        ----------
-        unsupervised_training: `bool`, (default is True)
-            pre-training of the unsupervised layers if any
-        save_mode : {None, 'end', 'each'}
-            None (default), model will not be saved unless name specified in the
-            model definition.
-            'end', model will only be saved at the end of the training
-            'each', model will be saved each time the model is improved
-
-        Returns
-        -------
-            report
-        """
-        start_time = timeit.default_timer()
-
-        if self.data is None:
-            raise NoDataFoundException
-        # else:
-        #     #y_tensor_type = theano.tensor.TensorType(dtype=floatX, broadcastable=(False,)*self.data.train_set_y.ndim)
-        #     if self.data.train_set_y.ndim == 1:
-        #         self.y = T.ivector('y')  # the output labels are presented as 1D vector of[int] labels
-        #     else:
-        #         self.y = T.matrix('y')
-        # y_tensor_type = theano.tensor.TensorType(dtype=floatX, broadcastable=(False,)*self.data.train_set_y.ndim)
-        # self.y = y_tensor_type('y')
-        # x_tensor_type = theano.tensor.TensorType(dtype=floatX, broadcastable=(False,)*self.data.train_set_x.ndim)
-        # self.x = x_tensor_type('x')
-
-        if self.network is None:
-            raise NoNetworkFoundException
-        else:
-            if self.network.layers[0].input is None:
-                self.network.layers[0].input = self.x
-
-        if save_mode is not None:
-            if save_mode not in ['end', 'each']:
-                self.save_mode = 'end'
-            else:
-                self.save_mode = save_mode
-            if self.file is None:
-                import datetime
-                self.file = self.name + '_' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.ym'
-
-        if self.file is not None and save_mode is None:
-            self.save_mode = 'end'
-
-        self.report['test_values'] = []
-        self.report['validation_values'] = []
-
-        if unsupervised_training and self.network.has_unsupervised_layer:
-            self.pretrain()
-
-        n_train_batches = self.data.train_set_x.get_value(borrow=True).shape[0] / self.hp.batch_size
-        n_valid_batches = self.data.valid_set_x.get_value(borrow=True).shape[0] / self.hp.batch_size
-        n_test_batches = self.data.test_set_x.get_value(borrow=True).shape[0] / self.hp.batch_size
-
-        train_idx = np.arange(n_train_batches * self.hp.batch_size, dtype='int32')
 
         ################################################
         # cost
@@ -224,6 +153,80 @@ class Model(object):
                                      givens={self.x: self.data.test_set_x[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size],
                                              self.y: self.data.test_set_y[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size]})
 
+        return train_model, validate_model, test_model
+
+    @timer(' Unsupervised Pre-Training')
+    def pretrain(self):
+        """
+        Pre-training of the unsupervised layers sequentially
+
+        Returns
+        -------
+            update unsupervised layers weights
+        """
+        if self.data is None:
+            raise NoDataFoundException
+
+        if self.network is None:
+            raise NoNetworkFoundException
+        else:
+            if self.network.layers[0].input is None:
+                self.network.layers[0].input = self.x
+
+        for layer in self.network.layers:
+            if isinstance(layer, UnsupervisedLayer):
+                layer.unsupervised_training(self.x, self.data.train_set_x)
+
+    @timer(' Training')
+    def train(self, unsupervised_training=True, save_mode=None, shuffle=True):
+        """
+        Training the network
+
+        Parameters
+        ----------
+        unsupervised_training: `bool`, (default is True)
+            pre-training of the unsupervised layers if any
+        save_mode : {None, 'end', 'each'}
+            None (default), model will not be saved unless name specified in the
+            model definition.
+            'end', model will only be saved at the end of the training
+            'each', model will be saved each time the model is improved
+
+        Returns
+        -------
+            report
+        """
+        start_time = timeit.default_timer()
+        if self.data is None:
+            raise NoDataFoundException
+
+        if unsupervised_training and self.network.has_unsupervised_layer:
+            self.pretrain()
+
+        if save_mode is not None:
+            if save_mode not in ['end', 'each']:
+                self.save_mode = 'end'
+            else:
+                self.save_mode = save_mode
+            if self.file is None:
+                import datetime
+                self.file = self.name + '_' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.ym'
+
+        if self.file is not None and save_mode is None:
+            self.save_mode = 'end'
+
+        n_train_batches = self.data.train_set_x.get_value(borrow=True).shape[0] / self.hp.batch_size
+        n_valid_batches = self.data.valid_set_x.get_value(borrow=True).shape[0] / self.hp.batch_size
+        n_test_batches = self.data.test_set_x.get_value(borrow=True).shape[0] / self.hp.batch_size
+
+        train_idx = np.arange(n_train_batches * self.hp.batch_size, dtype='int32')
+
+        self.report['test_values'] = []
+        self.report['validation_values'] = []
+
+        if self.train_model is None:
+            self.train_model, self.validate_model, self.test_model = self.compile()
+
         ################################################
         # Training
         logger.info('... Training the model')
@@ -246,13 +249,13 @@ class Model(object):
                 np_rng.shuffle(train_idx)
             for minibatch_index in xrange(n_train_batches):
                 # train
-                minibatch_avg_cost = train_model(minibatch_index, train_idx)
+                minibatch_avg_cost = self.train_model(minibatch_index, train_idx)
                 # iteration number
                 iter = (epoch - 1) * n_train_batches + minibatch_index
 
                 if (iter + 1) % validation_frequency == 0:
                     # compute zero-one loss on validation set
-                    validation_losses = [validate_model(i) for i
+                    validation_losses = [self.validate_model(i) for i
                                          in xrange(n_valid_batches)]
                     this_validation_loss = np.mean(validation_losses)
 
@@ -270,7 +273,7 @@ class Model(object):
                         best_iter = iter
 
                         # test it on the test set
-                        test_losses = [test_model(i) for i in xrange(n_test_batches)]
+                        test_losses = [self.test_model(i) for i in xrange(n_test_batches)]
                         test_score = np.mean(test_losses)
 
                         logger.info('  epoch %i, minibatch %i/%i, test error of best model %.3f %%' %
@@ -298,8 +301,6 @@ class Model(object):
 
         logger.info(' Validation score of %.3f %% obtained at iteration %i, with test performance %.3f %%' %
                     (best_validation_loss * 100., best_iter + 1, test_score * 100.))
-
-        self.trained = True
 
         # Report
         self.report['epoch'] = epoch
