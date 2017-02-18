@@ -618,10 +618,7 @@ class BatchNormalization(Layer):
 
         y = \gamma * \hat{x} + \beta
 
-    Warning
-    _______
-
-    When a BatchNormalization layer is used the batch size has to be given at compile time.
+    .. warning:: When a BatchNormalization layer is used the batch size has to be given at compile time.
     You can not use None as the first dimension anymore.
     Prediction has to be made on the same batch size.
 
