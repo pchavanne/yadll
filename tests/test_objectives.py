@@ -79,3 +79,31 @@ def test_kullback_leibler_divergence():
     actual = f(x_val, y_val)
     desired = np.sum(y_val * np.log(y_val/x_val), axis=-1)
     assert_allclose(actual, desired, rtol=eps)
+
+
+def test_binary_accuracy():
+    f = theano.function([x, y], yadll.objectives.binary_accuracy(x, y))
+    actual = f(x_val, y_val)
+    desired = np.mean(np.equal(x_val, np.round(y_val)))
+    assert_allclose(actual, desired, rtol=eps)
+
+
+def test_categorical_accuracy():
+    f = theano.function([x, y], yadll.objectives.categorical_accuracy(x, y))
+    actual = f(x_val, y_val)
+    desired = np.mean(np.equal(np.argmax(x_val, axis=-1), np.argmax(y_val, axis=-1)))
+    assert_allclose(actual, desired, rtol=eps)
+
+
+def test_binary_error():
+    f = theano.function([x, y], yadll.objectives.binary_error(x, y))
+    actual = f(x_val, y_val)
+    desired = np.mean(np.equal(x_val, np.round(y_val)))
+    assert_allclose(actual, desired, rtol=eps)
+
+
+def test_categorical_error():
+    f = theano.function([x, y], yadll.objectives.categorical_error(x, y))
+    actual = f(x_val, y_val)
+    desired = np.mean(np.not_equal(np.argmax(x_val, axis=-1), np.argmax(y_val, axis=-1)))
+    assert_allclose(actual, desired, rtol=eps)
