@@ -25,6 +25,16 @@ def test_one_hot_decoding():
                                   np.asarray([1, 0, 3]))
 
 
+def test_mnist_loader():
+    from yadll.data import mnist_loader
+    data = mnist_loader()
+
+
+def test_alphabet_loader():
+    from yadll.data import alphabet_loader
+    data = alphabet_loader(2)
+
+
 class Testdata:
     @pytest.fixture
     def train_valid_test_data(self):
