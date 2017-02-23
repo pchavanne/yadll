@@ -12,9 +12,20 @@ class TestLayer:
         return Layer(mock())
 
     @pytest.fixture
+    def layer2(self):
+        from yadll.layers import Layer
+        return Layer(mock())
+
+    @pytest.fixture
     def named_layer(self):
         from yadll.layers import Layer
         return Layer(mock(), name='layer_name')
+
+    def test_layer_from_none(self):
+        from yadll.layers import Layer
+        layer = Layer(incoming=None)
+        assert layer.input_layer is None
+        assert layer.input_shape is None
 
     def test_input_shape(self, layer):
         assert layer.input_shape == layer.input_layer.output_shape
@@ -45,6 +56,14 @@ class TestLayer:
         layer = layer_from_shape
         assert layer.input_layer is None
         assert layer.input_shape == (None, 20)
+
+    def test_layer_from_layers(self):
+        from yadll.layers import Layer
+        l_1 = Layer((10, 20))
+        l_2 = Layer((30, 40))
+        l = Layer([l_1, l_2])
+        assert l.input_shape == [l_1.input_shape, l_2.input_shape]
+        assert l.input_layer == [l_1, l_2]
 
 
 class Testinput_layer:
@@ -112,11 +131,11 @@ class TestFlattenLayer:
         return InputLayer(shape, input=input_data)
 
     def test_output_shape(self, flatten_layer, input_layer):
-        layer = flatten_layer(input_layer)
+        layer = flatten_layer(incoming=input_layer)
         assert layer.output_shape == (2, 3 * 4 * 5)
 
     def test_get_output(self, flatten_layer, input_layer, input_data):
-        layer = flatten_layer(input_layer)
+        layer = flatten_layer(incoming=input_layer)
         result = layer.get_output().eval()
         input = np.asarray(input_data.eval())
         assert (result == input.reshape(input.shape[0], -1)).all()
@@ -140,7 +159,7 @@ class TestActivation:
         return InputLayer(shape, input=input_data)
 
     def test_output_shape(self, activation, input_layer):
-        layer = activation(input_layer)
+        layer = activation(incoming=input_layer)
         assert layer.output_shape == (2, 3 * 4 * 5)
 
     def test_get_output(self, activation, input_layer, input_data):
@@ -170,11 +189,11 @@ class TestDenseLayer:
 
     @pytest.fixture
     def layer(self, dense_layer, input_layer):
-        return dense_layer(input_layer, n_units=2, l1=1, l2=2)
+        return dense_layer(incoming=input_layer, n_units=2, l1=1, l2=2)
 
     @pytest.fixture
     def layer_from_layer(self, dense_layer, input_layer, layer):
-        return dense_layer(input_layer, W=layer.W, b=layer.b, n_units=2, l1=1, l2=2)
+        return dense_layer(incoming=input_layer, W=layer.W, b=layer.b, n_units=2, l1=1, l2=2)
 
     def test_get_params(self, layer):
         assert layer.get_params() == [layer.W, layer.b]
@@ -221,12 +240,12 @@ class Testunsupervised_layer:
         hp('batch_size', 10)
         hp('n_epochs', 10)
         hp('learning_rate', 0.1)
-        hp('patience', 1000)
+        hp('patience', 100)
         return hp
 
     @pytest.fixture
     def layer(self, unsupervised_layer, input_layer, hp):
-        return unsupervised_layer(input_layer, n_units=2, hyperparameters=hp)
+        return unsupervised_layer(incoming=input_layer, n_units=2, hyperparameters=hp)
 
     def test_get_params(self, layer):
         assert layer.get_params() == [layer.W, layer.b]
@@ -275,17 +294,17 @@ class TestDropout:
 
     @pytest.fixture
     def layer(self, dropout, input_layer):
-        return dropout(input_layer, corruption_level=0.5)
+        return dropout(incoming=input_layer, corruption_level=0.5)
 
     @pytest.fixture
     def layer_c0(self, dropout, input_layer):
-        return dropout(input_layer, corruption_level=0)
+        return dropout(incoming=input_layer, corruption_level=0)
 
     @pytest.fixture
     def layer_c1(self, dropout, input_layer):
-        return dropout(input_layer, corruption_level=1)
+        return dropout(incoming=input_layer, corruption_level=1)
 
-    def test_get_output(self, input_layer, layer, layer_c0, layer_c1):
+    def test_get_output(self, input_layer, layer_c0, layer_c1):
         np.testing.assert_array_equal(input_layer.get_output().eval(), layer_c0.get_output().eval())
         assert np.all(layer_c1.get_output().eval() == 0)
 
@@ -309,17 +328,17 @@ class TestDropConnect:
 
     @pytest.fixture
     def layer(self, dropconnect, input_layer):
-        return dropconnect(input_layer, n_units=10, corruption_level=0.5)
+        return dropconnect(incoming=input_layer, n_units=10, corruption_level=0.5)
 
     @pytest.fixture
     def layer_c0(self, dropconnect, input_layer):
-        return dropconnect(input_layer, n_units=10, corruption_level=0)
+        return dropconnect(incoming=input_layer, n_units=10, corruption_level=0)
 
     @pytest.fixture
     def layer_c1(self, dropconnect, input_layer):
-        return dropconnect(input_layer, n_units=10, corruption_level=1)
+        return dropconnect(incoming=input_layer, n_units=10, corruption_level=1)
 
-    def test_get_output(self, input_layer, layer, layer_c0, layer_c1):
+    def test_get_output(self, layer_c1):
         assert np.all(layer_c1.get_output().eval() == 0)
 
 
@@ -342,7 +361,10 @@ class TestPoolLayer:
 
     @pytest.fixture
     def layer(self, pool_layer, input_layer):
-        return pool_layer(input_layer, poolsize=(2, 2))
+        return pool_layer(incoming=input_layer, poolsize=(2, 2))
+
+    def test_get_output(self, layer):
+        output = layer.get_output().eval()
 
 
 class TestConvLayer:
@@ -351,12 +373,48 @@ class TestConvLayer:
         from yadll.layers import ConvLayer
         return ConvLayer
 
+    @pytest.fixture
+    def input_data(self):
+        from yadll.utils import shared_variable
+        return shared_variable(np.random.random((100, 1, 28, 28)))
+
+    @pytest.fixture
+    def input_layer(self, input_data):
+        from yadll.layers import InputLayer
+        shape = (None, 1, 28, 28)
+        return InputLayer(shape, input=input_data)
+
+    @pytest.fixture
+    def layer(self, conv_layer, input_layer):
+        return conv_layer(incoming=input_layer, image_shape=(None, 1, 28, 28), filter_shape=(20, 1, 5, 5))
+
+    def test_get_output(self, layer):
+        output = layer.get_output().eval()
+
 
 class TestConvPoolLayer:
     @pytest.fixture
     def conv_pool_layer(self):
         from yadll.layers import ConvPoolLayer
         return ConvPoolLayer
+
+    @pytest.fixture
+    def input_data(self):
+        from yadll.utils import shared_variable
+        return shared_variable(np.random.random((100, 1, 28, 28)))
+
+    @pytest.fixture
+    def input_layer(self, input_data):
+        from yadll.layers import InputLayer
+        shape = (None, 1, 28, 28)
+        return InputLayer(shape, input=input_data)
+
+    @pytest.fixture
+    def layer(self, conv_pool_layer, input_layer):
+        return conv_pool_layer(incoming=input_layer, image_shape=(None, 1, 28, 28), filter_shape=(20, 1, 5, 5), poolsize=(2, 2))
+
+    def test_get_output(self, layer):
+        output = layer.get_output().eval()
 
 
 class TestAutoEncoder:
@@ -365,12 +423,66 @@ class TestAutoEncoder:
         from yadll.layers import AutoEncoder
         return AutoEncoder
 
+    @pytest.fixture
+    def input_data(self):
+        from yadll.utils import shared_variable
+        return shared_variable(np.random.random((10, 20)))
+
+    @pytest.fixture
+    def input_layer(self, input_data):
+        from yadll.layers import InputLayer
+        shape = (None, 20)
+        return InputLayer(shape, input=input_data)
+
+    @pytest.fixture
+    def unsupervised_hp(self):
+        from yadll.hyperparameters import Hyperparameters
+        hp = Hyperparameters()
+        hp('batch_size', 10)
+        hp('n_epochs', 15)
+        hp('learning_rate', 0.01)
+        return hp
+
+    @pytest.fixture
+    def layer(self, auto_encoder, input_layer, unsupervised_hp):
+        return auto_encoder(incoming=input_layer, n_units=10, hyperparameters=unsupervised_hp)
+
+    def test_get_output(self, layer):
+        output = layer.get_output().eval()
+
 
 class TestRBM:
     @pytest.fixture
     def rbm(self):
         from yadll.layers import RBM
         return RBM
+
+    @pytest.fixture
+    def input_data(self):
+        from yadll.utils import shared_variable
+        return shared_variable(np.random.random((10, 20)))
+
+    @pytest.fixture
+    def input_layer(self, input_data):
+        from yadll.layers import InputLayer
+        shape = (None, 20)
+        return InputLayer(shape, input=input_data)
+
+    @pytest.fixture
+    def unsupervised_hp(self):
+        from yadll.hyperparameters import Hyperparameters
+        hp = Hyperparameters()
+        hp('batch_size', 10)
+        hp('n_epochs', 15)
+        hp('learning_rate', 0.01)
+        return hp
+
+    @pytest.fixture
+    def layer(self, rbm, input_layer, unsupervised_hp):
+        return rbm(incoming=input_layer, n_units=10, hyperparameters=unsupervised_hp)
+
+    def test_get_output(self, layer):
+        output = layer.get_output().eval()
 
 
 class TestBatchNormalization:
@@ -379,12 +491,23 @@ class TestBatchNormalization:
         from yadll.layers import BatchNormalization
         return BatchNormalization
 
-
-class TestLayerNormalization:
     @pytest.fixture
-    def layer_normalization(self):
-        from yadll.layers import BatchNormalization
-        return BatchNormalization
+    def input_data(self):
+        from yadll.utils import shared_variable
+        return shared_variable(np.random.random((10, 20)))
+
+    @pytest.fixture
+    def input_layer(self, input_data):
+        from yadll.layers import InputLayer
+        shape = (10, 20)
+        return InputLayer(shape, input=input_data)
+
+    @pytest.fixture
+    def layer(self, batch_normalization, input_layer):
+        return batch_normalization(incoming=input_layer)
+
+    def test_get_output(self, layer):
+        output = layer.get_output().eval()
 
 
 class TestRNN:
@@ -393,6 +516,24 @@ class TestRNN:
         from yadll.layers import RNN
         return RNN
 
+    @pytest.fixture
+    def input_data(self):
+        from yadll.utils import shared_variable
+        return shared_variable(np.random.random((10, 20, 30)))
+
+    @pytest.fixture
+    def input_layer(self, input_data):
+        from yadll.layers import InputLayer
+        shape = (None, 20, 30)
+        return InputLayer(shape, input=input_data)
+
+    @pytest.fixture
+    def layer(self, rnn, input_layer):
+        return rnn(incoming=input_layer, n_units=100)
+
+    def test_get_output(self, layer):
+        output = layer.get_output().eval()
+
 
 class TestLSTM:
     @pytest.fixture
@@ -400,9 +541,45 @@ class TestLSTM:
         from yadll.layers import LSTM
         return LSTM
 
+    @pytest.fixture
+    def input_data(self):
+        from yadll.utils import shared_variable
+        return shared_variable(np.random.random((10, 20, 30)))
+
+    @pytest.fixture
+    def input_layer(self, input_data):
+        from yadll.layers import InputLayer
+        shape = (None, 20, 30)
+        return InputLayer(shape, input=input_data)
+
+    @pytest.fixture
+    def layer(self, lstm, input_layer):
+        return lstm(incoming=input_layer, n_units=10)
+
+    def test_get_output(self, layer):
+        output = layer.get_output().eval()
+
 
 class TestGRU:
     @pytest.fixture
     def gru(self):
         from yadll.layers import GRU
         return GRU
+
+    @pytest.fixture
+    def input_data(self):
+        from yadll.utils import shared_variable
+        return shared_variable(np.random.random((10, 20, 30)))
+
+    @pytest.fixture
+    def input_layer(self, input_data):
+        from yadll.layers import InputLayer
+        shape = (None, 20, 30)
+        return InputLayer(shape, input=input_data)
+
+    @pytest.fixture
+    def layer(self, gru, input_layer):
+        return gru(incoming=input_layer, n_units=10)
+
+    def test_get_output(self, layer):
+        output = layer.get_output().eval()

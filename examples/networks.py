@@ -533,7 +533,7 @@ def rnn(input_var=None):
 
     # Create connected layers
     l_in = InputLayer(input_shape=(None, 28 * 28), input_var=input_var, name='Input')
-    l_rnn = RNN(incoming=l_in, n_hidden=100, n_out=28 * 28, name='Recurrent Neural Network')
+    l_rnn = RNN(incoming=l_in, n_units=100, name='Recurrent Neural Network')
     l_out = LogisticRegression(incoming=l_rnn, n_class=10, name='Logistic regression')
 
     # Create network and add layers
@@ -557,7 +557,7 @@ def lstm(input_var=None):
 
     # Create connected layers
     l_in = InputLayer(input_shape=(None, 28 * 28), input_var=input_var, name='Input')
-    l_lstm = LSTM(incoming=l_in, n_hidden=100, n_out=28 * 28, name='Long Short Term Memory')
+    l_lstm = LSTM(incoming=l_in, n_units=100, name='Long Short Term Memory')
     l_out = LogisticRegression(incoming=l_lstm, n_class=10, name='Logistic regression')
 
     # Create network and add layers
