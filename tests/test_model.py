@@ -95,6 +95,8 @@ class TestModel:
     def test_no_network(self, model):
         from yadll.exceptions import NoNetworkFoundException
         with pytest.raises(NoNetworkFoundException):
+            model.compile(compile_arg='train')
+        with pytest.raises(NoNetworkFoundException):
             model.pretrain()
         with pytest.raises(NoNetworkFoundException):
             model.train(unsupervised_training=False)
@@ -129,6 +131,8 @@ class TestModel:
         network_unsupervised.layers[0].input = None
         model.network = network_unsupervised
         model.pretrain()
+        model.train()
+        model.hp.patience = 10  # test early stop
         model.train()
 
     def test_predict(self, data, model, network):
