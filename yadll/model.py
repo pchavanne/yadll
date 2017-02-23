@@ -169,8 +169,6 @@ class Model(object):
         ################################################
         # functions for predicting
         if 'predict' in compile_arg or 'all' in compile_arg:
-            if self.network.layers[0].input is None:
-                self.network.layers[0].input = self.x
             prediction = self.network.get_output(stochastic=False)
             self.predict_func = theano.function(inputs=[self.x], outputs=prediction, name='predict')
 
@@ -222,6 +220,8 @@ class Model(object):
         start_time = timeit.default_timer()
         if self.data is None:
             raise NoDataFoundException
+        if self.network is None:
+            raise NoNetworkFoundException
 
         if self.data.valid_set_x is not None:
             self.has_validation = True
@@ -259,8 +259,7 @@ class Model(object):
             compile_arg = kwargs.pop('compile_arg', ['train', 'test'])
             if self.has_validation:
                 compile_arg.append('validate')
-            self.compile(compile_arg='all') #compile_arg)
-            self.compile(compile_arg='all')
+            self.compile(compile_arg=compile_arg)
 
         ################################################
         # Training
@@ -348,12 +347,8 @@ class Model(object):
         return self.report
 
     def predict(self, X):
-        # if self.network.layers[0].input is None:
-        #     self.network.layers[0].input = self.x
         if self.predict_func is None:
             self.compile(compile_arg='predict')
-        # prediction = self.network.get_output(stochastic=False)
-        # self.predict_func = theano.function(inputs=[self.x], outputs=prediction, name='predict')
         return self.predict_func(X)
 
     def to_conf(self, file=None):

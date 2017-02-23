@@ -24,6 +24,8 @@ class TestModel:
         hp('momentum', 0.9)
         hp('epsilon', 1e-6)
         hp('rho', 0.95)
+        hp('beta1', 0.9)
+        hp('beta2', 0.99)
         hp('l1_reg', 0.00)
         hp('l2_reg', 0.000)
         hp('patience', 100)
@@ -83,6 +85,8 @@ class TestModel:
     def test_no_data_found(self, model_no_data, network_unsupervised):
         model_no_data.network = network_unsupervised
         from yadll.exceptions import NoDataFoundException
+        with pytest.raises(NoDataFoundException):
+            model_no_data.compile(compile_arg='train')
         with pytest.raises(NoDataFoundException):
             model_no_data.pretrain()
         with pytest.raises(NoDataFoundException):
