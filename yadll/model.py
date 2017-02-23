@@ -82,27 +82,40 @@ class Model(object):
                  updates=sgd, objective=CCE, evaluation_metric=categorical_accuracy, file=None):
         self.network = network
         self.data = data             # data [(train_set_x, train_set_y), (valid_set_x, valid_set_y), (test_set_x, test_set_y)]
+        self.has_validation = None
         self.name = name
         self.hp = hyperparameters
         self.updates = updates
         self.objective = objective
         self.metric = evaluation_metric
+        self.early_stop = None
         self.file = file
         self.save_mode = None          # None, 'end' or 'each'
         self.index = T.iscalar()       # index to a [mini]batch
         self.epoch_index = T.ivector() # index per epoch
         self.x = self.y = None  # T.matrix(name='y')
-        self.train_model = self.validate_model = self.test_model = None
+        self.train_func = self.validate_func = self.test_func = self.predict_func = None
         self.report = dict()
 
     @timer(' Compiling')
-    def compile(self):
+    def compile(self, compile_arg):
+        """
+        Compile theano functions of the model
+
+        Parameters
+        ----------
+        compile_arg: `string` or `List` of `string`
+            value can be 'train', 'validate', 'test', 'predict' and 'all'
+        """
         if self.data is None:
             raise NoDataFoundException
-        y_tensor_type = theano.tensor.TensorType(dtype=floatX, broadcastable=(False,)*self.data.train_set_y.ndim)
-        self.y = y_tensor_type('y')
-        x_tensor_type = theano.tensor.TensorType(dtype=floatX, broadcastable=(False,)*self.data.train_set_x.ndim)
-        self.x = x_tensor_type('x')
+        # X & Y get their shape from data
+        if self.x is None:
+            x_tensor_type = T.TensorType(dtype=floatX, broadcastable=(False,)*self.data.train_set_x.ndim)
+            self.x = x_tensor_type('x')
+        if self.y is None:
+            y_tensor_type = T.TensorType(dtype=floatX, broadcastable=(False,)*self.data.train_set_y.ndim)
+            self.y = y_tensor_type('y')
 
         if self.network is None:
             raise NoNetworkFoundException
@@ -139,21 +152,27 @@ class Model(object):
         error = categorical_error(self.network.get_output(stochastic=False), self.y)
 
         ################################################
-        # Compiling functions for training, validating and testing the model
+        # functions for training, validating and testing the model
         logger.info('... Compiling the model')
-        train_model = theano.function(inputs=[self.index, self.epoch_index], outputs=cost, updates=updates, name='train', # on_unused_input='ignore', # mode='DebugMode',
-                                      givens={self.x: self.data.train_set_x[self.epoch_index[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size]],
-                                              self.y: self.data.train_set_y[self.epoch_index[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size]]})
-
-        validate_model = theano.function(inputs=[self.index], outputs=error, name='validate',
-                                         givens={self.x: self.data.valid_set_x[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size],
-                                                 self.y: self.data.valid_set_y[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size]})
-
-        test_model = theano.function(inputs=[self.index], outputs=error, name='test',
-                                     givens={self.x: self.data.test_set_x[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size],
-                                             self.y: self.data.test_set_y[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size]})
-
-        return train_model, validate_model, test_model
+        if 'train' in compile_arg or 'all' in compile_arg:
+            self.train_func = theano.function(inputs=[self.index, self.epoch_index], outputs=cost, updates=updates, name='train', # on_unused_input='ignore', # mode='DebugMode',
+                                              givens={self.x: self.data.train_set_x[self.epoch_index[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size]],
+                                                      self.y: self.data.train_set_y[self.epoch_index[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size]]})
+        if 'validate' in compile_arg or 'all' in compile_arg:
+            self.validate_func = theano.function(inputs=[self.index], outputs=error, name='validate',
+                                                 givens={self.x: self.data.valid_set_x[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size],
+                                                         self.y: self.data.valid_set_y[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size]})
+        if 'test' in compile_arg or 'all' in compile_arg:
+            self.test_func = theano.function(inputs=[self.index], outputs=error, name='test',
+                                             givens={self.x: self.data.test_set_x[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size],
+                                                     self.y: self.data.test_set_y[self.index * self.hp.batch_size: (self.index + 1) * self.hp.batch_size]})
+        ################################################
+        # functions for predicting
+        if 'predict' in compile_arg or 'all' in compile_arg:
+            if self.network.layers[0].input is None:
+                self.network.layers[0].input = self.x
+            prediction = self.network.get_output(stochastic=False)
+            self.predict_func = theano.function(inputs=[self.x], outputs=prediction, name='predict')
 
     @timer(' Unsupervised Pre-Training')
     def pretrain(self):
@@ -178,7 +197,7 @@ class Model(object):
                 layer.unsupervised_training(self.x, self.data.train_set_x)
 
     @timer(' Training')
-    def train(self, unsupervised_training=True, save_mode=None, shuffle=True):
+    def train(self, unsupervised_training=True, save_mode=None, early_stop=True, shuffle=True, **kwargs):
         """
         Training the network
 
@@ -191,6 +210,10 @@ class Model(object):
             model definition.
             'end', model will only be saved at the end of the training
             'each', model will be saved each time the model is improved
+        early_stop : `bool`, (default is True)
+            early stopping when validation score is not improving
+        shuffle : `bool`, (default is True)
+            reshuffle the training set at each epoch. Batches will then be different from one epoch to another
 
         Returns
         -------
@@ -199,6 +222,11 @@ class Model(object):
         start_time = timeit.default_timer()
         if self.data is None:
             raise NoDataFoundException
+
+        if self.data.valid_set_x is not None:
+            self.has_validation = True
+
+        self.early_stop = early_stop and self.has_validation
 
         if unsupervised_training and self.network.has_unsupervised_layer:
             self.pretrain()
@@ -216,16 +244,23 @@ class Model(object):
             self.save_mode = 'end'
 
         n_train_batches = self.data.train_set_x.get_value(borrow=True).shape[0] / self.hp.batch_size
-        n_valid_batches = self.data.valid_set_x.get_value(borrow=True).shape[0] / self.hp.batch_size
         n_test_batches = self.data.test_set_x.get_value(borrow=True).shape[0] / self.hp.batch_size
+        if self.has_validation:
+            n_valid_batches = self.data.valid_set_x.get_value(borrow=True).shape[0] / self.hp.batch_size
 
         train_idx = np.arange(n_train_batches * self.hp.batch_size, dtype='int32')
 
         self.report['test_values'] = []
         self.report['validation_values'] = []
 
-        if self.train_model is None:
-            self.train_model, self.validate_model, self.test_model = self.compile()
+        ################################################
+        # Compile if not done already
+        if self.train_func is None:
+            compile_arg = kwargs.pop('compile_arg', ['train', 'test'])
+            if self.has_validation:
+                compile_arg.append('validate')
+            self.compile(compile_arg='all') #compile_arg)
+            self.compile(compile_arg='all')
 
         ################################################
         # Training
@@ -249,13 +284,13 @@ class Model(object):
                 np_rng.shuffle(train_idx)
             for minibatch_index in xrange(n_train_batches):
                 # train
-                minibatch_avg_cost = self.train_model(minibatch_index, train_idx)
+                minibatch_avg_cost = self.train_func(minibatch_index, train_idx)
                 # iteration number
                 iter = (epoch - 1) * n_train_batches + minibatch_index
 
                 if (iter + 1) % validation_frequency == 0:
                     # compute zero-one loss on validation set
-                    validation_losses = [self.validate_model(i) for i
+                    validation_losses = [self.validate_func(i) for i
                                          in xrange(n_valid_batches)]
                     this_validation_loss = np.mean(validation_losses)
 
@@ -273,7 +308,7 @@ class Model(object):
                         best_iter = iter
 
                         # test it on the test set
-                        test_losses = [self.test_model(i) for i in xrange(n_test_batches)]
+                        test_losses = [self.test_func(i) for i in xrange(n_test_batches)]
                         test_score = np.mean(test_losses)
 
                         logger.info('  epoch %i, minibatch %i/%i, test error of best model %.3f %%' %
@@ -313,11 +348,13 @@ class Model(object):
         return self.report
 
     def predict(self, X):
-        if self.network.layers[0].input is None:
-            self.network.layers[0].input = self.x
-        prediction = self.network.get_output(stochastic=False)
-        predict = theano.function(inputs=[self.x], outputs=prediction, name='predict')
-        return predict(X)
+        # if self.network.layers[0].input is None:
+        #     self.network.layers[0].input = self.x
+        if self.predict_func is None:
+            self.compile(compile_arg='predict')
+        # prediction = self.network.get_output(stochastic=False)
+        # self.predict_func = theano.function(inputs=[self.x], outputs=prediction, name='predict')
+        return self.predict_func(X)
 
     def to_conf(self, file=None):
         conf = {'model name': self.name,

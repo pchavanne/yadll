@@ -482,7 +482,7 @@ def batch_normalization(input_var=None):
 
     # Hyperparameters
     hp = Hyperparameters()
-    hp('batch_size', 50)
+    hp('batch_size', 32)
     hp('n_epochs', 1000)
     hp('learning_rate', 0.01)
     hp('l1_reg', 0.00)
