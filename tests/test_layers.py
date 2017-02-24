@@ -361,7 +361,7 @@ class TestPoolLayer:
 
     @pytest.fixture
     def layer(self, pool_layer, input_layer):
-        return pool_layer(incoming=input_layer, poolsize=(2, 2))
+        return pool_layer(incoming=input_layer, pool_size=(2, 2))
 
     def test_get_output(self, layer):
         output = layer.get_output().eval()
@@ -411,7 +411,7 @@ class TestConvPoolLayer:
 
     @pytest.fixture
     def layer(self, conv_pool_layer, input_layer):
-        return conv_pool_layer(incoming=input_layer, image_shape=(None, 1, 28, 28), filter_shape=(20, 1, 5, 5), poolsize=(2, 2))
+        return conv_pool_layer(incoming=input_layer, image_shape=(None, 1, 28, 28), filter_shape=(20, 1, 5, 5), pool_size=(2, 2))
 
     def test_get_output(self, layer):
         output = layer.get_output().eval()
