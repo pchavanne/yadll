@@ -218,8 +218,10 @@ class Model(object):
             report
         """
         start_time = timeit.default_timer()
+
         if self.data is None:
             raise NoDataFoundException
+
         if self.network is None:
             raise NoNetworkFoundException
 
@@ -227,6 +229,14 @@ class Model(object):
             self.has_validation = True
 
         self.early_stop = early_stop and self.has_validation
+
+        ################################################
+        # Compile if not done already
+        if self.train_func is None:
+            compile_arg = kwargs.pop('compile_arg', ['train', 'test'])
+            if self.has_validation:
+                compile_arg.append('validate')
+            self.compile(compile_arg=compile_arg)
 
         if unsupervised_training and self.network.has_unsupervised_layer:
             self.pretrain()
@@ -252,14 +262,6 @@ class Model(object):
 
         self.report['test_values'] = []
         self.report['validation_values'] = []
-
-        ################################################
-        # Compile if not done already
-        if self.train_func is None:
-            compile_arg = kwargs.pop('compile_arg', ['train', 'test'])
-            if self.has_validation:
-                compile_arg.append('validate')
-            self.compile(compile_arg=compile_arg)
 
         ################################################
         # Training

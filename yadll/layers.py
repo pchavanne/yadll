@@ -360,29 +360,29 @@ class PoolLayer(Layer):
     """
     n_instances = 0
 
-    def __init__(self, incoming, poolsize, stride=None, ignore_border=True,
-                 padding=(0, 0), mode='max', **kwargs):
+    def __init__(self, incoming, pool_size, stride=None, ignore_border=True,
+                 pad=(0, 0), mode='max', **kwargs):
         super(PoolLayer, self).__init__(incoming, **kwargs)
-        self.poolsize = poolsize
+        self.pool_size = pool_size
         self.stride = stride    # If st is None, it is considered equal to ds
         self.ignore_border = ignore_border
-        self.padding = padding
+        self.pad = pad
         self.mode = mode    # {'max', 'sum', 'average_inc_pad', 'average_exc_pad'}
 
-    def pool(self, input, ds):
-        return pool.pool_2d(input=input, ds=ds, st=self.stride, ignore_border=self.ignore_border,
-                                      padding=self.padding, mode=self.mode)
+    def pool(self, input, ws):
+        return pool.pool_2d(input=input, ws=ws, st=self.stride, ignore_border=self.ignore_border,
+                            pad=self.pad, mode=self.mode)
 
     @property
     def output_shape(self):
         return (self.input_shape[0],
                 self.input_shape[1],
-                self.input_shape[2] / self.poolsize[0],
-                self.input_shape[3] / self.poolsize[1])
+                self.input_shape[2] / self.pool_size[0],
+                self.input_shape[3] / self.pool_size[1])
 
     def get_output(self, stochastic=False, **kwargs):
         X = self.input_layer.get_output(stochastic=stochastic, **kwargs)
-        return self.pool(input=X, ds=self.poolsize)
+        return self.pool(input=X, ws=self.pool_size)
 
 
 class ConvLayer(Layer):
@@ -437,10 +437,10 @@ class ConvPoolLayer(ConvLayer, PoolLayer):
     """
     n_instances = 0
 
-    def __init__(self, incoming, poolsize, image_shape=None, filter_shape=None,
-                  b=constant, activation=tanh, **kwargs):
-        super(ConvPoolLayer, self).__init__(incoming, poolsize=poolsize, image_shape=image_shape,
-                                            filter_shape=filter_shape, pool_scale=poolsize, **kwargs)
+    def __init__(self, incoming, pool_size, image_shape=None, filter_shape=None,
+                 b=constant, activation=tanh, **kwargs):
+        super(ConvPoolLayer, self).__init__(incoming, pool_size=pool_size, image_shape=image_shape,
+                                            filter_shape=filter_shape, pool_scale=pool_size, **kwargs)
         self.b = initializer(b, shape=(self.filter_shape[0],), name='b')
         self.params.append(self.b)
         self.activation = get_activation(activation)
@@ -449,14 +449,14 @@ class ConvPoolLayer(ConvLayer, PoolLayer):
     def output_shape(self):
         return (self.input_shape[0],
                 self.filter_shape[0],
-                (self.image_shape[2] - self.filter_shape[2] + 1) / self.poolsize[0],
-                (self.image_shape[3] - self.filter_shape[3] + 1) / self.poolsize[1])
+                (self.image_shape[2] - self.filter_shape[2] + 1) / self.pool_size[0],
+                (self.image_shape[3] - self.filter_shape[3] + 1) / self.pool_size[1])
 
     def get_output(self, stochastic=False, **kwargs):
         X = self.input_layer.get_output(stochastic=stochastic, **kwargs)
         conv_X = self.conv(input=X, filters=self.W, image_shape=self.image_shape,
                            filter_shape=self.filter_shape)
-        pool_X = self.pool(input=conv_X, ds=self.poolsize)
+        pool_X = self.pool(input=conv_X, ws=self.pool_size)
         return self.activation(pool_X + self.b.dimshuffle('x', 0, 'x', 'x'))
 
 

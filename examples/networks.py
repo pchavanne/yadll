@@ -17,8 +17,6 @@ __all__ = ['logistic_regression',
            'rbm',
            'dbn',
            'batch_normalization',
-           'rnn',
-           'lstm'
            ]
 
 
@@ -164,13 +162,13 @@ def convpool(input_var=None):
     # Create connected layers
     image_shape = (None, 1, 28, 28)    # (batch size, nb input feature maps, image height, image width)
     filter_shape = (20, 1, 5, 5)       # (number of filters, nb input feature maps, filter height, filter width)
-    poolsize = (2, 2)                  # downsampling factor per (row, col)
+    pool_size = (2, 2)                  # downsampling factor per (row, col)
     # Input layer
     l_in = InputLayer(input_shape=(None, 28 * 28), input_var=input_var, name='Input')
     # ConvLayer needs 4D Tensor
     l_rs = ReshapeLayer(incoming=l_in, output_shape=image_shape)
     # ConvPool Layer
-    l_cp = ConvPoolLayer(incoming=l_rs, poolsize=poolsize, image_shape=image_shape,
+    l_cp = ConvPoolLayer(incoming=l_rs, pool_size=pool_size, image_shape=image_shape,
                          filter_shape=filter_shape, name='ConvPool layer')
     # flatten convpool output
     l_fl = FlattenLayer(incoming=l_cp, ndim=2)
@@ -205,14 +203,14 @@ def lenet5(input_var=None):
     l_rs = ReshapeLayer(incoming=l_in, output_shape=image_shape)
     # first convpool
     filter_shape = (20, 1, 5, 5)
-    poolsize = (2, 2)
-    l_cp1 = ConvPoolLayer(incoming=l_rs, poolsize=poolsize, image_shape=image_shape,
+    pool_size = (2, 2)
+    l_cp1 = ConvPoolLayer(incoming=l_rs, pool_size=pool_size, image_shape=image_shape,
                           filter_shape=filter_shape, name='ConvPool layer 1')
     # second convpool
     image_shape = (None, 20, 12, 12)   # (batch size, nb filters, (28-5)/2, (28-5)/2)
     filter_shape = (50, 20, 5, 5)
-    poolsize = (2, 2)
-    l_cp2 = ConvPoolLayer(incoming=l_cp1, poolsize=poolsize, image_shape=image_shape,
+    pool_size = (2, 2)
+    l_cp2 = ConvPoolLayer(incoming=l_cp1, pool_size=pool_size, image_shape=image_shape,
                           filter_shape=filter_shape, name='ConvPool layer 2')
     # flatten convpool output
     l_fl = FlattenLayer(incoming=l_cp2, ndim=2)
@@ -482,7 +480,7 @@ def batch_normalization(input_var=None):
 
     # Hyperparameters
     hp = Hyperparameters()
-    hp('batch_size', 32)
+    hp('batch_size', 30)
     hp('n_epochs', 1000)
     hp('learning_rate', 0.01)
     hp('l1_reg', 0.00)
@@ -516,54 +514,6 @@ def batch_normalization(input_var=None):
     net.add(l_bn2)
     net.add(l_hid2)
     net.add(l_bn3)
-    net.add(l_out)
-
-    return net, hp
-
-
-def rnn(input_var=None):
-    """Recurrent Neural Network"""
-
-    # Hyperparameters
-    hp = Hyperparameters()
-    hp('batch_size', 500)
-    hp('n_epochs', 1000)
-    hp('learning_rate', 0.1)
-    hp('patience', 500)
-
-    # Create connected layers
-    l_in = InputLayer(input_shape=(None, 28 * 28), input_var=input_var, name='Input')
-    l_rnn = RNN(incoming=l_in, n_units=100, name='Recurrent Neural Network')
-    l_out = LogisticRegression(incoming=l_rnn, n_class=10, name='Logistic regression')
-
-    # Create network and add layers
-    net = Network('rnn')
-    net.add(l_in)
-    net.add(l_rnn)
-    net.add(l_out)
-
-    return net, hp
-
-
-def lstm(input_var=None):
-    """Long Short Term Memory"""
-
-    # Hyperparameters
-    hp = Hyperparameters()
-    hp('batch_size', 500)
-    hp('n_epochs', 1000)
-    hp('learning_rate', 0.1)
-    hp('patience', 500)
-
-    # Create connected layers
-    l_in = InputLayer(input_shape=(None, 28 * 28), input_var=input_var, name='Input')
-    l_lstm = LSTM(incoming=l_in, n_units=100, name='Long Short Term Memory')
-    l_out = LogisticRegression(incoming=l_lstm, n_class=10, name='Logistic regression')
-
-    # Create network and add layers
-    net = Network('lstm')
-    net.add(l_in)
-    net.add(l_lstm)
     net.add(l_out)
 
     return net, hp

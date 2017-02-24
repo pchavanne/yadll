@@ -28,18 +28,12 @@ We will first import yadll and configure a basic logger.
     logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
 Then we load the MNIST dataset (or download it) and create a
-:class:`yadll.data.Data` instance that will hold the data
+:class:`yadll.data.Data` instance that will hold the data. We call a loader function to retrieve the data and fill the container.
 
 .. code-block:: python
 
     # load the data
-    datafile = 'mnist.pkl.gz'
-    if not os.path.isfile(datafile):
-        import urllib
-        origin = 'http://www.iro.umontreal.ca/~lisa/deep/data/mnist/mnist.pkl.gz'
-        print 'Downloading data from %s' % origin
-        urllib.urlretrieve(origin, datafile)
-    data = yadll.data.Data(datafile)
+    data = yadll.data.Data(yadll.data.mnist_loader())
 
 We now create a :class:`yadll.model.Model`, that is the class that contain
 the data, the network, the hyperparameters and the updates function. As a file
