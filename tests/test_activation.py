@@ -25,6 +25,34 @@ def test_get_activation():
     actual = f(x_val)
     desired = x_val * (x_val > 0) + alpha * x_val * (x_val < 0)
     assert_allclose(actual, desired, rtol=1e-5)
+    x = T.matrix('x')
+    activation = yadll.activations.get_activation('relu')
+    f = theano.function([x], activation(x))
+    actual = f(x_val)
+    desired = x_val * (x_val > 0)
+    assert_allclose(actual, desired, rtol=1e-5)
+    x = T.matrix('x')
+    alpha = 0.5
+    activation = yadll.activations.get_activation(('relu', {'alpha': alpha}))
+    f = theano.function([x], activation(x))
+    actual = f(x_val)
+    desired = x_val * (x_val > 0) + alpha * x_val * (x_val < 0)
+    assert_allclose(actual, desired, rtol=1e-5)
+
+
+def test_activation_to_conf():
+    activation = yadll.activations.get_activation(yadll.activations.relu)
+    conf = yadll.activations.activation_to_conf(activation)
+    assert conf == ('relu', {})
+    activation = yadll.activations.get_activation((yadll.activations.relu, {'alpha': 0.5}))
+    conf = yadll.activations.activation_to_conf(activation)
+    assert conf == ('relu', {'alpha': 0.5})
+    activation = yadll.activations.get_activation('relu')
+    conf = yadll.activations.activation_to_conf(activation)
+    assert conf == ('relu', {})
+    activation = yadll.activations.get_activation(('relu', {'alpha': 0.5}))
+    conf = yadll.activations.activation_to_conf(activation)
+    assert conf == ('relu', {'alpha': 0.5})
 
 
 def test_linear():

@@ -556,8 +556,18 @@ class TestLSTM:
     def layer(self, lstm, input_layer):
         return lstm(incoming=input_layer, n_units=10)
 
-    def test_get_output(self, layer):
+    @pytest.fixture
+    def peepholes_layer(self, lstm, input_layer):
+        return lstm(incoming=input_layer, n_units=10, peepholes=True)
+
+    @pytest.fixture
+    def tied_layer(self, lstm, input_layer):
+        return lstm(incoming=input_layer, n_units=10, tied_i_f=True)
+
+    def test_get_output(self, layer, peepholes_layer, tied_layer):
         output = layer.get_output().eval()
+        output = peepholes_layer.get_output().eval()
+        output = tied_layer.get_output().eval()
 
 
 class TestGRU:
