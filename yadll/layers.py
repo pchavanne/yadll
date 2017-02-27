@@ -117,16 +117,6 @@ class Layer(object):
         raise NotImplementedError
 
     def to_conf(self):
-        # conf = self.__dict__.copy()
-        # for key in ['params', 'reguls']:
-        #     conf.pop(key, None)
-        # if conf['input_layer']:
-        #     conf['input_layer'] = conf['input_layer'].name
-        # if 'activation' in conf:
-        #     conf['activation'] = conf['activation'].__name__
-        # if 'hyperparameters' in conf:
-        #     conf['hp'] = conf.pop('hyperparameters').to_conf()
-        # conf['type'] = self.__class__.__name__
         conf = {'type': self.__class__.__name__,
                 'id': self.id,
                 'name': self.name,
@@ -138,12 +128,6 @@ class Layer(object):
         else:
             conf['input_layer'] = self.input_layer.name
         return conf
-
-    # def from_conf(self, conf):
-    #     self.__dict__.update(conf)
-    #     if 'hp' in conf:
-    #         for k, v in conf['hp'].iteritems():
-    #             self.hp(k, v)
 
 
 class InputLayer(Layer):
@@ -564,6 +548,16 @@ class ConvPoolLayer(ConvLayer, PoolLayer):
         conf['activation'] = activation_to_conf(self.activation)
         return conf
 
+    def __getstate__(self):
+        if hasattr(self.activation, '__call__'):
+            dic = self.__dict__.copy()
+            dic['activation'] = activation_to_conf(self.activation)
+            return dic
+
+    def __setstate__(self, dic):
+        self.__dict__.update(dic)
+        self.activation = get_activation(self.activation)
+
 
 class AutoEncoder(UnsupervisedLayer):
     """
@@ -746,20 +740,21 @@ class BatchNormalization(Layer):
     """
     n_instances = 0
 
-    def __init__(self, incoming, axis=-2, alpha=0.1, epsilon=1e-5, beta=True, **kwargs):
+    def __init__(self, incoming, axis=-2, alpha=0.1, epsilon=1e-5, has_beta=True, **kwargs):
         super(BatchNormalization, self).__init__(incoming, **kwargs)
         self.axis = axis
         self.alpha = alpha
         self.epsilon = epsilon
+        self.has_beta = has_beta
         self.beta = self.gamma = self.mean = self.var = None
         if self.input_shape is not None:
-            self.init_params(self.input_shape, beta=beta)
+            self.init_params(self.input_shape, has_beta=has_beta)
 
-    def init_params(self, input_shape, beta):
+    def init_params(self, input_shape, has_beta):
         self.gamma = initializer(constant, shape=input_shape, value=1, name='gamma')
         self.params.append(self.gamma)
-        self.beta = initializer(constant, shape=(input_shape[1],), value=0, name='beta')
-        if beta:
+        if has_beta:
+            self.beta = initializer(constant, shape=(input_shape[1],), value=0, name='beta')
             self.params.append(self.beta)
         self.mean = initializer(constant, shape=input_shape, value=0, name='mean')
         self.var = initializer(constant, shape=input_shape, value=1, name='var')
@@ -774,8 +769,10 @@ class BatchNormalization(Layer):
         else:
             mean = self.mean
             var = self.var
-        x_hat = (x - mean) / T.sqrt(var + self.epsilon)                 # normalize
-        y = self.gamma * x_hat + self.beta                              # scale and shift
+        x_hat = (x - mean) / T.sqrt(var + self.epsilon)     # normalize
+        y = self.gamma * x_hat                              # scale
+        if self.has_beta:
+            y += self.beta                                  # shift
         return y
 
     def to_conf(self):
@@ -783,7 +780,7 @@ class BatchNormalization(Layer):
         conf['axis'] = self.axis
         conf['alpha'] = self.alpha
         conf['epsilon'] = self.epsilon
-        conf['beta'] = self.beta
+        conf['has_beta'] = self.has_beta
         return conf
 
 
@@ -876,7 +873,23 @@ class RNN(Layer):
 
     def to_conf(self):
         conf = super(RNN, self).to_conf()
+        conf['n_out'] = self.n_out
+        conf['activation'] = activation_to_conf(self.activation)
+        conf['last_only'] = self.last_only
+        conf['grad_clipping'] = self.grad_clipping
+        conf['go_backwards'] = self.go_backwards
+        conf['allow_gc'] = self.allow_gc
         return conf
+
+    def __getstate__(self):
+        if hasattr(self.activation, '__call__'):
+            dic = self.__dict__.copy()
+            dic['activation'] = activation_to_conf(self.activation)
+            return dic
+
+    def __setstate__(self, dic):
+        self.__dict__.update(dic)
+        self.activation = get_activation(self.activation)
 
 
 class LSTM(Layer):
@@ -1047,7 +1060,25 @@ class LSTM(Layer):
 
     def to_conf(self):
         conf = super(LSTM, self).to_conf()
+        conf['n_units'] = self.n_units
+        conf['peepholes'] = self.peepholes
+        conf['tied_i_f'] = self.tied
+        conf['activation'] = activation_to_conf(self.activation)
+        conf['last_only'] = self.last_only
+        conf['grad_clipping'] = self.grad_clipping
+        conf['go_backwards'] = self.go_backwards
+        conf['allow_gc'] = self.allow_gc
         return conf
+
+    def __getstate__(self):
+        if hasattr(self.activation, '__call__'):
+            dic = self.__dict__.copy()
+            dic['activation'] = activation_to_conf(self.activation)
+            return dic
+
+    def __setstate__(self, dic):
+        self.__dict__.update(dic)
+        self.activation = get_activation(self.activation)
 
 
 class GRU(Layer):
@@ -1160,7 +1191,23 @@ class GRU(Layer):
 
     def to_conf(self):
         conf = super(GRU, self).to_conf()
+        conf['n_units'] = self.n_units
+        conf['activation'] = activation_to_conf(self.activation)
+        conf['last_only'] = self.last_only
+        conf['grad_clipping'] = self.grad_clipping
+        conf['go_backwards'] = self.go_backwards
+        conf['allow_gc'] = self.allow_gc
         return conf
+
+    def __getstate__(self):
+        if hasattr(self.activation, '__call__'):
+            dic = self.__dict__.copy()
+            dic['activation'] = activation_to_conf(self.activation)
+            return dic
+
+    def __setstate__(self, dic):
+        self.__dict__.update(dic)
+        self.activation = get_activation(self.activation)
 
 
 class BNLSTM(LSTM):
@@ -1202,16 +1249,16 @@ class BNLSTM(LSTM):
                                      grad_clipping=grad_clipping, go_backwards=go_backwards,
                                      allow_gc=allow_gc, **kwargs)
         # Batch Normalise the input
-        self.bn_x = BatchNormalization(None, nested=True)
-        self.bn_x.init_params(input_shape=(self.input_shape[1], self.input_shape[0], n_units), beta=False)
+        self.bn_x = BatchNormalization(None)
+        self.bn_x.init_params(input_shape=(self.input_shape[1], self.input_shape[0], n_units), has_beta=False)
         self.params.extend(self.bn_x.params)
         # Batch Normalise the hidden state
-        self.bn_h = BatchNormalization(None, nested=True)
-        self.bn_h.init_params(input_shape=(self.input_shape[1], self.input_shape[0], n_units), beta=False)
+        self.bn_h = BatchNormalization(None)
+        self.bn_h.init_params(input_shape=(self.input_shape[1], self.input_shape[0], n_units), has_beta=False)
         self.params.extend(self.bn_h.params)
         # Batch Normalise the cell state
-        self.bn_c = BatchNormalization(None, nested=True)
-        self.bn_c.init_params(input_shape=(self.input_shape[1], self.input_shape[0], n_units), beta=False)
+        self.bn_c = BatchNormalization(None)
+        self.bn_c.init_params(input_shape=(self.input_shape[1], self.input_shape[0], n_units), has_beta=False)
         self.params.extend(self.bn_c.params)
 
     def get_output(self, **kwargs):

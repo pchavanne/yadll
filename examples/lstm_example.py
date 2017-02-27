@@ -22,9 +22,9 @@ model = yadll.model.Model(name='lstm', data=data)
 
 # Hyperparameters
 hp = yadll.hyperparameters.Hyperparameters()
-hp('batch_size', 3)
+hp('batch_size', 1)
 hp('n_epochs', 100)
-hp('patience', 100)
+hp('patience', 1000)
 
 # add the hyperparameters to the model
 model.hp = hp
@@ -33,10 +33,11 @@ model.hp = hp
 # Input layer
 l_in = yadll.layers.InputLayer(input_shape=(hp.batch_size, sequence_length, number_of_chars))
 # LSTM 1
-l_lstm1 = yadll.layers.LSTM(incoming=l_in, n_units=16, last_only=False)
+l_lstm1 = yadll.layers.BNLSTM(incoming=l_in, n_units=16, last_only=False)
 # LSTM 2
-l_lstm2 = yadll.layers.LSTM(incoming=l_lstm1, n_units=16)
+l_lstm2 = yadll.layers.BNLSTM(incoming=l_lstm1, n_units=16)
 # Logistic regression Layer
+
 l_out = yadll.layers.LogisticRegression(incoming=l_lstm2, n_class=number_of_chars)
 
 # Create network and add layers
@@ -52,6 +53,7 @@ model.network = net
 model.updates = yadll.updates.rmsprop
 
 # train the model and save it to file at each best
+model.compile(compile_arg='all')
 model.train()
 
 # prime the model with 'ab' sequence and let it generate the learned alphabet
