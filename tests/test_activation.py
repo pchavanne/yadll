@@ -43,13 +43,13 @@ def test_get_activation():
 def test_activation_to_conf():
     activation = yadll.activations.get_activation(yadll.activations.relu)
     conf = yadll.activations.activation_to_conf(activation)
-    assert conf == ('relu', {})
+    assert conf == 'relu'
     activation = yadll.activations.get_activation((yadll.activations.relu, {'alpha': 0.5}))
     conf = yadll.activations.activation_to_conf(activation)
     assert conf == ('relu', {'alpha': 0.5})
     activation = yadll.activations.get_activation('relu')
     conf = yadll.activations.activation_to_conf(activation)
-    assert conf == ('relu', {})
+    assert conf == 'relu'
     activation = yadll.activations.get_activation(('relu', {'alpha': 0.5}))
     conf = yadll.activations.activation_to_conf(activation)
     assert conf == ('relu', {'alpha': 0.5})

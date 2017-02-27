@@ -43,11 +43,11 @@ def get_activation(activator):
 
 def activation_to_conf(activation):
     func_name = activation.__closure__[0].cell_contents.__name__
-    try:
-        kwargs = activation.__closure__[1].cell_contents
-        conf = (func_name, kwargs)
-    except IndexError:
+    kwargs = activation.__closure__[1].cell_contents
+    if kwargs == {}:
         conf = func_name
+    else:
+        conf = (func_name, kwargs)
     return conf
 
 
