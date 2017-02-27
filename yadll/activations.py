@@ -13,17 +13,42 @@ def get_activation(activator):
     Parameters
     ----------
     activator : `activator`
-            an activator is an activation function or the tuple of (activation function, dict of args)
+            an activator is an activation function, a tuple of (activation function, dict of args),
+            the name of the activation function as a str or a tuple (name of function, dict of args)
             example : activator = tanh  or activator = (elu, {'alpha':0.5})
+                   or activator = 'tanh'  or activator = ('elu', {'alpha':0.5})
 
     Returns
     -------
-        an activation function with proper parameters
+        an activation function
     """
-    if not isinstance(activator, tuple):
-        return activator
+    if isinstance(activator, tuple):
+        kwargs = activator[1]
+        if isinstance(activator[0], str):
+            func = eval(activator[0])
+        else:
+            func = activator[0]
     else:
-        return lambda x: activator[0](x, **activator[1])
+        kwargs = {}
+        if isinstance(activator, str):
+            func = eval(activator)
+        else:
+            func = activator
+
+    def activation(x):
+        return func(x, **kwargs)
+
+    return activation
+
+
+def activation_to_conf(activation):
+    func_name = activation.__closure__[0].cell_contents.__name__
+    try:
+        kwargs = activation.__closure__[1].cell_contents
+        conf = (func_name, kwargs)
+    except IndexError:
+        conf = func_name
+    return conf
 
 
 def linear(x):

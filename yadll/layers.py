@@ -38,7 +38,7 @@ class Layer(object):
         It has to be subclassed by any kind of layer.
 
         """
-        self.id = self.get_id()
+        self.id = kwargs.pop('id', self.get_id())
         if incoming is None:
             # incoming can be set to None to creat nested layers.
             self.input_shape = None
@@ -117,18 +117,33 @@ class Layer(object):
         raise NotImplementedError
 
     def to_conf(self):
-        conf = self.__dict__.copy()
-        for key in ['id', 'params', 'reguls']:
-            conf.pop(key, None)
-        if conf['input_layer']:
-            conf['input_layer'] = conf['input_layer'].name
-        if 'activation' in conf:
-            conf['activation'] = conf['activation'].__name__
-        conf['type'] = self.__class__.__name__
+        # conf = self.__dict__.copy()
+        # for key in ['params', 'reguls']:
+        #     conf.pop(key, None)
+        # if conf['input_layer']:
+        #     conf['input_layer'] = conf['input_layer'].name
+        # if 'activation' in conf:
+        #     conf['activation'] = conf['activation'].__name__
+        # if 'hyperparameters' in conf:
+        #     conf['hp'] = conf.pop('hyperparameters').to_conf()
+        # conf['type'] = self.__class__.__name__
+        conf = {'type': self.__class__.__name__,
+                'id': self.id,
+                'name': self.name,
+                'input_shape': self.input_shape}
+        if self.input_layer is None:
+            conf['input_layer'] = None
+        elif isinstance(self.input_layer, list):
+            conf['input_layer'] = [layer.name for layer in self.input_layer]
+        else:
+            conf['input_layer'] = self.input_layer.name
         return conf
 
-    def from_conf(self, conf):
-        self.__dict__.update(conf)
+    # def from_conf(self, conf):
+    #     self.__dict__.update(conf)
+    #     if 'hp' in conf:
+    #         for k, v in conf['hp'].iteritems():
+    #             self.hp(k, v)
 
 
 class InputLayer(Layer):
@@ -156,6 +171,10 @@ class InputLayer(Layer):
     def get_output(self, **kwargs):
         return self.input
 
+    def to_conf(self):
+        conf = super(InputLayer, self).to_conf()
+        return conf
+
 
 class ReshapeLayer(Layer):
     """
@@ -179,6 +198,11 @@ class ReshapeLayer(Layer):
             self.reshape_shape = tuple(lst)
         return X.reshape(self.reshape_shape)
 
+    def to_conf(self):
+        conf = super(ReshapeLayer, self).to_conf()
+        conf['output_shape'] = self.output_shape
+        return conf
+
 
 class FlattenLayer(Layer):
     """
@@ -198,6 +222,11 @@ class FlattenLayer(Layer):
         X = self.input_layer.get_output(**kwargs)
         return X.flatten(self.n_dim)
 
+    def to_conf(self):
+        conf = super(FlattenLayer, self).to_conf()
+        conf['n_dim'] = self.n_dim
+        return conf
+
 
 class Activation(Layer):
     """
@@ -216,6 +245,21 @@ class Activation(Layer):
     def get_output(self, **kwargs):
         X = self.input_layer.get_output(**kwargs)
         return self.activation(X)
+
+    def to_conf(self):
+        conf = super(Activation, self).to_conf()
+        conf['activation'] = activation_to_conf(self.activation)
+        return conf
+
+    def __getstate__(self):
+        if hasattr(self.activation, '__call__'):
+            dic = self.__dict__.copy()
+            dic['activation'] = activation_to_conf(self.activation)
+            return dic
+
+    def __setstate__(self, dic):
+        self.__dict__.update(dic)
+        self.activation = get_activation(self.activation)
 
 
 class DenseLayer(Layer):
@@ -254,6 +298,24 @@ class DenseLayer(Layer):
     def get_output(self, **kwargs):
         X = self.input_layer.get_output(**kwargs)
         return self.activation(T.dot(X, self.W) + self.b)
+
+    def to_conf(self):
+        conf = super(DenseLayer, self).to_conf()
+        conf['n_units'] = self.n_units
+        conf['activation'] = activation_to_conf(self.activation)
+        conf['l1'] = self.l1
+        conf['l2'] = self.l2
+        return conf
+
+    def __getstate__(self):
+        if hasattr(self.activation, '__call__'):
+            dic = self.__dict__.copy()
+            dic['activation'] = activation_to_conf(self.activation)
+            return dic
+
+    def __setstate__(self, dic):
+        self.__dict__.update(dic)
+        self.activation = get_activation(self.activation)
 
 
 class UnsupervisedLayer(DenseLayer):
@@ -294,6 +356,11 @@ class UnsupervisedLayer(DenseLayer):
             for minibatch_index in xrange(n_train_batches):
                 c.append(pretrain(minibatch_index))
             logger.info('Layer: %s, pre-training epoch %d, cost %d' % (self.name, epoch, np.mean(c)))
+
+    def to_conf(self):
+            conf = super(UnsupervisedLayer, self).to_conf()
+            conf['hyperparameters'] = self.hp.to_conf()
+            return conf
 
 
 class LogisticRegression(DenseLayer):
@@ -336,6 +403,11 @@ class Dropout(Layer):
             X = X * T_rng.binomial(self.input_shape, n=1, p=self.p, dtype=floatX)
         return X
 
+    def to_conf(self):
+        conf = super(Dropout, self).to_conf()
+        conf['corruption_level'] = 1 - self.p
+        return conf
+
 
 class Dropconnect(DenseLayer):
     """
@@ -352,6 +424,11 @@ class Dropconnect(DenseLayer):
         if self.p != 1 and stochastic:
             self.W = self.W * T_rng.binomial(self.shape, n=1, p=self.p, dtype=floatX)
         return self.activation(T.dot(X, self.W) + self.b)
+
+    def to_conf(self):
+        conf = super(Dropconnect, self).to_conf()
+        conf['corruption_level'] = 1 - self.p
+        return conf
 
 
 class PoolLayer(Layer):
@@ -384,6 +461,15 @@ class PoolLayer(Layer):
         X = self.input_layer.get_output(stochastic=stochastic, **kwargs)
         return self.pool(input=X, ws=self.pool_size)
 
+    def to_conf(self):
+        conf = super(PoolLayer, self).to_conf()
+        conf['pool_size'] = self.pool_size
+        conf['pool_size'] = self.stride
+        conf['ignore_border'] = self.ignore_border
+        conf['pad'] = self.pad
+        conf['mode'] = self.mode
+        return conf
+
 
 class ConvLayer(Layer):
     """
@@ -401,10 +487,13 @@ class ConvLayer(Layer):
         self.subsample = subsample
         self.fan_in = np.prod(filter_shape[1:])
         self.fan_out = filter_shape[0] * np.prod(filter_shape[2:])
+        self.pool_scale = pool_scale
         if pool_scale:
             self.fan_out /= np.prod(pool_scale)
         self.W = initializer(W, shape=self.filter_shape, fan=(self.fan_in, self.fan_out), name='W')
         self.params.append(self.W)
+        self.l1 = l1
+        self.l2 = l2
         if l1:
             self.reguls += l1 * T.mean(T.abs_(self.W))
         if l2:
@@ -425,6 +514,17 @@ class ConvLayer(Layer):
         X = self.input_layer.get_output(stochastic=stochastic, **kwargs)
         return self.conv(input=X, filters=self.W, image_shape=self.image_shape,
                          filter_shape=self.filter_shape)
+
+    def to_conf(self):
+        conf = super(ConvLayer, self).to_conf()
+        conf['image_shape'] = self.image_shape
+        conf['filter_shape'] = self.filter_shape
+        conf['border_mode'] = self.border_mode
+        conf['subsample'] = self.subsample
+        conf['l1'] = self.l1
+        conf['l2'] = self.l2
+        conf['pool_scale'] = self.pool_scale
+        return conf
 
 
 class ConvPoolLayer(ConvLayer, PoolLayer):
@@ -458,6 +558,11 @@ class ConvPoolLayer(ConvLayer, PoolLayer):
                            filter_shape=self.filter_shape)
         pool_X = self.pool(input=conv_X, ws=self.pool_size)
         return self.activation(pool_X + self.b.dimshuffle('x', 0, 'x', 'x'))
+
+    def to_conf(self):
+        conf = super(ConvLayer, self).to_conf()
+        conf['activation'] = activation_to_conf(self.activation)
+        return conf
 
 
 class AutoEncoder(UnsupervisedLayer):
@@ -507,6 +612,13 @@ class AutoEncoder(UnsupervisedLayer):
             Lj = T.sum(J**2) / self.hp.batch_size
             cost = cost + self.contraction_level * T.mean(Lj)
         return cost
+
+    def to_conf(self):
+        conf = super(AutoEncoder, self).to_conf()
+        conf['corruption_level'] = 1 - self.p
+        conf['sigma'] = self.sigma
+        conf['contraction_level'] = self.contraction_level
+        return conf
 
 
 class RBM(UnsupervisedLayer):
@@ -608,6 +720,10 @@ class RBM(UnsupervisedLayer):
             monitoring_cost = self.get_reconstruction_cost(updates, pre_sigmoid_nvs[-1])
         return monitoring_cost, updates
 
+    def to_conf(self):
+        conf = super(RBM, self).to_conf()
+        return conf
+
 
 class BatchNormalization(Layer):
     r"""
@@ -661,6 +777,14 @@ class BatchNormalization(Layer):
         x_hat = (x - mean) / T.sqrt(var + self.epsilon)                 # normalize
         y = self.gamma * x_hat + self.beta                              # scale and shift
         return y
+
+    def to_conf(self):
+        conf = super(BatchNormalization, self).to_conf()
+        conf['axis'] = self.axis
+        conf['alpha'] = self.alpha
+        conf['epsilon'] = self.epsilon
+        conf['beta'] = self.beta
+        return conf
 
 
 class RNN(Layer):
@@ -749,6 +873,10 @@ class RNN(Layer):
                 h_vals = h_vals[:, ::-1]
 
         return h_vals
+
+    def to_conf(self):
+        conf = super(RNN, self).to_conf()
+        return conf
 
 
 class LSTM(Layer):
@@ -917,6 +1045,10 @@ class LSTM(Layer):
 
         return h_vals
 
+    def to_conf(self):
+        conf = super(LSTM, self).to_conf()
+        return conf
+
 
 class GRU(Layer):
     r"""
@@ -1025,6 +1157,10 @@ class GRU(Layer):
                 h_vals = h_vals[:, ::-1]
 
         return h_vals
+
+    def to_conf(self):
+        conf = super(GRU, self).to_conf()
+        return conf
 
 
 class BNLSTM(LSTM):
@@ -1140,3 +1276,7 @@ class BNLSTM(LSTM):
                 h_vals = h_vals[:, ::-1]
 
         return h_vals
+
+    def to_conf(self):
+        conf = super(BNLSTM, self).to_conf()
+        return conf

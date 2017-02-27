@@ -150,12 +150,12 @@ class Network(object):
                 'layers': OrderedDict([(layer.name, layer.to_conf()) for layer in self.layers])}
 
     def from_conf(self, conf):
-        layers = conf.pop('layers', None)
+        layers_conf = conf.pop('layers', None)
         self.__dict__.update(conf)
-        for l in layers.items():
-            layer_class = getattr(yadll.layers, l[1]['type'])
+        for layer_conf in layers_conf.items():
+            layer_class = getattr(yadll.layers, layer_conf[1]['type'])
             if layer_class is yadll.layers.InputLayer:
-                layer = layer_class(**l[1])
+                layer = layer_class(**layer_conf[1])
             else:
-                layer = layer_class(**dict({'incoming': self.layers[-1]}, **l[1])) # ony work for sequential nets
+                layer = layer_class(**dict({'incoming': self.layers[-1]}, **layer_conf[1])) # ony work for sequential nets
             self.add(layer)

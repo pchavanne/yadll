@@ -122,7 +122,7 @@ class TestModel:
         model_from_conf = Model()
         model_from_conf.from_conf(conf)
         model_from_conf_file = Model()
-        model_from_conf_file.from_conf(file='test_conf.yc')
+        model_from_conf_file.from_conf('test_conf.yc')
 
     def test_model(self, model, network, network_unsupervised):
         model.network = network

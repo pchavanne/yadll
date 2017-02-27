@@ -60,6 +60,10 @@ model.network = net
 # Updates method
 model.updates = yadll.updates.sgd
 
+# Compile the model
+# this is not mandatory but it is better to do it before saving conf
+model.compile(compile_arg='all')
+
 # Saving configuration of the model. Model doesn't have to be trained
 conf = model.to_conf()    # get the configuration
 model.to_conf('conf.yc')  # or save it to file .yc by convention
@@ -89,12 +93,13 @@ model_2 = yadll.model.load_model('best_model.ym')
 # Watch out this not the proper way of saving models.
 predicted_values_2 = [np.argmax(prediction) for prediction in model_2.predict(test_set_x[:30])]
 
-print ("Model 1 Predicted & True values for the first 30 examples in test set:")
-print predicted_values
+print ("Model 2 Predicted & True values for the first 30 examples in test set:")
+print predicted_values_2
 print true_values
 ##########################################################################
 # Recreate model and load parameters
-model_3 = yadll.model.Model()
+model_3 = yadll.model.Model(data=data)
+
 l_in = yadll.layers.InputLayer(input_shape=(hp.batch_size, 28 * 28))
 l_dro1 = yadll.layers.Dropout(incoming=l_in, corruption_level=0.5)
 
@@ -119,21 +124,21 @@ model_3.network = net
 predicted_values_3 = [np.argmax(prediction) for prediction in model_3.predict(test_set_x[:30])]
 print ("Model 3 without loading parameters values for the first 30 examples in test set:")
 print predicted_values_3
-print test_set_y[:30]
+print true_values
 # Now let's load parameters
 model_3.network.load_params('net_params.yp')
 # And try predicting again
 predicted_values_3 = [np.argmax(prediction) for prediction in model_3.predict(test_set_x[:30])]
 print ("Model 3 after loading parameters values for the first 30 examples in test set:")
 print predicted_values_3
-print test_set_y[:30]
+print true_values
 
 ##########################################################################
 # Reconstruction the model from configuration and load parameters
 model_4 = yadll.model.Model()
 model_4.from_conf(conf)         # load from conf obj
 model_5 = yadll.model.Model()
-model_5.from_conf(file='conf.yc')    # load from conf file
+model_5.from_conf('conf.yc')    # load from conf file
 
 model_4.network.load_params('net_params.yp')
 model_5.network.load_params('net_params.yp')
@@ -141,9 +146,9 @@ model_5.network.load_params('net_params.yp')
 predicted_values_4 = [np.argmax(prediction) for prediction in model_4.predict(test_set_x[:30])]
 print ("Model 4 after loading parameters values for the first 30 examples in test set:")
 print predicted_values_4
-print test_set_y[:30]
+print true_values
 
 predicted_values_5 = [np.argmax(prediction) for prediction in model_5.predict(test_set_x[:30])]
 print ("Model 5 after loading parameters values for the first 30 examples in test set:")
 print predicted_values_5
-print test_set_y[:30]
+print true_values

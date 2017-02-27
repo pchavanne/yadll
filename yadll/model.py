@@ -82,6 +82,7 @@ class Model(object):
                  updates=sgd, objective=CCE, evaluation_metric=categorical_accuracy, file=None):
         self.network = network
         self.data = data             # data [(train_set_x, train_set_y), (valid_set_x, valid_set_y), (test_set_x, test_set_y)]
+        self.data_shape = None
         self.has_validation = None
         self.name = name
         self.hp = hyperparameters
@@ -107,14 +108,19 @@ class Model(object):
         compile_arg: `string` or `List` of `string`
             value can be 'train', 'validate', 'test', 'predict' and 'all'
         """
-        if self.data is None:
+        if self.data is None and self.data_shape is None:
             raise NoDataFoundException
+        if self.data_shape is None:
+            self.data_shape = self.data.shape()
+
         # X & Y get their shape from data
         if self.x is None:
-            x_tensor_type = T.TensorType(dtype=floatX, broadcastable=(False,)*self.data.train_set_x.ndim)
+            x_dim = len(self.data_shape[0][0])
+            x_tensor_type = T.TensorType(dtype=floatX, broadcastable=(False,)*x_dim)
             self.x = x_tensor_type('x')
         if self.y is None:
-            y_tensor_type = T.TensorType(dtype=floatX, broadcastable=(False,)*self.data.train_set_y.ndim)
+            y_dim = len(self.data_shape[0][1])
+            y_tensor_type = T.TensorType(dtype=floatX, broadcastable=(False,)*y_dim)
             self.y = y_tensor_type('y')
 
         if self.network is None:
@@ -354,10 +360,14 @@ class Model(object):
         return self.predict_func(X)
 
     def to_conf(self, file=None):
+        """
+        Save model as a conf object or conf file
+        """
         conf = {'model name': self.name,
                 'hyperparameters': self.hp.to_conf(),
                 'network': self.network.to_conf(),
                 'updates': self.updates.__name__,
+                'data_shape': self.data_shape,
                 'report': self.report,
                 'file': self.file}
         if file is None:
@@ -366,9 +376,12 @@ class Model(object):
             with open(file, 'wb') as f:
                 cPickle.dump(conf, f, cPickle.HIGHEST_PROTOCOL)
 
-    def from_conf(self, conf=None, file = None):
-        if file:
-            with open(file, 'rb') as f:
+    def from_conf(self, conf):
+        """
+        build model from conf object or conf file
+        """
+        if isinstance(conf, str):
+            with open(conf, 'rb') as f:
                 _conf = cPickle.load(f)
         else:
             _conf = conf.copy()
@@ -381,5 +394,4 @@ class Model(object):
         self.updates = getattr(yadll.updates, _conf['updates'])
         self.report = _conf['report']
         self.file = _conf['file']
-
-
+        self.data_shape = _conf['data_shape']
