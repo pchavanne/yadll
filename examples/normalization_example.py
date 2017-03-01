@@ -115,4 +115,4 @@ model_BN.network = net
 model_BN.updates = yadll.updates.adagrad
 
 # train the model and save it to file at each best
-model_BN_report = model.train()
+model_BN_report = model_BN.train()

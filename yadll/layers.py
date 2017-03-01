@@ -129,6 +129,10 @@ class Layer(object):
             conf['input_layer'] = self.input_layer.name
         return conf
 
+    @classmethod
+    def from_conf(cls, incoming_conf):
+        return cls(**incoming_conf)
+
 
 class InputLayer(Layer):
     """
@@ -179,12 +183,14 @@ class ReshapeLayer(Layer):
         if self.reshape_shape[0] is None:
             lst = list(self.reshape_shape)
             lst[0] = T.shape(X)[0]
-            self.reshape_shape = tuple(lst)
-        return X.reshape(self.reshape_shape)
+            reshape_shape = tuple(lst)
+            return X.reshape(reshape_shape)
+        else:
+            return X.reshape(self.reshape_shape)
 
     def to_conf(self):
         conf = super(ReshapeLayer, self).to_conf()
-        conf['output_shape'] = self.output_shape
+        conf['output_shape'] = self.reshape_shape
         return conf
 
 
@@ -448,7 +454,7 @@ class PoolLayer(Layer):
     def to_conf(self):
         conf = super(PoolLayer, self).to_conf()
         conf['pool_size'] = self.pool_size
-        conf['pool_size'] = self.stride
+        conf['stride'] = self.stride
         conf['ignore_border'] = self.ignore_border
         conf['pad'] = self.pad
         conf['mode'] = self.mode
@@ -464,7 +470,7 @@ class ConvLayer(Layer):
     def __init__(self, incoming, image_shape=None, filter_shape=None, W=glorot_uniform,
                  border_mode='valid', subsample=(1, 1), l1=None, l2=None, pool_scale=None, **kwargs):
         super(ConvLayer, self).__init__(incoming, **kwargs)
-        assert image_shape[1] == filter_shape[1]
+        # assert image_shape[1] == filter_shape[1]
         self.image_shape = image_shape      # (batch size, num input feature maps, image height, image width)
         self.filter_shape = filter_shape    # (number of filters, num input feature maps, filter height, filter width)
         self.border_mode = border_mode      # {'valid', 'full'}
@@ -544,7 +550,8 @@ class ConvPoolLayer(ConvLayer, PoolLayer):
         return self.activation(pool_X + self.b.dimshuffle('x', 0, 'x', 'x'))
 
     def to_conf(self):
-        conf = super(ConvLayer, self).to_conf()
+        conf = super(ConvPoolLayer, self).to_conf()
+        conf.pop('pool_scale', None)
         conf['activation'] = activation_to_conf(self.activation)
         return conf
 

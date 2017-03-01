@@ -4,8 +4,6 @@ import numpy as np
 from .utils import shared_variable, np_rng
 from .activations import *
 
-
-
 # init_obj = glorot_uniform  or init_obj = (glorot_uniform, {'gain':tanh, 'borrow':False})
 
 

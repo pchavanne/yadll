@@ -155,7 +155,7 @@ class Network(object):
         for layer_conf in layers_conf.items():
             layer_class = getattr(yadll.layers, layer_conf[1]['type'])
             if layer_class is yadll.layers.InputLayer:
-                layer = layer_class(**layer_conf[1])
+                layer = layer_class.from_conf(layer_conf[1])
             else:
-                layer = layer_class(**dict({'incoming': self.layers[-1]}, **layer_conf[1])) # ony work for sequential nets
+                layer = layer_class.from_conf(dict({'incoming': self.layers[-1]}, **layer_conf[1])) # ony work for sequential nets
             self.add(layer)

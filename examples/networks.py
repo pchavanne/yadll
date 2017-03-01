@@ -180,6 +180,7 @@ def convpool(input_var=None):
     net.add(l_in)
     net.add(l_rs)
     net.add(l_cp)
+    net.add(l_fl)
     net.add(l_out)
 
     return net, hp
