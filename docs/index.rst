@@ -12,7 +12,7 @@ Welcome to Yadll
 This is an ultra light deep learning framework written in Python and based on Theano_.
 It allows you to very quickly start building Deep Learning models and play with toy examples.
 
-If you are looking for mature deep learning APIs I would recommend Lasagne_, keras_ or blocks_ in stead of yadll, they are well documented and contributed projects.
+If you are looking for mature deep learning APIs I would recommend Lasagne_, keras_ or blocks_ instead of yadll, they are well documented and contributed projects.
 
 Read the documentation at `Read the doc`_
 
