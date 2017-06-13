@@ -11,8 +11,12 @@ from .utils import *
 def normalize(x):
     x_min = x.min()
     x_max = x.max()
-    z = (x - x_min) / (x_max - x_min)
+    z = apply_normalize(x, x_min, x_max)
     return z, x_min, x_max
+
+
+def apply_normalize(x, x_min, x_max):
+    return (x - x_min) / (x_max - x_min)
 
 
 def revert_normalize(z, x_min, x_max):
@@ -22,8 +26,12 @@ def revert_normalize(z, x_min, x_max):
 def standardize(x):
     x_mean = x.mean()
     x_std = x.std()
-    z = (x - x_mean) / x_std
+    z = apply_standardize(x, x_mean, x_std)
     return z, x_mean, x_std
+
+
+def apply_standardize(x, x_mean, x_std):
+    return (x - x_mean) / x_std
 
 
 def revert_standardize(z, x_mean, x_std):
@@ -157,7 +165,8 @@ class Data(object):
     >>> yadll.data.Data('data/mnist/mnist.pkl.gz')
 
     """
-    def __init__(self, data, shared=True, borrow=True, cast_y=False):
+    def __init__(self, data, preprocessing=None,
+                 shared=True, borrow=True, cast_y=False):
         self.data = data
         #TODO: Check data input
         if len(data) == 3:
@@ -170,6 +179,19 @@ class Data(object):
             train_set_x, train_set_y = train_set
             valid_set_x, valid_set_y = None, None
             test_set_x, test_set_y = test_set
+
+        self.preprocessing = preprocessing
+        if preprocessing == 'Normalize':
+            train_set_x, self.min, self.max = normalize(train_set_x)
+            test_set_x = apply_normalize(test_set_x, self.min, self.max)
+            if valid_set_x:
+                valid_set_x = apply_normalize(valid_set_x, self.min, self.max)
+
+        if preprocessing == 'Standardize':
+            train_set_x, self.mean, self.std = standardize(train_set_x)
+            test_set_x = apply_standardize(test_set_x, self.mean, self.std)
+            if valid_set_x:
+                valid_set_x = apply_standardize(valid_set_x, self.mean, self.std)
 
         if shared:
             self.train_set_x = shared_variable(train_set_x, name='train_set_x', borrow=borrow)
