@@ -117,6 +117,44 @@ def dropout(input_var=None):
     return net, hp
 
 
+def snn(input_var=None):
+    """Self Normalizing Neural Networks"""
+
+        # Hyperparameters
+    hp = Hyperparameters()
+    hp('batch_size', 20)
+    hp('n_epochs', 1000)
+    hp('learning_rate', 0.01)
+    hp('patience', 10000)
+
+    # Create connected layers
+    # Input layer
+    l_in = InputLayer(input_shape=(None, 28 * 28), input_var=input_var, name='Input')
+    # Dropout Layer
+    l_dro1 = Dropout(incoming=l_in, corruption_level=0.4, name='Dropout 1')
+    # Dense Layer
+    l_hid1 = DenseLayer(incoming=l_dro1, n_units=500, W=selu_normal,
+                        activation=selu, name='Hidden layer 1')
+    # Dropout Layer
+    l_dro2 = Dropout(incoming=l_hid1, corruption_level=0.2, name='Dropout 2')
+    # Dense Layer
+    l_hid2 = DenseLayer(incoming=l_dro2, n_units=500, W=selu_normal,
+                        activation=selu, name='Hidden layer 2')
+    # Logistic regression Layer
+    l_out = LogisticRegression(incoming=l_hid2, n_class=10, name='Logistic regression')
+
+    # Create network and add layers
+    net = Network('dropout')
+    net.add(l_in)
+    net.add(l_dro1)
+    net.add(l_hid1)
+    net.add(l_dro2)
+    net.add(l_hid2)
+    net.add(l_out)
+
+    return net, hp
+
+
 def dropconnect(input_var=None):
     """DropConnect MLP"""
 

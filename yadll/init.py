@@ -160,6 +160,11 @@ def He_normal(shape, name=None, borrow=True, **kwargs):
     return normal(shape, scale, name, borrow, **kwargs)
 
 
+def selu_normal(shape, name=None, borrow=True, **kwargs):
+    scale = np.sqrt(1. / shape[0])
+    return normal(shape, scale, name, borrow, **kwargs)
+
+
 def orthogonal(shape, gain=1, name=None, borrow=True, **kwargs):
     """
     Orthogonal initialization for Recurrent Networks
