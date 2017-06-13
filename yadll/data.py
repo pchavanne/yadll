@@ -8,6 +8,28 @@ import theano.tensor as T
 from .utils import *
 
 
+def normalize(x):
+    x_min = x.min()
+    x_max = x.max()
+    z = (x - x_min) / (x_max - x_min)
+    return z, x_min, x_max
+
+
+def revert_normalize(z, x_min, x_max):
+    return z * (x_max - x_min) + x_min
+
+
+def standardize(x):
+    x_mean = x.mean()
+    x_std = x.std()
+    z = (x - x_mean) / x_std
+    return z, x_mean, x_std
+
+
+def revert_standardize(z, x_mean, x_std):
+    return (z * x_std) + x_mean
+
+
 def one_hot_encoding(arr, N=None):
     """
     One hot encoding of a vector of integer categorical variables in a range [0..N].
