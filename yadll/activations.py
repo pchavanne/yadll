@@ -225,3 +225,26 @@ def elu(x, alpha=1):
         Exponential Linear Units (ELUs)" <http://arxiv.org/abs/1511.07289>`.
     """
     return T.nnet.elu(x, alpha)
+
+
+def selu(x):
+    r"""
+    Compute the element-wise scaled exponential linear activation function.
+
+    Parameters
+    ----------
+    x : symbolic tensor
+        Tensor to compute the activation function for.
+
+    Returns
+    -------
+    symbolic tensor
+        Element-wise scaled exponential linear activation function applied to `x`.
+
+    References
+    -----
+    .. [1] https://arxiv.org/pdf/1706.02515.pdf
+    """
+    alpha = 1.6732632423543772848170429916717
+    scale = 1.0507009873554804934193349852946
+    return scale * elu(x, alpha)

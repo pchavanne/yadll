@@ -10,10 +10,10 @@ import examples.networks as networks
 
 logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
-_networks = [# 'logistic_regression',
-            # 'mlp',
-            # 'dropout',
-            # 'dropconnect',
+_networks = [ 'logistic_regression',
+            'mlp',
+            'dropout',
+            'dropconnect',
             'convpool',
             'lenet5',
             'autoencoder',

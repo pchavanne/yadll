@@ -1,5 +1,6 @@
 # -*- coding: UTF-8 -*-
 import cPickle
+import sys
 import yadll
 from .layers import *
 from .exceptions import *
@@ -29,8 +30,14 @@ def save_model(model, file=None):
             d_file = model.file
     else:
         d_file = file
-    with open(d_file, 'wb') as f:
-        cPickle.dump(model, f, cPickle.HIGHEST_PROTOCOL)
+
+    try:
+        with open(d_file, 'wb') as f:
+            cPickle.dump(model, f, cPickle.HIGHEST_PROTOCOL)
+    except RuntimeError:
+        sys.setrecursionlimit(5000)
+        with open(d_file, 'wb') as f:
+            cPickle.dump(model, f, cPickle.HIGHEST_PROTOCOL)
 
 
 def load_model(file):

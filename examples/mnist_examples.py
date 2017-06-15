@@ -30,7 +30,7 @@ logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 @yadll.utils.timer(' Loading the data')
 def load_data(data_loader):
     print '... Loading the data'
-    return yadll.data.Data(data_loader)
+    return yadll.data.Data(data_loader) #, preprocessing='Standardize')
 
 
 def build_network(network_name='Logistic_regression', input_var=None):

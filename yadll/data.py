@@ -9,8 +9,8 @@ from .utils import *
 
 
 def normalize(x):
-    x_min = x.min()
-    x_max = x.max()
+    x_min = x.min(axis=0)
+    x_max = x.max(axis=0)
     z = apply_normalize(x, x_min, x_max)
     return z, x_min, x_max
 
@@ -23,9 +23,9 @@ def revert_normalize(z, x_min, x_max):
     return z * (x_max - x_min) + x_min
 
 
-def standardize(x):
-    x_mean = x.mean()
-    x_std = x.std()
+def standardize(x, epsilon=1e-6):
+    x_mean = x.mean(axis=0)
+    x_std = x.std(axis=0) + epsilon
     z = apply_standardize(x, x_mean, x_std)
     return z, x_mean, x_std
 
@@ -184,13 +184,13 @@ class Data(object):
         if preprocessing == 'Normalize':
             train_set_x, self.min, self.max = normalize(train_set_x)
             test_set_x = apply_normalize(test_set_x, self.min, self.max)
-            if valid_set_x:
+            if valid_set_x is not None:
                 valid_set_x = apply_normalize(valid_set_x, self.min, self.max)
 
         if preprocessing == 'Standardize':
             train_set_x, self.mean, self.std = standardize(train_set_x)
             test_set_x = apply_standardize(test_set_x, self.mean, self.std)
-            if valid_set_x:
+            if valid_set_x is not None:
                 valid_set_x = apply_standardize(valid_set_x, self.mean, self.std)
 
         if shared:
@@ -214,3 +214,6 @@ class Data(object):
 
     def shape(self):
         return [(data[0].shape, data[1].shape) for data in self.data]
+
+from sklearn.preprocessing import StandardScaler
+

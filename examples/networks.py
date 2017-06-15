@@ -6,6 +6,7 @@ from yadll.layers import *
 __all__ = ['logistic_regression',
            'mlp',
            'dropout',
+           'snn',
            'dropconnect',
            'convpool',
            'lenet5',
@@ -93,12 +94,12 @@ def dropout(input_var=None):
     # Input layer
     l_in = InputLayer(input_shape=(None, 28 * 28), input_var=input_var, name='Input')
     # Dropout Layer
-    l_dro1 = Dropout(incoming=l_in, corruption_level=0.4, name='Dropout 1')
+    l_dro1 = Dropout(incoming=l_in, corruption_level=0.2, name='Dropout 1')
     # Dense Layer
     l_hid1 = DenseLayer(incoming=l_dro1, n_units=500, W=glorot_uniform,
                         activation=relu, name='Hidden layer 1')
     # Dropout Layer
-    l_dro2 = Dropout(incoming=l_hid1, corruption_level=0.2, name='Dropout 2')
+    l_dro2 = Dropout(incoming=l_hid1, corruption_level=0.1, name='Dropout 2')
     # Dense Layer
     l_hid2 = DenseLayer(incoming=l_dro2, n_units=500, W=glorot_uniform,
                         activation=relu, name='Hidden layer 2')
@@ -131,12 +132,12 @@ def snn(input_var=None):
     # Input layer
     l_in = InputLayer(input_shape=(None, 28 * 28), input_var=input_var, name='Input')
     # Dropout Layer
-    l_dro1 = Dropout(incoming=l_in, corruption_level=0.4, name='Dropout 1')
+    l_dro1 = AlphaDropout(incoming=l_in, corruption_level=0.2, name='Dropout 1')
     # Dense Layer
     l_hid1 = DenseLayer(incoming=l_dro1, n_units=500, W=selu_normal,
                         activation=selu, name='Hidden layer 1')
     # Dropout Layer
-    l_dro2 = Dropout(incoming=l_hid1, corruption_level=0.2, name='Dropout 2')
+    l_dro2 = AlphaDropout(incoming=l_hid1, corruption_level=0.1, name='Dropout 2')
     # Dense Layer
     l_hid2 = DenseLayer(incoming=l_dro2, n_units=500, W=selu_normal,
                         activation=selu, name='Hidden layer 2')

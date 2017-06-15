@@ -390,12 +390,50 @@ class Dropout(Layer):
             lst[0] = T.shape(X)[0]
             self.input_shape = tuple(lst)
         if self.p != 1 and stochastic:
-            X = X * T_rng.binomial(self.input_shape, n=1, p=self.p, dtype=floatX)
+            X *= T_rng.binomial(self.input_shape, n=1, p=self.p, dtype=floatX)
+            X /= self.p
         return X
 
     def to_conf(self):
         conf = super(Dropout, self).to_conf()
         conf['corruption_level'] = 1 - self.p
+        return conf
+
+
+class AlphaDropout(Layer):
+    """
+    Alpha Dropout layer for zero mean and unit variance
+
+    References
+    ----------
+    .. [1] https://arxiv.org/pdf/1706.02515.pdf
+    """
+    n_instances = 0
+
+    def __init__(self, incoming, corruption_level=0.5,
+                 alpha_prime=-1.7580993408473766, **kwargs):
+        super(AlphaDropout, self).__init__(incoming, **kwargs)
+        self.p = 1 - corruption_level
+        self.alpha_prime = alpha_prime  # selu params : - alpha * scale
+
+    def get_output(self, stochastic=True, **kwargs):
+        X = self.input_layer.get_output(stochastic=stochastic, **kwargs)
+        if self.input_shape[0] is None:
+            lst = list(self.input_shape)
+            lst[0] = T.shape(X)[0]
+            self.input_shape = tuple(lst)
+        if self.p != 1 and stochastic:
+            binary_mask = T_rng.binomial(self.input_shape, n=1, p=self.p, dtype=floatX)
+            X = X * binary_mask + self.alpha_prime * (1 - binary_mask)
+            a = T.sqrt(1 / (self.p * (1 + (1-self.p) * T.pow(self.alpha_prime, 2))))
+            b = - a * (1 - self.p) * self.alpha_prime
+            X = a * X + b
+        return X
+
+    def to_conf(self):
+        conf = super(AlphaDropout, self).to_conf()
+        conf['corruption_level'] = 1 - self.p
+        conf['alpha_prime'] = self.alpha_prime
         return conf
 
 
