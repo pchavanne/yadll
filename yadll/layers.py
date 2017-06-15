@@ -389,9 +389,11 @@ class Dropout(Layer):
             lst = list(self.input_shape)
             lst[0] = T.shape(X)[0]
             self.input_shape = tuple(lst)
-        if self.p != 1 and stochastic:
+        if self.p != 1 and self.p != 0 and stochastic:
             X *= T_rng.binomial(self.input_shape, n=1, p=self.p, dtype=floatX)
             X /= self.p
+        if self.p == 0 and stochastic:
+            X *= 0
         return X
 
     def to_conf(self):
@@ -422,12 +424,14 @@ class AlphaDropout(Layer):
             lst = list(self.input_shape)
             lst[0] = T.shape(X)[0]
             self.input_shape = tuple(lst)
-        if self.p != 1 and stochastic:
+        if self.p != 1 and self.p != 0 and stochastic:
             binary_mask = T_rng.binomial(self.input_shape, n=1, p=self.p, dtype=floatX)
             X = X * binary_mask + self.alpha_prime * (1 - binary_mask)
             a = T.sqrt(1 / (self.p * (1 + (1-self.p) * T.pow(self.alpha_prime, 2))))
             b = - a * (1 - self.p) * self.alpha_prime
             X = a * X + b
+        if self.p == 0 and stochastic:
+            X *= 0
         return X
 
     def to_conf(self):
