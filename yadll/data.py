@@ -214,6 +214,3 @@ class Data(object):
 
     def shape(self):
         return [(data[0].shape, data[1].shape) for data in self.data]
-
-from sklearn.preprocessing import StandardScaler
-
