@@ -1,4 +1,4 @@
-git+git://github.com/Theano/Theano.git
+Theano
 mock
 numpydoc
 pandas
