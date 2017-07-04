@@ -9,6 +9,18 @@ from .utils import *
 
 
 def normalize(x):
+    r"""
+    Normalization: Scale data to [0, 1]
+    :math: z = (x - min(x)) / (max(x) - min(x))
+
+    Parameters
+    ----------
+    x: numpy array
+
+    Returns
+    -------
+    z, min, max: The
+    """
     x_min = x.min(axis=0)
     x_max = x.max(axis=0)
     z = apply_normalize(x, x_min, x_max)
@@ -16,14 +28,32 @@ def normalize(x):
 
 
 def apply_normalize(x, x_min, x_max):
+    r"""
+    Apply normalization to data given min and max
+    """
     return (x - x_min) / (x_max - x_min)
 
 
 def revert_normalize(z, x_min, x_max):
+    r"""
+    Return x given z, min and max
+    """
     return z * (x_max - x_min) + x_min
 
 
 def standardize(x, epsilon=1e-6):
+    r"""
+    Standardization: Scale to mean=0 and std=1
+    :math: z = (x - mean(x)) / std(x)
+
+    Parameters
+    ----------
+    x: numpy array
+
+    Returns
+    -------
+    z, mean, std: The
+    """
     x_mean = x.mean(axis=0)
     x_std = x.std(axis=0) + epsilon
     z = apply_standardize(x, x_mean, x_std)
@@ -31,10 +61,16 @@ def standardize(x, epsilon=1e-6):
 
 
 def apply_standardize(x, x_mean, x_std):
+    r"""
+    Apply standardization to data given mean and std
+    """
     return (x - x_mean) / x_std
 
 
 def revert_standardize(z, x_mean, x_std):
+    r"""
+    Return x given z, mean and std
+    """
     return (z * x_std) + x_mean
 
 
