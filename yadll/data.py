@@ -21,7 +21,7 @@ def normalize(x):
 
     Returns
     -------
-    z, min, max: The
+    z, min, max
     """
     x_min = x.min(axis=0)
     x_max = x.max(axis=0)
@@ -46,7 +46,9 @@ def revert_normalize(z, x_min, x_max):
 def standardize(x, epsilon=1e-6):
     r"""
     Standardization: Scale to mean=0 and std=1
-    .. math :: z = (x - mean(x)) / std(x)
+
+    .. math ::
+        z = (x - mean(x)) / std(x)
 
     Parameters
     ----------
@@ -54,7 +56,7 @@ def standardize(x, epsilon=1e-6):
 
     Returns
     -------
-    z, mean, std: The
+    z, mean, std
     """
     x_mean = x.mean(axis=0)
     x_std = x.std(axis=0) + epsilon
