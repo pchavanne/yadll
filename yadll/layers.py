@@ -1259,120 +1259,120 @@ class GRU(Layer):
         self.activation = get_activation(self.activation)
 
 
-class BNLSTM(LSTM):
-    r"""
-    Batch Normalization Long Short Term Memory
-
-    .. math ::
-        i_t &= \sigma(x_t.W_i + h_{t-1}.U_i + b_i)\\
-        f_t &= \sigma(x_t.W_f + h_{t-1}.U_f + b_f)\\
-        \tilde{C_t} &= \tanh(x_t.W_c + h_{t-1}.U_c + b_c)\\
-        C_t &= f_t * C_{t-1} + i_t * \tilde{C_t}\\
-        o_t &= \sigma(x_t.W_o + h_{t-1}.U_o + b_o)\\
-        h_t &= o_t * \tanh(C_t) && \text{Hidden state}\\
-
-    Parameters
-    ----------
-    incoming : a `Layer`
-        The incoming layer with an output_shape = (n_batches, n_time_steps, n_dim)
-    n_units : int
-        n_hidden = n_input_gate = n_forget_gate = n_cell_gate = n_output_gate = n_units
-        All gates have the same number of units
-    n_out : int
-        number of output units
-    activation : `yadll.activations` function default is `yadll.activations.tanh`
-        activation function
-    last_only : boolean default is True
-        set to true if you only need the last element of the output sequence.
-        Theano will optimize graph.
-
-    References
-    ----------
-    .. [1] https://arxiv.org/pdf/1603.09025.pdf
-    """
-    n_instances = 0
-
-    def __init__(self, incoming, n_units, activation=tanh, last_only=True, grad_clipping=0,
-                 go_backwards=False, allow_gc=False, **kwargs):
-        super(BNLSTM, self).__init__(incoming, n_units, activation=activation, last_only=last_only,
-                                     grad_clipping=grad_clipping, go_backwards=go_backwards,
-                                     allow_gc=allow_gc, **kwargs)
-        # Batch Normalise the input
-        self.bn_x = BatchNormalization(None)
-        self.bn_x.init_params(input_shape=(self.input_shape[1], self.input_shape[0], n_units), has_beta=False)
-        self.params.extend(self.bn_x.params)
-        # Batch Normalise the hidden state
-        self.bn_h = BatchNormalization(None)
-        self.bn_h.init_params(input_shape=(self.input_shape[1], self.input_shape[0], n_units), has_beta=False)
-        self.params.extend(self.bn_h.params)
-        # Batch Normalise the cell state
-        self.bn_c = BatchNormalization(None)
-        self.bn_c.init_params(input_shape=(self.input_shape[1], self.input_shape[0], n_units), has_beta=False)
-        self.params.extend(self.bn_c.params)
-
-    def get_output(self, **kwargs):
-        X = self.input_layer.get_output(**kwargs)
-
-        if X.ndim > 3:
-            X = T.flatten(X, 3)
-        # (n_batch, n_time_steps, n_dim) ->  (n_time_steps, n_batch, n_dim)
-        X = X.dimshuffle(1, 0, 2)
-        n_batch = X.shape[1]
-        # Input dot product is outside of the scan
-        X = T.dot(X, self.W)
-        # Batch Normalise the input
-        self.bn_x.input_layer = X
-        X = self.bn_x.get_output(**kwargs) + self.b
-
-        c0 = T.ones((n_batch, self.n_hidden), dtype=floatX)
-        h0 = self.activation(c0)
-
-        def one_step(x_t, h_tm1, c_tm1, *args):
-            H = T.dot(h_tm1, self.U)
-            # Batch Normalise the hidden state
-            self.bn_h.input_layer = H
-            H = self.bn_h.get_output(**kwargs)
-            # pre-activation
-            if self.peepholes:
-                pre_act = x_t + H + T.dot(c_tm1, self.P)
-            else:
-                pre_act = x_t + H
-            # Clip gradients
-            if self.grad_clipping:
-                pre_act = theano.gradient.grad_clip(pre_act, -self.grad_clipping, self.grad_clipping)
-            # gates
-            i_t = sigmoid(pre_act[:, 0: self.n_units])
-            f_t = sigmoid(pre_act[:, self.n_units: 2*self.n_units])
-            c_t = self.activation(pre_act[:, 2*self.n_units: 3*self.n_units])
-            o_t = sigmoid(pre_act[:, 3*self.n_units: 4*self.n_units])
-
-            if self.tied:
-                i_t = 1. - f_t
-            # cell state
-            c_t = f_t * c_tm1 + i_t * c_t
-            # Batch Normalise the cell state
-            self.bn_c.input_layer = c_t
-            c_t = self.bn_c.get_output(**kwargs)
-            h_t = o_t * self.activation(c_t)
-
-            return [h_t, c_t]
-
-        [h_vals, _], _ = theano.scan(fn=one_step,
-                                     sequences=X,
-                                     outputs_info=[h0, c0],
-                                     non_sequences=self.non_seq,
-                                     go_backwards=self.go_backwards,
-                                     allow_gc=self.allow_gc,
-                                     strict=True)
-        if self.last_only:
-            h_vals = h_vals[-1]
-        else:
-            h_vals = h_vals.dimshuffle(1, 0, 2)
-            if self.go_backwards:
-                h_vals = h_vals[:, ::-1]
-
-        return h_vals
-
-    def to_conf(self):
-        conf = super(BNLSTM, self).to_conf()
-        return conf
+# class BNLSTM(LSTM):
+#     r"""
+#     Batch Normalization Long Short Term Memory
+#
+#     .. math ::
+#         i_t &= \sigma(x_t.W_i + h_{t-1}.U_i + b_i)\\
+#         f_t &= \sigma(x_t.W_f + h_{t-1}.U_f + b_f)\\
+#         \tilde{C_t} &= \tanh(x_t.W_c + h_{t-1}.U_c + b_c)\\
+#         C_t &= f_t * C_{t-1} + i_t * \tilde{C_t}\\
+#         o_t &= \sigma(x_t.W_o + h_{t-1}.U_o + b_o)\\
+#         h_t &= o_t * \tanh(C_t) && \text{Hidden state}\\
+#
+#     Parameters
+#     ----------
+#     incoming : a `Layer`
+#         The incoming layer with an output_shape = (n_batches, n_time_steps, n_dim)
+#     n_units : int
+#         n_hidden = n_input_gate = n_forget_gate = n_cell_gate = n_output_gate = n_units
+#         All gates have the same number of units
+#     n_out : int
+#         number of output units
+#     activation : `yadll.activations` function default is `yadll.activations.tanh`
+#         activation function
+#     last_only : boolean default is True
+#         set to true if you only need the last element of the output sequence.
+#         Theano will optimize graph.
+#
+#     References
+#     ----------
+#     .. [1] https://arxiv.org/pdf/1603.09025.pdf
+#     """
+#     n_instances = 0
+#
+#     def __init__(self, incoming, n_units, activation=tanh, last_only=True, grad_clipping=0,
+#                  go_backwards=False, allow_gc=False, **kwargs):
+#         super(BNLSTM, self).__init__(incoming, n_units, activation=activation, last_only=last_only,
+#                                      grad_clipping=grad_clipping, go_backwards=go_backwards,
+#                                      allow_gc=allow_gc, **kwargs)
+#         # Batch Normalise the input
+#         self.bn_x = BatchNormalization(None)
+#         self.bn_x.init_params(input_shape=(self.input_shape[1], self.input_shape[0], n_units), has_beta=False)
+#         self.params.extend(self.bn_x.params)
+#         # Batch Normalise the hidden state
+#         self.bn_h = BatchNormalization(None)
+#         self.bn_h.init_params(input_shape=(self.input_shape[1], self.input_shape[0], n_units), has_beta=False)
+#         self.params.extend(self.bn_h.params)
+#         # Batch Normalise the cell state
+#         self.bn_c = BatchNormalization(None)
+#         self.bn_c.init_params(input_shape=(self.input_shape[1], self.input_shape[0], n_units), has_beta=False)
+#         self.params.extend(self.bn_c.params)
+#
+#     def get_output(self, **kwargs):
+#         X = self.input_layer.get_output(**kwargs)
+#
+#         if X.ndim > 3:
+#             X = T.flatten(X, 3)
+#         # (n_batch, n_time_steps, n_dim) ->  (n_time_steps, n_batch, n_dim)
+#         X = X.dimshuffle(1, 0, 2)
+#         n_batch = X.shape[1]
+#         # Input dot product is outside of the scan
+#         X = T.dot(X, self.W)
+#         # Batch Normalise the input
+#         self.bn_x.input_layer = X
+#         X = self.bn_x.get_output(**kwargs) + self.b
+#
+#         c0 = T.ones((n_batch, self.n_hidden), dtype=floatX)
+#         h0 = self.activation(c0)
+#
+#         def one_step(x_t, h_tm1, c_tm1, *args):
+#             H = T.dot(h_tm1, self.U)
+#             # Batch Normalise the hidden state
+#             self.bn_h.input_layer = H
+#             H = self.bn_h.get_output(**kwargs)
+#             # pre-activation
+#             if self.peepholes:
+#                 pre_act = x_t + H + T.dot(c_tm1, self.P)
+#             else:
+#                 pre_act = x_t + H
+#             # Clip gradients
+#             if self.grad_clipping:
+#                 pre_act = theano.gradient.grad_clip(pre_act, -self.grad_clipping, self.grad_clipping)
+#             # gates
+#             i_t = sigmoid(pre_act[:, 0: self.n_units])
+#             f_t = sigmoid(pre_act[:, self.n_units: 2*self.n_units])
+#             c_t = self.activation(pre_act[:, 2*self.n_units: 3*self.n_units])
+#             o_t = sigmoid(pre_act[:, 3*self.n_units: 4*self.n_units])
+#
+#             if self.tied:
+#                 i_t = 1. - f_t
+#             # cell state
+#             c_t = f_t * c_tm1 + i_t * c_t
+#             # Batch Normalise the cell state
+#             self.bn_c.input_layer = c_t
+#             c_t = self.bn_c.get_output(**kwargs)
+#             h_t = o_t * self.activation(c_t)
+#
+#             return [h_t, c_t]
+#
+#         [h_vals, _], _ = theano.scan(fn=one_step,
+#                                      sequences=X,
+#                                      outputs_info=[h0, c0],
+#                                      non_sequences=self.non_seq,
+#                                      go_backwards=self.go_backwards,
+#                                      allow_gc=self.allow_gc,
+#                                      strict=True)
+#         if self.last_only:
+#             h_vals = h_vals[-1]
+#         else:
+#             h_vals = h_vals.dimshuffle(1, 0, 2)
+#             if self.go_backwards:
+#                 h_vals = h_vals[:, ::-1]
+#
+#         return h_vals
+#
+#     def to_conf(self):
+#         conf = super(BNLSTM, self).to_conf()
+#         return conf
