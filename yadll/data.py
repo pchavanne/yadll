@@ -11,7 +11,9 @@ from .utils import *
 def normalize(x):
     r"""
     Normalization: Scale data to [0, 1]
-    :math: `z = (x - min(x)) / (max(x) - min(x))`
+
+    .. math ::
+        z = (x - min(x)) / (max(x) - min(x))
 
     Parameters
     ----------
@@ -44,7 +46,7 @@ def revert_normalize(z, x_min, x_max):
 def standardize(x, epsilon=1e-6):
     r"""
     Standardization: Scale to mean=0 and std=1
-    :math: `z = (x - mean(x)) / std(x)`
+    .. math :: z = (x - mean(x)) / std(x)
 
     Parameters
     ----------
