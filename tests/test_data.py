@@ -3,7 +3,31 @@ import cPickle
 import gzip
 import pytest
 import numpy as np
+from numpy.testing import assert_allclose
 
+
+def test_normalize():
+    from yadll.data import normalize, apply_normalize, revert_normalize
+    x = np.asarray([0, 1, 2, 3], dtype=float)
+    z, min, max = normalize(x)
+    assert_allclose(z, np.asarray([0., 0.33333333, 0.66666666, 1.]))
+    assert min == 0
+    assert max == 3
+    assert apply_normalize(1.5, min, max) == 0.5
+    assert revert_normalize(0.5, min, max) == 1.5
+
+
+def test_standardize():
+    from yadll.data import standardize, apply_standardize, revert_standardize
+    x = np.asarray([0, 1, 2, 3], dtype=float)
+    z, mean, std = standardize(x)
+    assert_allclose(z, np.asarray([-1.34163959, -0.4472132, 0.4472132, 1.34163959]))
+    assert mean == 1.5
+    assert std == 1.1180349887498948
+    assert apply_standardize(1.5, mean, std) == 0.0
+    assert revert_standardize(0.0, mean, std) == 1.5
+    assert apply_standardize(2.618034988749895, mean, std) - 1 < 1e-6
+    assert revert_standardize(1.0, mean, std) - 2.618034988749895 < 1e-6
 
 def test_one_hot_encoding():
     from yadll.data import one_hot_encoding
