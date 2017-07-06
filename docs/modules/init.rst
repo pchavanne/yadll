@@ -12,8 +12,9 @@ Initializers
    normal
    glorot_uniform
    glorot_normal
-   he_uniform
-   he_normal
+   He_uniform
+   He_normal
+   selu_normal
    orthogonal
 
 Detailed description
@@ -25,5 +26,7 @@ Detailed description
 .. autofunction:: normal
 .. autofunction:: glorot_uniform
 .. autofunction:: glorot_normal
-.. autofunction:: he_uniform
-.. autofunction:: he_normal
+.. autofunction:: He_uniform
+.. autofunction:: He_normal
+.. autofunction:: selu_normal
+.. autofunction:: orthogonal

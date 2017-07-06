@@ -16,9 +16,8 @@ Updating functions that are passed to the network for optimization.
     rmsprop
     adadelta
     adam
-    admax
+    adamax
     nadam
-    hessian_free
 
 Detailed description
 --------------------
@@ -30,6 +29,6 @@ Detailed description
 .. autofunction:: rmsprop
 .. autofunction:: adadelta
 .. autofunction:: adam
-.. autofunction:: admax
+.. autofunction:: adamax
 .. autofunction:: nadam
-.. autofunction:: hessian_free
+

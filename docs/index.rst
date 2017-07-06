@@ -35,7 +35,6 @@ neural networks using many different models on mnist.
 
   user/installation
   user/tutorial
-  user/layers
 
 
 API Reference
