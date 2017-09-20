@@ -65,8 +65,8 @@ for network in _networks:
     true_values = [np.argmax(true_value) for true_value in test_set_y[:30]]
 
     print ("Model 1 Predicted & True values for the first 30 examples in test set:")
-    print predicted_values
-    print true_values
+    print(predicted_values)
+    print(true_values)
 
     ##########################################################################
     # Loading model from file
@@ -76,8 +76,8 @@ for network in _networks:
     predicted_values_2 = [np.argmax(prediction) for prediction in model_2.predict(test_set_x[:30])]
 
     print ("Model 2 Predicted & True values for the first 30 examples in test set:")
-    print predicted_values_2
-    print true_values
+    print(predicted_values_2)
+    print(true_values)
     ##########################################################################
     # Recreate model and load parameters
     model_3 = yadll.model.Model(data=data)
@@ -86,15 +86,15 @@ for network in _networks:
     # Let's try prediction with this network.
     predicted_values_3 = [np.argmax(prediction) for prediction in model_3.predict(test_set_x[:30])]
     print ("Model 3 without loading parameters values for the first 30 examples in test set:")
-    print predicted_values_3
-    print true_values
+    print(predicted_values_3)
+    print(true_values)
     # Now let's load parameters
     model_3.network.load_params('net_params.yp')
     # And try predicting again
     predicted_values_3 = [np.argmax(prediction) for prediction in model_3.predict(test_set_x[:30])]
     print ("Model 3 after loading parameters values for the first 30 examples in test set:")
-    print predicted_values_3
-    print true_values
+    print(predicted_values_3)
+    print(true_values)
 
     ##########################################################################
     # Reconstruction the model from configuration and load parameters
@@ -108,13 +108,13 @@ for network in _networks:
 
     predicted_values_4 = [np.argmax(prediction) for prediction in model_4.predict(test_set_x[:30])]
     print ("Model 4 after loading parameters values for the first 30 examples in test set:")
-    print predicted_values_4
-    print true_values
+    print(predicted_values_4)
+    print(true_values)
 
     predicted_values_5 = [np.argmax(prediction) for prediction in model_5.predict(test_set_x[:30])]
     print ("Model 5 after loading parameters values for the first 30 examples in test set:")
-    print predicted_values_5
-    print true_values
+    print(predicted_values_5)
+    print(true_values)
 
 
 

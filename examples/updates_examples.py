@@ -84,7 +84,7 @@ def get_model(hp):
 
 report = list()
 
-for update, hyperparams in updates.iteritems():
+for update, hyperparams in updates.items():
     hps = get_hps()
     for hyperparam in hyperparams:
         hps(*hyperparam)
@@ -110,7 +110,7 @@ for update, hyperparams in updates.iteritems():
         r.append('training_duration')
         r.append(model.report['training_duration'])
         report.append(r)
-        print report
+        print(report)
         with open('report', 'w') as f:
             f.writelines(' '.join(str(e) for e in r))
 

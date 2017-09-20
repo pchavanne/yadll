@@ -331,7 +331,7 @@ class UnsupervisedLayer(DenseLayer):
     def unsupervised_training(self, x, train_set_x):
         logger.info('... Pre-training the layer: %s' % self.name)
         index = T.iscalar('index')
-        n_train_batches = train_set_x.get_value(borrow=True).shape[0] / self.hp.batch_size
+        n_train_batches = train_set_x.get_value(borrow=True).shape[0] // self.hp.batch_size
         unsupervised_cost = self.get_unsupervised_cost()
         if isinstance(unsupervised_cost, tuple):
             cost = unsupervised_cost[0]
@@ -341,9 +341,9 @@ class UnsupervisedLayer(DenseLayer):
             updates = sgd(cost, self.unsupervised_params, self.hp.learning_rate)
         pretrain = theano.function(inputs=[index], outputs=cost, updates=updates,
                                    givens={x: train_set_x[index * self.hp.batch_size: (index + 1) * self.hp.batch_size]})
-        for epoch in xrange(self.hp.n_epochs):
+        for epoch in range(self.hp.n_epochs):
             c = []
-            for minibatch_index in xrange(n_train_batches):
+            for minibatch_index in range(n_train_batches):
                 c.append(pretrain(minibatch_index))
             logger.info('Layer: %s, pre-training epoch %d, cost %d' % (self.name, epoch, np.mean(c)))
 

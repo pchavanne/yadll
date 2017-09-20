@@ -68,9 +68,9 @@ class TestUpdateFunctions(object):
 
         for _ in range(10):
             do_update()
-        print method
-        print A.get_value()
-        print B.get_value()
-        print self.toy_values[method]
+        print(method)
+        print(A.get_value())
+        print(B.get_value())
+        print(self.toy_values[method])
         assert np.allclose(A.get_value(), B.get_value())
         assert np.allclose(A.get_value(), self.toy_values[method])

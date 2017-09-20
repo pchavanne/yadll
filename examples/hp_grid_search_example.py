@@ -4,7 +4,7 @@
 This example show you how to make a grid search on the Hyperparameters
 """
 import os
-import cPickle
+import pickle
 import pandas as pd
 
 import yadll
@@ -68,7 +68,7 @@ def grid_search():
         reports.append((hp, model.train()))
 
         with open('reports.pkl', 'wb') as report_file:
-            cPickle.dump(reports, report_file)
+            pickle.dump(reports, report_file)
 
 
 # Grid search
@@ -76,7 +76,7 @@ grid_search()
 
 # Report Analysis
 with open('reports.pkl', 'rb') as report_file:
-    reports = cPickle.load(report_file)
+    reports = pickle.load(report_file)
 reports = pd.DataFrame(reports)
 param_reports = pd.DataFrame.from_records(reports[0])
 pd_report = pd.DataFrame(reports,
@@ -85,4 +85,4 @@ reports = pd.concat([param_reports, pd_report], axis=1)
 
 reports.to_html(open('report.html', 'w'))
 
-print reports.loc[reports['validation'].idxmin()]
+print(reports.loc[reports['validation'].idxmin()])

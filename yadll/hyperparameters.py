@@ -44,15 +44,15 @@ class Hyperparameters(object):
         self.hp_range = dict()
         self.iteration = 0
 
-    def __call__(self, name, value, range=None):
+    def __call__(self, name, value, hp_range=None):
         self.__setattr__(name, value)
         self.hp_value[name] = value
         self.hp_default[name] = value
-        self.hp_range[name] = range
-        if not range:
+        self.hp_range[name] = hp_range
+        if not hp_range:
             self.hp_range[name] = [value]
-        product = [x for x in apply(itertools.product, self.hp_range.values())]
-        self.hp_product = [dict(zip(self.hp_value.keys(), p)) for p in product]
+        product = [x for x in itertools.product(*list(self.hp_range.values()))]
+        self.hp_product = [dict(list(zip(list(self.hp_value.keys()), p))) for p in product]
 
     def __str__(self):
         return str(self.hp_value)
@@ -60,17 +60,17 @@ class Hyperparameters(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         if self.iteration > len(self.hp_product) - 1:
             raise StopIteration
         self.hp_value = self.hp_product[self.iteration]
-        for name, value in self.hp_value.iteritems():
+        for name, value in self.hp_value.items():
             self.__setattr__(name, value)
         self.iteration += 1
         return self
 
     def reset(self):
-        for name, value in self.hp_default.iteritems():
+        for name, value in self.hp_default.items():
             self.__setattr__(name, value)
         self.iteration = 0
 

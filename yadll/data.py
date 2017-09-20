@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 import os
-import cPickle
+import pickle
 import gzip
 
 import theano.tensor as T
@@ -140,12 +140,12 @@ def one_hot_decoding(mat):
 def mnist_loader():
     datafile = 'mnist.pkl.gz'
     if not os.path.isfile(datafile):
-        import urllib
+        import urllib.request, urllib.parse, urllib.error
         origin = 'http://www.iro.umontreal.ca/~lisa/deep/data/mnist/mnist.pkl.gz'
-        print 'Downloading data from %s' % origin
-        urllib.urlretrieve(origin, datafile)
+        print('Downloading data from %s' % origin)
+        urllib.request.urlretrieve(origin, datafile)
     f = gzip.open(datafile, 'rb')
-    train_set, valid_set, test_set = cPickle.load(f)
+    train_set, valid_set, test_set = pickle.load(f, encoding='latin1')
     f.close()
     train_set_x, train_set_y = train_set
     valid_set_x, valid_set_y = valid_set

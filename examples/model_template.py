@@ -77,5 +77,5 @@ predicted_values = [np.argmax(prediction) for prediction in model.predict(test_s
 true_values = [np.argmax(true_value) for true_value in test_set_y[:30]]
 
 print ("Predicted & True values for the first 30 examples in test set:")
-print predicted_values
-print true_values
+print(predicted_values)
+print(true_values)

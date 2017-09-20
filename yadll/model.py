@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-import cPickle
+import pickle
 import sys
 import yadll
 from .layers import *
@@ -33,11 +33,11 @@ def save_model(model, file=None):
 
     try:
         with open(d_file, 'wb') as f:
-            cPickle.dump(model, f, cPickle.HIGHEST_PROTOCOL)
+            pickle.dump(model, f, pickle.HIGHEST_PROTOCOL)
     except RuntimeError:
         sys.setrecursionlimit(5000)
         with open(d_file, 'wb') as f:
-            cPickle.dump(model, f, cPickle.HIGHEST_PROTOCOL)
+            pickle.dump(model, f, pickle.HIGHEST_PROTOCOL)
 
 
 def load_model(file):
@@ -60,7 +60,7 @@ def load_model(file):
 
     """
     with open(file, 'rb') as f:
-        model = cPickle.load(f)
+        model = pickle.load(f)
     return model
 
 
@@ -266,10 +266,10 @@ class Model(object):
         if self.file is not None and save_mode is None:
             self.save_mode = 'end'
 
-        n_train_batches = self.data.train_set_x.get_value(borrow=True).shape[0] / self.hp.batch_size
-        n_test_batches = self.data.test_set_x.get_value(borrow=True).shape[0] / self.hp.batch_size
+        n_train_batches = self.data.train_set_x.get_value(borrow=True).shape[0] // self.hp.batch_size
+        n_test_batches = self.data.test_set_x.get_value(borrow=True).shape[0] // self.hp.batch_size
         if self.has_validation:
-            n_valid_batches = self.data.valid_set_x.get_value(borrow=True).shape[0] / self.hp.batch_size
+            n_valid_batches = self.data.valid_set_x.get_value(borrow=True).shape[0] // self.hp.batch_size
 
         train_idx = np.arange(n_train_batches * self.hp.batch_size, dtype='int32')
 
@@ -296,7 +296,7 @@ class Model(object):
             epoch += 1
             if shuffle:
                 np_rng.shuffle(train_idx)
-            for minibatch_index in xrange(n_train_batches):
+            for minibatch_index in range(n_train_batches):
                 # train
                 minibatch_avg_cost = self.train_func(minibatch_index, train_idx)
                 # iteration number
@@ -305,7 +305,7 @@ class Model(object):
                 if (iter + 1) % validation_frequency == 0:
                     # compute zero-one loss on validation set
                     validation_losses = [self.validate_func(i) for i
-                                         in xrange(n_valid_batches)]
+                                         in range(n_valid_batches)]
                     this_validation_loss = np.mean(validation_losses)
 
                     logger.info('epoch %i, minibatch %i/%i, validation error %.3f %%' %
@@ -322,7 +322,7 @@ class Model(object):
                         best_iter = iter
 
                         # test it on the test set
-                        test_losses = [self.test_func(i) for i in xrange(n_test_batches)]
+                        test_losses = [self.test_func(i) for i in range(n_test_batches)]
                         test_score = np.mean(test_losses)
 
                         logger.info('  epoch %i, minibatch %i/%i, test error of best model %.3f %%' %
@@ -381,7 +381,7 @@ class Model(object):
             return conf
         else:
             with open(file, 'wb') as f:
-                cPickle.dump(conf, f, cPickle.HIGHEST_PROTOCOL)
+                pickle.dump(conf, f, pickle.HIGHEST_PROTOCOL)
 
     def from_conf(self, conf):
         """
@@ -389,12 +389,12 @@ class Model(object):
         """
         if isinstance(conf, str):
             with open(conf, 'rb') as f:
-                _conf = cPickle.load(f)
+                _conf = pickle.load(f)
         else:
             _conf = conf.copy()
         self.name = _conf['model name']
         self.hp = yadll.hyperparameters.Hyperparameters()
-        for k, v in _conf['hyperparameters'].iteritems():
+        for k, v in _conf['hyperparameters'].items():
             self.hp(k, v)
         self.network = yadll.network.Network()
         self.network.from_conf(_conf['network'])

@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 from collections import OrderedDict
-import cPickle
+import pickle
 import yadll
 from .layers import *
 
@@ -112,10 +112,10 @@ class Network(object):
             return
 
         with open(file, 'wb') as f:
-            cPickle.dump(self.name, f, cPickle.HIGHEST_PROTOCOL)
+            pickle.dump(self.name, f, pickle.HIGHEST_PROTOCOL)
             for param in self.params:
-                cPickle.dump(param.get_value(borrow=True), f,
-                             cPickle.HIGHEST_PROTOCOL)
+                pickle.dump(param.get_value(borrow=True), f,
+                             pickle.HIGHEST_PROTOCOL)
 
     def load_params(self, file):
         """
@@ -135,14 +135,14 @@ class Network(object):
         """
 
         with open(file, 'rb') as f:
-            pickled_name = cPickle.load(f)
+            pickled_name = pickle.load(f)
             if pickled_name != self.name:
                 logger.error(
                     'Network names are different. Saved network name is: %s' % pickled_name)
                 return
 
             for param in self.params:
-                param.set_value(cPickle.load(f), borrow=True)
+                param.set_value(pickle.load(f), borrow=True)
 
     def to_conf(self):
         return {'name': self.name,
@@ -152,7 +152,7 @@ class Network(object):
     def from_conf(self, conf):
         layers_conf = conf.pop('layers', None)
         self.__dict__.update(conf)
-        for layer_conf in layers_conf.items():
+        for layer_conf in list(layers_conf.items()):
             layer_class = getattr(yadll.layers, layer_conf[1]['type'])
             if layer_class is yadll.layers.InputLayer:
                 layer = layer_class.from_conf(layer_conf[1])

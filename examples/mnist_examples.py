@@ -29,7 +29,7 @@ logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
 @yadll.utils.timer(' Loading the data')
 def load_data(data_loader):
-    print '... Loading the data'
+    print('... Loading the data')
     return yadll.data.Data(data_loader) #, preprocessing='Standardize')
 
 
@@ -61,17 +61,17 @@ def train(network_name, data):
     predicted_values = [np.argmax(prediction) for prediction in model.predict(test_set_x[:30])]
     true_values = [np.argmax(true_value) for true_value in test_set_y[:30]]
     print ("Predicted & True values for the first 30 examples in test set:")
-    print predicted_values
-    print true_values
+    print(predicted_values)
+    print(true_values)
 
 if __name__ == '__main__':
     arguments = docopt(__doc__, version='0.0.1')
     network_name = 'logistic_regression'
     if arguments['--network_list']:
-        print 'Default network is: %s' % network_name
-        print 'Supported networks are:'
+        print('Default network is: %s' % network_name)
+        print('Supported networks are:')
         for d in networks.__all__:
-            print '\t%s' % d
+            print('\t%s' % d)
 
     else:
         if arguments['<network>']:

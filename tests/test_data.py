@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-import cPickle
+import pickle
 import gzip
 import pytest
 import numpy as np
