@@ -1,3 +1,5 @@
+.. image::  https://img.shields.io/badge/python-3.6+-blue.svg
+
 .. image:: https://travis-ci.org/pchavanne/yadll.svg
     :target: https://travis-ci.org/pchavanne/yadll
 
